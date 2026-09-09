@@ -1,0 +1,243 @@
+[gd_scene load_steps=10 format=3 uid="uid://cmain_production_01"]
+
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player_scn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/world1_bastion_bg.png" id="2_bg"]
+[ext_resource type="Script" path="res://src/enemies/DummyEnemy.gd" id="3_enemy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/rusty_guard_sheet_grid.png" id="4_enemy_sheet"]
+[ext_resource type="Script" path="res://src/combat/Hurtbox.gd" id="5_hurtbox"]
+[ext_resource type="Script" path="res://src/combat/HitboxHurtbox.gd" id="6_hitbox"]
+[ext_resource type="Script" path="res://src/ui/GameUI.gd" id="7_game_ui"]
+
+[sub_resource type="GDScript" id="GDScript_main"]
+script/source = "extends Node2D
+
+@onready var player: Player = $World/Entities/Player
+@onready var ui: GameUI = $UI_Layer
+@onready var dummy: DummyEnemy = $World/Entities/DummyEnemy
+
+func _ready() -> void:
+	if ui and player:
+		ui.connect_player(player)
+		
+	if dummy and dummy.attack_hitbox and player:
+		dummy.attack_hitbox.hit_landed.connect(func(_target):
+			# Phản đòn Cross-Parry kiểm tra trong player.gd thông qua Hurtbox
+			pass
+		)
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
+size = Vector2(1600, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(40, 300)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_enemy"]
+radius = 8.0
+height = 28.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_box"]
+size = Vector2(24, 30)
+
+[node name="Main" type="Node2D"]
+script = SubResource("GDScript_main")
+
+[node name="ParallaxBackground" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="BackgroundSprite" type="Sprite2D" parent="ParallaxBackground"]
+texture_filter = 0
+position = Vector2(240, 135)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("2_bg")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Environment" type="Node2D" parent="World"]
+
+[node name="Ground" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(240, 230)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/Ground"]
+shape = SubResource("RectangleShape2D_ground")
+
+[node name="ColorRect" type="ColorRect" parent="World/Environment/Ground"]
+offset_left = -800.0
+offset_top = -20.0
+offset_right = 800.0
+offset_bottom = 20.0
+color = Color(0.12, 0.14, 0.18, 1)
+
+[node name="WallLeft" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(-200, 100)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/WallLeft"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="ColorRect" type="ColorRect" parent="World/Environment/WallLeft"]
+offset_left = -20.0
+offset_top = -150.0
+offset_right = 20.0
+offset_bottom = 150.0
+color = Color(0.18, 0.2, 0.25, 1)
+
+[node name="WallRight" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(680, 100)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/WallRight"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="ColorRect" type="ColorRect" parent="World/Environment/WallRight"]
+offset_left = -20.0
+offset_top = -150.0
+offset_right = 20.0
+offset_bottom = 150.0
+color = Color(0.18, 0.2, 0.25, 1)
+
+[node name="Entities" type="Node2D" parent="World"]
+
+[node name="Player" parent="World/Entities" instance=ExtResource("1_player_scn")]
+position = Vector2(80, 210)
+
+[node name="DummyEnemy" type="CharacterBody2D" parent="World/Entities"]
+position = Vector2(280, 210)
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("3_enemy")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/DummyEnemy"]
+position = Vector2(0, -14)
+shape = SubResource("CapsuleShape2D_enemy")
+
+[node name="Sprite2D" type="Sprite2D" parent="World/Entities/DummyEnemy"]
+texture_filter = 0
+texture = ExtResource("4_enemy_sheet")
+offset = Vector2(0, -32)
+hframes = 4
+
+[node name="Hurtbox" type="Area2D" parent="World/Entities/DummyEnemy"]
+collision_layer = 32
+collision_mask = 16
+script = ExtResource("5_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/DummyEnemy/Hurtbox"]
+position = Vector2(0, -14)
+shape = SubResource("RectangleShape2D_box")
+
+[node name="AttackHitbox" type="Area2D" parent="World/Entities/DummyEnemy"]
+position = Vector2(-16, -14)
+collision_layer = 8
+collision_mask = 4
+script = ExtResource("6_hitbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/DummyEnemy/AttackHitbox"]
+shape = SubResource("RectangleShape2D_box")
+
+[node name="HPLabel" type="Label" parent="World/Entities/DummyEnemy"]
+offset_left = -40.0
+offset_top = -48.0
+offset_right = 40.0
+offset_bottom = -34.0
+theme_override_font_sizes/font_size = 8
+text = "HP: 200/200"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="World/Entities/DummyEnemy"]
+offset_left = -50.0
+offset_top = -60.0
+offset_right = 50.0
+offset_bottom = -46.0
+theme_override_font_sizes/font_size = 8
+text = "Idle"
+horizontal_alignment = 1
+
+[node name="UI_Layer" type="CanvasLayer" parent="."]
+layer = 10
+script = ExtResource("7_game_ui")
+
+[node name="TopContainer" type="Control" parent="UI_Layer"]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 40.0
+grow_horizontal = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="UI_Layer/TopContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI_Layer/TopContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="HPContainer" type="VBoxContainer" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="HPLabel" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/HPContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "HP: 100/100"
+
+[node name="HPProgressBar" type="ProgressBar" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/HPContainer"]
+custom_minimum_size = Vector2(110, 8)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="FlowContainer" type="VBoxContainer" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="FlowLabel" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "FLOW: □ □ □ □ □ (0/5)"
+
+[node name="BottomContainer" type="Control" parent="UI_Layer"]
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -42.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="UI_Layer/BottomContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_bottom = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI_Layer/BottomContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="StateLabel" type="Label" parent="UI_Layer/BottomContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 9
+text = "STATE: IDLE | I-FRAME: OFF"
+
+[node name="GuideLabel" type="Label" parent="UI_Layer/BottomContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 8
+text = "A/D: Chạy | Space: Nhảy (Double Jump / Bám tường) | J: Combo chém (2-hit) | K: Cross-Parry (0.15s) | L: Shadow Dash"

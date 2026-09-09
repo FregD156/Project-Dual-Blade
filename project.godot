@@ -1,19 +1,20 @@
 ; Engine configuration file.
-; It's best edited using the editor UI and not directly.
+; Project Dual Blade - Commercial Pixel-Perfect 16:9 Standard
 
 config_version=5
 
 [application]
 
 config/name="Project Dual Blade"
-config/description="2D Side-scrolling Action, Boss Rush with Dual Blades"
-run/main_scene="res://scenes/world1_bastion_level.tscn"
+config/description="2D Side-scroller Action Boss Rush with Dual Blades"
+run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
+boot_splash/bg_color=Color(0.08, 0.09, 0.12, 1)
 
 [display]
 
-window/size/viewport_width=640
-window/size/viewport_height=360
+window/size/viewport_width=480
+window/size/viewport_height=270
 window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="viewport"
@@ -63,10 +64,5 @@ dash={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":76,"key_label":0,"unicode":108,"location":0,"echo":false,"script":null)
 , Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":4194325,"physical_keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
-]
-}
-blade_dance={
-"deadzone": 0.5,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":85,"key_label":0,"unicode":117,"location":0,"echo":false,"script":null)
 ]
 }

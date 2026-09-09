@@ -17,7 +17,7 @@ var is_winding_up: bool = false
 var windup_timer: float = 0.0
 const WINDUP_DURATION: float = 0.8 # 0.8s báo hiệu trước khi vung đòn (như Boss 1.10)
 
-@onready var visual: EnemyAnimationController = $AnimSprite
+@onready var visual: Node2D = $Sprite2D if has_node("Sprite2D") else ($AnimSprite if has_node("AnimSprite") else null)
 @onready var hurtbox: Hurtbox = $Hurtbox
 @onready var attack_hitbox: Hitbox = $AttackHitbox
 @onready var hp_label: Label = $HPLabel
