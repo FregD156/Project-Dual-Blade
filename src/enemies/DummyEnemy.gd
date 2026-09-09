@@ -20,8 +20,9 @@ const WINDUP_DURATION: float = 0.8 # 0.8s báo hiệu trước khi vung đòn (n
 @onready var visual: Node2D = $Sprite2D if has_node("Sprite2D") else ($AnimSprite if has_node("AnimSprite") else null)
 @onready var hurtbox: Hurtbox = $Hurtbox
 @onready var attack_hitbox: Hitbox = $AttackHitbox
-@onready var hp_label: Label = $HPLabel
-@onready var status_label: Label = $StatusLabel
+@onready var hp_label: Label = $FloatingUI/HPLabel if has_node("FloatingUI/HPLabel") else ($HPLabel if has_node("HPLabel") else null)
+@onready var status_label: Label = $FloatingUI/StatusLabel if has_node("FloatingUI/StatusLabel") else ($StatusLabel if has_node("StatusLabel") else null)
+@onready var hp_fill: ColorRect = $FloatingUI/HPBarBorder/HPBarFill if has_node("FloatingUI/HPBarBorder/HPBarFill") else null
 
 var next_attack_unparryable: bool = false
 
@@ -110,4 +111,7 @@ func _on_hit_received(incoming_hitbox: Hitbox) -> void:
 
 func _update_labels() -> void:
 	if hp_label:
-		hp_label.text = "HP: %d / %d" % [round(current_hp), round(max_hp)]
+		hp_label.text = "%d/%d" % [round(current_hp), round(max_hp)]
+	if hp_fill:
+		var ratio := clampf(current_hp / max(1.0, max_hp), 0.0, 1.0)
+		hp_fill.size.x = 32.0 * ratio
