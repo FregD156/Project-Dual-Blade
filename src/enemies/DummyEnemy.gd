@@ -72,13 +72,13 @@ func _execute_attack() -> void:
 	attack_hitbox.monitoring = true
 	attack_hitbox.monitorable = true
 	
-	# Đòn active trong 0.12s
 	await get_tree().create_timer(0.12).timeout
 	attack_hitbox.monitoring = false
 	attack_hitbox.monitorable = false
 	is_attacking = false
 	attack_timer = attack_interval
-	visual.modulate = Color(0.8, 0.3, 0.3)
+	if visual:
+		visual.modulate = Color(1.0, 1.0, 1.0) # Trả về màu gốc trong suốt, không bị ám đỏ cam!
 	status_label.text = "Idle"
 
 func _on_hit_received(incoming_hitbox: Hitbox) -> void:
