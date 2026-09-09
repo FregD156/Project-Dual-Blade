@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://src/ui/GameUI.gd" id="7_game_ui"]
 [ext_resource type="Script" path="res://src/ui/DebugLayer.gd" id="8_debug_ui"]
 [ext_resource type="FontFile" path="res://assets/fonts/pixel_font.ttf" id="9_font"]
+[ext_resource type="Script" path="res://src/combat/PushArea.gd" id="10_push"]
 
 [sub_resource type="GDScript" id="GDScript_main"]
 script/source = "extends Node2D
@@ -156,9 +157,14 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("9_font")
 theme_override_font_sizes/font_size = 7
-text = "IDLE"
+text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="TelegraphIcon" type="Sprite2D" parent="World/Entities/DummyEnemy/FloatingUI"]
+visible = false
+texture_filter = 0
+position = Vector2(0, -10)
 
 [node name="HPLabel" type="Label" parent="World/Entities/DummyEnemy/FloatingUI"]
 visible = false
@@ -170,6 +176,15 @@ theme_override_fonts/font = ExtResource("9_font")
 theme_override_font_sizes/font_size = 6
 text = "200/200"
 horizontal_alignment = 1
+
+[node name="PushArea" type="Area2D" parent="World/Entities/DummyEnemy"]
+collision_layer = 64
+collision_mask = 64
+script = ExtResource("10_push")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/DummyEnemy/PushArea"]
+position = Vector2(0, -14)
+shape = SubResource("CapsuleShape2D_enemy")
 
 [node name="UI_Layer" type="CanvasLayer" parent="."]
 layer = 10

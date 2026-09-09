@@ -83,6 +83,7 @@ var hit_stop_timer: float = 0.0
 @onready var anim_player: AnimationPlayer = $AnimationPlayer
 @onready var hitbox: Hitbox = $Hitbox
 @onready var hurtbox: Hurtbox = $Hurtbox
+@onready var push_area: PushArea = $PushArea if has_node("PushArea") else null
 
 # ------------------------------------------------------------------------------
 # 5. GODOT ENGINE CALLBACKS
@@ -128,6 +129,10 @@ func _physics_process(delta: float) -> void:
 			_state_hurt(delta)
 		State.DEAD:
 			pass
+
+	if push_area:
+		var push_vec = push_area.get_push_vector()
+		velocity += push_vec * delta
 
 	move_and_slide()
 	_update_facing_and_hitbox()
@@ -410,8 +415,16 @@ func _reset_flow() -> void:
 func is_full_flow() -> bool:
 	return current_flow >= MAX_FLOW
 
-func _on_attack_landed(_target) -> void:
+func _on_attack_landed(target) -> void:
 	add_flow(1)
+	# 1. Kích hoạt Freeze Frame / Hit-Stop đanh thép (0.06s)
+	HitStopManager.freeze(get_tree(), 0.06, 0.05)
+	
+	# 2. Truyền lực đẩy Knockback dồn dập vào kẻ địch theo hướng chém
+	if target and target.owner:
+		var target_entity = target.owner
+		if target_entity.has_method("apply_knockback"):
+			target_entity.apply_knockback(Vector2(facing_direction, 0.0), 130.0)
 
 func _update_input_buffering(delta: float) -> void:
 	if has_buffered_attack:

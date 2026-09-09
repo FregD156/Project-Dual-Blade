@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/player/player_sheet_grid.png" id="2_sheet"]
 [ext_resource type="Script" path="res://src/combat/HitboxHurtbox.gd" id="3_hitbox"]
 [ext_resource type="Script" path="res://src/combat/Hurtbox.gd" id="4_hurtbox"]
+[ext_resource type="Script" path="res://src/combat/PushArea.gd" id="5_push"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
 radius = 7.0
@@ -365,3 +366,12 @@ drag_left_margin = 0.1
 drag_right_margin = 0.1
 drag_top_margin = 0.2
 drag_bottom_margin = 0.2
+
+[node name="PushArea" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 64
+script = ExtResource("5_push")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PushArea"]
+position = Vector2(0, -14)
+shape = SubResource("CapsuleShape2D_body")
