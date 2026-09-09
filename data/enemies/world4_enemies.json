@@ -1,0 +1,11 @@
+{
+  "world": 4,
+  "name": "Đền Thờ Hư Vô",
+  "enemies": {
+    "shattered_shadow": { "id": "shattered_shadow", "name": "Bóng Vỡ Vụn", "hp": 240, "atk": 60, "def": 12, "behavior": "Dịch chuyển tức thời ngắn, đánh lén" },
+    "gravity_phantom": { "id": "gravity_phantom", "name": "Ảo Ảnh Trọng Lực", "hp": 220, "atk": 55, "def": 10, "behavior": "Đổi hướng trọng lực cục bộ khi bị chém" },
+    "exploding_crystal": { "id": "exploding_crystal", "name": "Tinh Thể Vỡ", "hp": 180, "atk": 85, "def": 8, "behavior": "Nổ chậm delay, luyện Just-dodge" },
+    "mini_dark_swordsman": { "id": "mini_dark_swordsman", "name": "Kiếm Sĩ Bóng Tối Nhỏ", "hp": 450, "atk": 95, "def": 18, "behavior": "Combo tốc độ cao báo trước Boss cuối" },
+    "elite_phantom_warrior": { "id": "elite_phantom_warrior", "name": "Chiến Binh Ảo Ảnh", "hp": 5500, "atk": 110, "def": 20, "behavior": "Phân thân liên tục, tốc độ cực nhanh" }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "world": 2,
+  "name": "Hầm Ngục Huyết Rễ",
+  "enemies": {
+    "jumping_spore": { "id": "jumping_spore", "name": "Bào Tử Nhảy", "hp": 90, "atk": 22, "def": 3, "behavior": "Nổ chậm gây độc nếu không hạ nhanh" },
+    "wall_parasite": { "id": "wall_parasite", "name": "Ấu Trùng Bám Tường", "hp": 75, "atk": 25, "def": 2, "behavior": "Bám trần tường, rơi bất ngờ khi đi ngang" },
+    "floor_root": { "id": "floor_root", "name": "Rễ Con Đâm Sàn", "hp": 110, "atk": 30, "def": 5, "behavior": "Bất động, đâm khi người chơi đến gần" },
+    "giant_blood_spider": { "id": "giant_blood_spider", "name": "Nhện Máu Lớn", "hp": 160, "atk": 35, "def": 6, "behavior": "Phun tơ làm chậm diện rộng, nhảy né" },
+    "elite_mutated_tree": { "id": "elite_mutated_tree", "name": "Cổ Thụ Biến Dị", "hp": 1800, "atk": 55, "def": 6, "behavior": "Rễ đâm ngẫu nhiên + phun phấn độc diện rộng" }
+  }
+}

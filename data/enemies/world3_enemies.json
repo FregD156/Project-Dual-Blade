@@ -1,0 +1,11 @@
+{
+  "world": 3,
+  "name": "Tháp Đồng Hồ Cơ Giới",
+  "enemies": {
+    "patrol_robot": { "id": "patrol_robot", "name": "Robot Tuần Tra", "hp": 160, "atk": 38, "def": 8, "behavior": "Tuần tra cố định, laser quét định kỳ" },
+    "piston_turret": { "id": "piston_turret", "name": "Turret Piston", "hp": 130, "atk": 42, "def": 10, "behavior": "Bắn đạn theo nhịp piston giập" },
+    "scout_drone": { "id": "scout_drone", "name": "Drone Trinh Sát", "hp": 110, "atk": 30, "def": 5, "behavior": "Bay lượn, gọi thêm quái nếu quá 5s" },
+    "crusher_mech": { "id": "crusher_mech", "name": "Cỗ Máy Nghiền", "hp": 280, "atk": 65, "def": 14, "behavior": "Giáp cực dày, quật sàn gây choáng" },
+    "elite_core_guardian": { "id": "elite_core_guardian", "name": "Cỗ Máy Hộ Vệ Lõi", "hp": 3200, "atk": 80, "def": 12, "behavior": "Khiên phản sát thương phía trước (cần đánh sau lưng)" }
+  }
+}
