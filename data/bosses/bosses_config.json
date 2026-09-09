@@ -1,0 +1,61 @@
+{
+  "bosses": {
+    "boss_1_10": {
+      "id": "ironclad_commander",
+      "name": "Thống Lĩnh Thiết Vệ",
+      "world": 1,
+      "stage": 10,
+      "total_hp": 3800,
+      "def": 4,
+      "stun_resist": 300,
+      "target_ttk_seconds": 90,
+      "phases": [
+        { "phase": 1, "hp": 1900, "description": "Đại kiếm uy lực cao, báo vệt đỏ 0.8s (tập parry)" },
+        { "phase": 2, "hp": 1900, "description": "Bỏ khiên dùng song kiếm, combo 3 nhát + sóng chấn động sàn" }
+      ]
+    },
+    "boss_2_10": {
+      "id": "parasitic_broodmother",
+      "name": "Mẫu Thể Ký Sinh",
+      "world": 2,
+      "stage": 10,
+      "total_hp": 7800,
+      "def": 8,
+      "stun_resist": 500,
+      "target_ttk_seconds": 110,
+      "phases": [
+        { "phase": 1, "hp": 4680, "description": "Nhện bám vách, phun tơ làm chậm, chân nhọn rơi trần" },
+        { "phase": 2, "hp": 3120, "description": "Rơi sàn, triệu hồi trứng nổ + mạng nhện bao phủ map" }
+      ]
+    },
+    "boss_3_10": {
+      "id": "automaton_executioner",
+      "name": "Kẻ Hành Quyết Cơ Giới",
+      "world": 3,
+      "stage": 10,
+      "total_hp": 14900,
+      "def": 15,
+      "stun_resist": 800,
+      "target_ttk_seconds": 125,
+      "phases": [
+        { "phase": 1, "hp": 7450, "description": "Robot 4 tay cưa xoay càn quét sàn, tên lửa đuổi" },
+        { "phase": 2, "hp": 7450, "description": "Tách rời bộ phận, bay lơ lửng phóng chùm laser quét 360 độ" }
+      ]
+    },
+    "boss_4_10": {
+      "id": "void_sovereign",
+      "name": "Kẻ Thao Túng Hư Không",
+      "world": 4,
+      "stage": 10,
+      "total_hp": 28500,
+      "def": 25,
+      "stun_resist": 1200,
+      "target_ttk_seconds": 140,
+      "phases": [
+        { "phase": 1, "hp": 11400, "description": "Kiếm sĩ bóng tối song đao, tốc độ ngang người chơi" },
+        { "phase": 2, "hp": 9975, "description": "2 phân thân tấn công phối hợp 2 hướng" },
+        { "phase": 3, "hp": 7125, "description": "Sàn thu hẹp, chuỗi tất sát liên hoàn ép Cross-Parry liên tục" }
+      ]
+    }
+  }
+}

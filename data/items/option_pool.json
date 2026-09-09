@@ -1,0 +1,102 @@
+{
+  "options": [
+    {
+      "id": "D_BLUNT_EDGE",
+      "tier": "D",
+      "name": "Cùn Nhẹ",
+      "description": "+5% Sát thương vật lý",
+      "stat_modifier": { "phys_damage_pct": 0.05 }
+    },
+    {
+      "id": "D_LIGHT_HAND",
+      "tier": "D",
+      "name": "Nhẹ Tay",
+      "description": "+4% Tốc độ chạy khi rút vũ khí",
+      "stat_modifier": { "move_speed_pct": 0.04 }
+    },
+    {
+      "id": "C_SHARPEN",
+      "tier": "C",
+      "name": "Mài Sắc",
+      "description": "+6% Tỷ lệ chí mạng",
+      "stat_modifier": { "crit_rate": 0.06 }
+    },
+    {
+      "id": "C_BALANCE",
+      "tier": "C",
+      "name": "Cân Bằng",
+      "description": "Giảm 8% thời gian khựng khi tiếp đất",
+      "stat_modifier": { "land_recovery_reduction_pct": 0.08 }
+    },
+    {
+      "id": "B_BLOODTHIRST_MINOR",
+      "tier": "B",
+      "name": "Huyết Khát Nhỏ",
+      "description": "Hồi 1% HP tối đa khi hạ 1 kẻ địch",
+      "passive_flag": "heal_on_kill_1pct"
+    },
+    {
+      "id": "B_FLOW_BOOST",
+      "tier": "B",
+      "name": "Nạp Khí",
+      "description": "Tăng 15% lượng Flow tích lũy mỗi đòn đánh",
+      "stat_modifier": { "flow_gain_pct": 0.15 }
+    },
+    {
+      "id": "A_ARMOR_PIERCE",
+      "tier": "A",
+      "name": "Xuyên Giáp",
+      "description": "Bỏ qua 20% giáp của kẻ địch có giáp/khiên",
+      "stat_modifier": { "ignore_def_pct": 0.20 }
+    },
+    {
+      "id": "A_SHADOW_STEP",
+      "tier": "A",
+      "name": "Hư Ảnh Bước",
+      "description": "Tăng thêm 0.04s bất tử (i-frame) cho Shadow Dash",
+      "stat_modifier": { "dash_iframe_bonus": 0.04 }
+    },
+    {
+      "id": "R_THUNDER_SCYTHE",
+      "tier": "R",
+      "name": "Lôi Kích Liêm",
+      "description": "Đòn chém thứ 4 phóng tia sét nảy sang 2 mục tiêu lân cận gây 40% sát thương",
+      "skill_mutation": "combo4_chain_lightning"
+    },
+    {
+      "id": "R_BLOOD_BLADE",
+      "tier": "R",
+      "name": "Huyết Nhẫn",
+      "description": "Tích tụ Chảy Máu tối đa 5 tầng; đầy tầng nổ 10% máu quái thường",
+      "skill_mutation": "bleed_stack_explode"
+    },
+    {
+      "id": "SR_DEATH_COUNTER",
+      "tier": "SR",
+      "name": "Phản Kích Tử Thần",
+      "description": "Parry chuẩn xác khung cuối sẽ chém 2 nhát chí mạng gây 250% sát thương và hồi 5% HP",
+      "skill_mutation": "parry_death_counter"
+    },
+    {
+      "id": "SR_CLONE_DANCE",
+      "tier": "SR",
+      "name": "Vũ Điệu Phân Thân",
+      "description": "Ở trạng thái Full Flow, mỗi đòn đánh triệu hồi 1 bóng ma chém phụ 35% sát thương",
+      "skill_mutation": "flow_clone_strike"
+    },
+    {
+      "id": "SSR_VOID_SAMSARA",
+      "tier": "SSR",
+      "name": "Luân Hồi Hư Không",
+      "description": "Just-dodge thành công làm chậm thời gian toàn map 50% trong 1.5s (Bullet-time)",
+      "build_definer": "just_dodge_bullet_time"
+    },
+    {
+      "id": "SSR_WORLD_SLAYER",
+      "tier": "SSR",
+      "name": "Diệt Thế Thần Khí",
+      "description": "Blade Dance nâng cấp thành Vô Hạn Trảm: Biến mất tung 12 nhát chém toàn màn hình",
+      "build_definer": "infinite_blade_dance"
+    }
+  ]
+}

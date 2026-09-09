@@ -1,0 +1,142 @@
+[gd_scene load_steps=9 format=3 uid="uid://bcombat_harness_02"]
+
+[ext_resource type="Script" path="res://tests/TestHarnessController.gd" id="1_controller"]
+[ext_resource type="Script" path="res://src/player/PlayerController.gd" id="1_player"]
+[ext_resource type="Script" path="res://src/enemies/DummyEnemy.gd" id="2_dummy"]
+[ext_resource type="Script" path="res://src/combat/HitboxHurtbox.gd" id="3_hitbox"]
+[ext_resource type="Script" path="res://src/combat/Hurtbox.gd" id="4_hurtbox"]
+[ext_resource type="Script" path="res://src/ui/DebugCombatOverlay.gd" id="5_overlay"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(1000, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(20, 36)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_box"]
+size = Vector2(28, 36)
+
+[node name="TestCombatHarness" type="Node2D"]
+script = ExtResource("1_controller")
+
+
+[node name="StaticBody2D_Floor" type="StaticBody2D" parent="."]
+position = Vector2(320, 330)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D_Floor"]
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="ColorRect" type="ColorRect" parent="StaticBody2D_Floor"]
+offset_left = -500.0
+offset_top = -20.0
+offset_right = 500.0
+offset_bottom = 20.0
+color = Color(0.18, 0.2, 0.24, 1)
+
+[node name="Player" type="CharacterBody2D" parent="."]
+position = Vector2(160, 290)
+script = ExtResource("1_player")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+shape = SubResource("RectangleShape2D_player")
+
+[node name="VisualPlaceholder" type="ColorRect" parent="Player"]
+offset_left = -10.0
+offset_top = -18.0
+offset_right = 10.0
+offset_bottom = 18.0
+color = Color(0.2, 0.6, 1, 1)
+
+[node name="Hurtbox" type="Area2D" parent="Player"]
+script = ExtResource("4_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player/Hurtbox"]
+shape = SubResource("RectangleShape2D_box")
+
+[node name="Hitbox" type="Area2D" parent="Player"]
+script = ExtResource("3_hitbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player/Hitbox"]
+position = Vector2(18, 0)
+shape = SubResource("RectangleShape2D_box")
+
+[node name="DummyEnemy" type="CharacterBody2D" parent="."]
+position = Vector2(380, 290)
+script = ExtResource("2_dummy")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DummyEnemy"]
+shape = SubResource("RectangleShape2D_player")
+
+[node name="Visual" type="ColorRect" parent="DummyEnemy"]
+offset_left = -12.0
+offset_top = -20.0
+offset_right = 12.0
+offset_bottom = 20.0
+color = Color(0.8, 0.3, 0.3, 1)
+
+[node name="Hurtbox" type="Area2D" parent="DummyEnemy"]
+script = ExtResource("4_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DummyEnemy/Hurtbox"]
+shape = SubResource("RectangleShape2D_box")
+
+[node name="AttackHitbox" type="Area2D" parent="DummyEnemy"]
+script = ExtResource("3_hitbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DummyEnemy/AttackHitbox"]
+position = Vector2(-20, 0)
+shape = SubResource("RectangleShape2D_box")
+
+[node name="HPLabel" type="Label" parent="DummyEnemy"]
+offset_left = -40.0
+offset_top = -36.0
+offset_right = 40.0
+offset_bottom = -20.0
+text = "HP: 200/200"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="DummyEnemy"]
+offset_left = -60.0
+offset_top = -52.0
+offset_right = 60.0
+offset_bottom = -36.0
+text = "Idle"
+horizontal_alignment = 1
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(320, 180)
+zoom = Vector2(1.5, 1.5)
+
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("5_overlay")
+
+[node name="FlowLabel" type="Label" parent="DebugOverlay"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 350.0
+offset_bottom = 36.0
+text = "FLOW METER: [ ][ ][ ][ ][ ] (0/5)"
+
+[node name="ParryLabel" type="Label" parent="DebugOverlay"]
+offset_left = 16.0
+offset_top = 40.0
+offset_right = 350.0
+offset_bottom = 60.0
+text = "Parry: Ready (K)"
+
+[node name="StateLabel" type="Label" parent="DebugOverlay"]
+offset_left = 16.0
+offset_top = 64.0
+offset_right = 450.0
+offset_bottom = 84.0
+text = "Player State: IDLE"
+
+[node name="InstructionLabel" type="Label" parent="DebugOverlay"]
+offset_left = 16.0
+offset_top = 92.0
+offset_right = 550.0
+offset_bottom = 160.0
+text = "A/D: Chạy | Space: Nhảy (x2, Bám tường) | J: Combo 4 nhát Song Đao
+K: Cross-Parry (Cửa sổ 9 frame, phản đòn lướt sau lưng)
+L: Shadow Dash (Khung bất tử i-frame)
+Dummy: Báo vàng -> Parry được | Báo đỏ -> Đòn búa nặng, phải né Dash!"

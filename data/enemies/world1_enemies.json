@@ -1,0 +1,46 @@
+{
+  "world": 1,
+  "enemies": {
+    "rusty_guard": {
+      "id": "rusty_guard",
+      "name": "Lính Gác Rỉ Sét",
+      "tier_zone": "X.1-X.4",
+      "hp": 80,
+      "atk": 15,
+      "def": 2,
+      "speed": 60,
+      "behavior": "Chém đơn giản, di chuyển chậm, dễ Parry"
+    },
+    "watchtower_archer": {
+      "id": "watchtower_archer",
+      "name": "Cung Thủ Tháp Canh",
+      "tier_zone": "X.1-X.4",
+      "hp": 55,
+      "atk": 18,
+      "def": 1,
+      "speed": 0,
+      "behavior": "Đứng xa bắn tên theo đường thẳng"
+    },
+    "iron_chain_hound": {
+      "id": "iron_chain_hound",
+      "name": "Chó Săn Xích Sắt",
+      "tier_zone": "X.1-X.4",
+      "hp": 45,
+      "atk": 20,
+      "def": 1,
+      "speed": 140,
+      "behavior": "Lao nhanh thành cặp 2 con, dễ bị combo AoE nhát 3"
+    },
+    "elite_demon_executioner": {
+      "id": "elite_demon_executioner",
+      "name": "Thủ Lĩnh Đao Phủ Quỷ",
+      "tier_zone": "X.5",
+      "hp": 950,
+      "atk": 45,
+      "def": 4,
+      "speed": 75,
+      "is_unparryable_hammer": true,
+      "behavior": "Đòn vung búa nặng báo đỏ không thể đỡ, gọi 2 lính nỏ hỗ trợ"
+    }
+  }
+}

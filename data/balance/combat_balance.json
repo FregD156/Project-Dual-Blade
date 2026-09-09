@@ -1,0 +1,42 @@
+{
+  "k_factor": 50.0,
+  "flow_meter": {
+    "max_stacks": 5,
+    "decay_time": 2.5,
+    "full_flow_buff": {
+      "move_speed_mult": 1.20,
+      "damage_mult": 1.20,
+      "has_after_image": true,
+      "after_image_dmg_pct": 0.35
+    },
+    "flow_preserve_on_parry": true
+  },
+  "parry": {
+    "window_seconds": 0.15,
+    "window_frames_60fps": 9,
+    "hit_stop_seconds": 0.1,
+    "boss_parry_reward_threshold": 3
+  },
+  "shadow_dash": {
+    "duration": 0.25,
+    "speed_mult": 2.5,
+    "cooldown": 0.4,
+    "just_dodge_window": 0.08
+  },
+  "rarity_tiers": {
+    "D": { "atk_base": 12, "crit_rate": 0.05, "dps_base": 31, "color_hex": "#888888", "sub_option_slots": 0 },
+    "C": { "atk_base": 21, "crit_rate": 0.07, "dps_base": 54, "color_hex": "#FFFFFF", "sub_option_slots": 1 },
+    "B": { "atk_base": 36, "crit_rate": 0.10, "dps_base": 94, "color_hex": "#2ECC71", "sub_option_slots": 2 },
+    "A": { "atk_base": 61, "crit_rate": 0.14, "dps_base": 163, "color_hex": "#3498DB", "sub_option_slots": 2 },
+    "R": { "atk_base": 100, "crit_rate": 0.18, "dps_base": 271, "color_hex": "#9B59B6", "sub_option_slots": 3 },
+    "SR": { "atk_base": 168, "crit_rate": 0.23, "dps_base": 468, "color_hex": "#F1C40F", "sub_option_slots": 4 },
+    "SSR": { "atk_base": 270, "crit_rate": 0.28, "dps_base": 767, "color_hex": "#E74C3C", "sub_option_slots": 4 }
+  },
+  "mercy_drop": {
+    "high_hp_threshold": 0.70,
+    "low_hp_threshold": 0.30,
+    "high_hp": { "life_shard_rate": 0.15, "life_flask_rate": 0.02 },
+    "mid_hp": { "life_shard_rate": 0.30, "life_flask_rate": 0.08 },
+    "low_hp": { "life_shard_rate": 0.60, "guaranteed_flask_kill_count": 3 }
+  }
+}

@@ -1,0 +1,142 @@
+[gd_scene load_steps=14 format=3 uid="uid://bworld1_bastion_03"]
+
+[ext_resource type="Script" path="res://tests/TestHarnessController.gd" id="1_ctrl"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/world1_bastion_bg.png" id="2_bg"]
+[ext_resource type="Script" path="res://src/player/PlayerController.gd" id="3_player"]
+[ext_resource type="Script" path="res://src/player/PlayerAnimationController.gd" id="4_player_anim"]
+[ext_resource type="Script" path="res://src/enemies/DummyEnemy.gd" id="5_enemy"]
+[ext_resource type="Script" path="res://src/enemies/EnemyAnimationController.gd" id="6_enemy_anim"]
+[ext_resource type="Script" path="res://src/ui/DebugCombatOverlay.gd" id="7_ui"]
+[ext_resource type="Script" path="res://src/combat/HitboxHurtbox.gd" id="8_hitbox"]
+[ext_resource type="Script" path="res://src/combat/Hurtbox.gd" id="9_hurtbox"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
+size = Vector2(1920, 60)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(24, 42)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_box"]
+size = Vector2(30, 42)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_enemy"]
+size = Vector2(28, 44)
+
+[node name="World1_Bastion_Level" type="Node2D"]
+script = ExtResource("1_ctrl")
+
+[node name="ParallaxBackground" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="BackgroundSprite" type="Sprite2D" parent="ParallaxBackground"]
+position = Vector2(320, 180)
+scale = Vector2(0.35, 0.35)
+texture = ExtResource("2_bg")
+
+[node name="StaticBody2D_Ground" type="StaticBody2D" parent="."]
+position = Vector2(320, 340)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D_Ground"]
+shape = SubResource("RectangleShape2D_ground")
+
+[node name="Player" type="CharacterBody2D" parent="."]
+position = Vector2(160, 285)
+script = ExtResource("3_player")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+shape = SubResource("RectangleShape2D_player")
+
+[node name="AnimSprite" type="AnimatedSprite2D" parent="Player"]
+scale = Vector2(0.32, 0.32)
+script = ExtResource("4_player_anim")
+
+[node name="Hurtbox" type="Area2D" parent="Player"]
+script = ExtResource("9_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player/Hurtbox"]
+shape = SubResource("RectangleShape2D_box")
+
+[node name="Hitbox" type="Area2D" parent="Player"]
+script = ExtResource("8_hitbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player/Hitbox"]
+position = Vector2(20, 0)
+shape = SubResource("RectangleShape2D_box")
+
+[node name="DummyEnemy" type="CharacterBody2D" parent="."]
+position = Vector2(440, 285)
+script = ExtResource("5_enemy")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DummyEnemy"]
+shape = SubResource("RectangleShape2D_enemy")
+
+[node name="AnimSprite" type="AnimatedSprite2D" parent="DummyEnemy"]
+scale = Vector2(0.32, 0.32)
+script = ExtResource("6_enemy_anim")
+
+[node name="Hurtbox" type="Area2D" parent="DummyEnemy"]
+script = ExtResource("9_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DummyEnemy/Hurtbox"]
+shape = SubResource("RectangleShape2D_box")
+
+[node name="AttackHitbox" type="Area2D" parent="DummyEnemy"]
+script = ExtResource("8_hitbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DummyEnemy/AttackHitbox"]
+position = Vector2(-22, 0)
+shape = SubResource("RectangleShape2D_box")
+
+[node name="HPLabel" type="Label" parent="DummyEnemy"]
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = -24.0
+text = "HP: 200/200"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="DummyEnemy"]
+offset_left = -60.0
+offset_top = -56.0
+offset_right = 60.0
+offset_bottom = -40.0
+text = "Idle"
+horizontal_alignment = 1
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(320, 180)
+zoom = Vector2(1.5, 1.5)
+
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("7_ui")
+
+[node name="FlowLabel" type="Label" parent="DebugOverlay"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 350.0
+offset_bottom = 36.0
+text = "FLOW METER: [ ][ ][ ][ ][ ] (0/5)"
+
+[node name="ParryLabel" type="Label" parent="DebugOverlay"]
+offset_left = 16.0
+offset_top = 40.0
+offset_right = 350.0
+offset_bottom = 60.0
+text = "Parry: Ready (K)"
+
+[node name="StateLabel" type="Label" parent="DebugOverlay"]
+offset_left = 16.0
+offset_top = 64.0
+offset_right = 450.0
+offset_bottom = 84.0
+text = "Player State: IDLE"
+
+[node name="InstructionLabel" type="Label" parent="DebugOverlay"]
+offset_left = 16.0
+offset_top = 92.0
+offset_right = 550.0
+offset_bottom = 160.0
+text = "=== WORLD 1: THE FORSAKEN BASTION ===
+A/D: Chạy | Space: Nhảy (Double Jump / Bám tường) | J: Combo Song Đao
+K: Cross-Parry (0.15s) | L: Shadow Dash (i-frame)
+Lính Gác: Báo vàng -> K (Parry) | Báo đỏ -> L (Né Dash!)"
