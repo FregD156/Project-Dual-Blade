@@ -18,13 +18,15 @@ func _ready() -> void:
 	# Kết nối đòn đánh của Dummy tới Player
 	if dummy and dummy.attack_hitbox and player:
 		dummy.attack_hitbox.hit_landed.connect(func(_target):
-			# Kiểm tra xem player có đang trong trạng thái Parry không
 			var hitbox_info = {
 				"is_unparryable": dummy.attack_hitbox.is_unparryable,
 				"damage": dummy.attack_hitbox.damage
 			}
 			if player.parry_handler.try_parry_incoming_attack(hitbox_info, dummy):
-				print("[COMBAT LOG] >>> CROSS-PARRY THÀNH CÔNG! Hit-stop kích hoạt! Dịch chuyển sau lưng!")
+				print("[COMBAT LOG] >>> CROSS-PARRY THÀNH CÔNG! Hit-stop + Screen Shake!")
+				var camera: Camera2D = get_node_or_null("Camera2D")
+				if camera:
+					ScreenShake.shake(camera, 12.0, 0.2)
 			elif not player.is_iframe:
 				print("[COMBAT LOG] >>> PLAYER DÍNH ĐÒN! Mất Flow Meter!")
 				player.flow_meter.on_hit_taken()
