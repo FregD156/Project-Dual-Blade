@@ -115,9 +115,9 @@ var blade_dance_timer: float = 0.0
 var blade_dance_slashes_left: int = 0
 var blade_dance_slash_interval: float = 0.0
 var is_infinite_slash: bool = false
-const BLADE_DANCE_SLASH_INTERVAL_BASE: float = 0.06
-const BLADE_DANCE_SLASH_COUNT_BASE: int = 7
-const BLADE_DANCE_SLASH_COUNT_SSR: int = 12
+const BLADE_DANCE_SLASH_INTERVAL_BASE: float = 0.08
+const BLADE_DANCE_SLASH_COUNT_BASE: int = 8
+const BLADE_DANCE_SLASH_COUNT_SSR: int = 14
 
 # Hit-stop
 var hit_stop_timer: float = 0.0
@@ -458,6 +458,8 @@ func _state_air_attack(delta: float) -> void:
 		_change_state(State.IDLE if is_on_floor() else State.FALL)
 
 func on_attack_animation_finished(attack_name: String) -> void:
+	if current_state == State.BLADE_DANCE:
+		return
 	match attack_name:
 		"attack_1":
 			if has_buffered_attack:
@@ -561,6 +563,12 @@ func _state_blade_dance(delta: float) -> void:
 	if blade_dance_slashes_left > 0 and blade_dance_slash_interval <= 0.0:
 		blade_dance_slash_interval = BLADE_DANCE_SLASH_INTERVAL_BASE
 		blade_dance_slashes_left -= 1
+		# Đảo hướng và đổi hoạt ảnh vung đao liên hồi
+		if anim_player:
+			var anim_to_play = "attack_1" if (blade_dance_slashes_left % 2 == 0) else "attack_3"
+			anim_player.play(anim_to_play)
+		facing_direction = -facing_direction
+		_update_facing_and_hitbox()
 		_execute_blade_dance_slash()
 		
 	if blade_dance_timer <= 0.0 or blade_dance_slashes_left <= 0:
@@ -596,17 +604,24 @@ func _execute_blade_dance_slash() -> void:
 			target_enemy._on_hit_received(virtual_hitbox)
 			virtual_hitbox.queue_free()
 			
-	# Spawn hiệu ứng chém điện quang và vệt dư ảnh bão đao
+	# Spawn hiệu ứng chém điện quang, vòng cung kiếm quang cực đại và vệt dư ảnh bão đao
 	var slash_dir = Vector2(randf_range(-1.0, 1.0), randf_range(-0.8, 0.8)).normalized()
 	var trail_color = Color(1.0, 0.2, 0.8, 0.95) if is_infinite_slash else Color(0.0, 0.9, 1.0, 0.9)
 	_spawn_ghost_trail(trail_color)
 	
 	if get_parent():
+		# 1. Spawn vệt chém kiếm quang điện ảnh (Blade Dance Arc Slash)
+		var arc_vfx = BladeDanceSlashVFX.new()
+		get_parent().add_child(arc_vfx)
+		var slash_angle = slash_dir.angle()
+		arc_vfx.setup(slash_pos, slash_angle, randf_range(44.0, 62.0), is_infinite_slash)
+		
+		# 2. Spawn tia lửa, máu và số sát thương
 		VFXManager.spawn_combat_impact(get_parent(), slash_pos, slash_dir, slash_dmg, true, false)
 		
 	var cam: Camera2D = get_node_or_null("Camera2D")
 	if cam:
-		VFXManager.screen_shake(cam, 3.5, 0.06)
+		VFXManager.screen_shake(cam, 4.5, 0.08)
 
 func _finish_blade_dance() -> void:
 	if sprite:
