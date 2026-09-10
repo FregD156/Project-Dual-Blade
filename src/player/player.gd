@@ -32,6 +32,7 @@ signal flasks_changed(current: int, maximum: int)
 signal weapon_equipped(tier_name: String, atk: float, crit: float)
 signal crystals_changed(count: int)
 signal inventory_changed(items: Array[Dictionary])
+signal player_died()
 
 # ------------------------------------------------------------------------------
 # 2. THÔNG SỐ VẬT LÝ & DI CHUYỂN
@@ -523,19 +524,21 @@ func _take_damage(amount: float) -> void:
 		VFXManager.screen_shake(cam, 5.0, 0.15)
 	VFXManager.spawn_combat_impact(get_parent(), global_position + Vector2(0, -14), Vector2(-facing_direction, 0.0), amount, false, true)
 	
+	if current_hp <= 0.0:
+		_change_state(State.DEAD)
+		emit_signal("player_died")
+		return
+
 	if sprite:
 		sprite.modulate = Color(2.5, 0.5, 0.5, 1.0)
 		await get_tree().create_timer(0.08).timeout
 		if is_instance_valid(sprite):
 			sprite.modulate = Color.WHITE
 
-	if current_hp <= 0.0:
-		_change_state(State.DEAD)
-	else:
-		_change_state(State.HURT)
-		await get_tree().create_timer(0.2).timeout
-		if current_state == State.HURT:
-			_change_state(State.IDLE)
+	_change_state(State.HURT)
+	await get_tree().create_timer(0.2).timeout
+	if current_state == State.HURT:
+		_change_state(State.IDLE)
 
 # ------------------------------------------------------------------------------
 # 9. FLOW METER & ATTACK FEEDBACK

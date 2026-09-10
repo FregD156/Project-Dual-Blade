@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://cmain_production_06"]
+[gd_scene load_steps=24 format=3 uid="uid://cmain_production_06"]
 
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player_scn"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/world1_bastion_bg.png" id="2_bg"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://src/combat/StageManager.gd" id="8_stage_mgr"]
 [ext_resource type="PackedScene" path="res://scenes/Portal.tscn" id="9_portal"]
 [ext_resource type="PackedScene" path="res://scenes/InventoryUI.tscn" id="10_inv"]
+[ext_resource type="PackedScene" path="res://scenes/GameOverUI.tscn" id="11_game_over"]
 
 [sub_resource type="GDScript" id="GDScript_main"]
 script/source = "extends Node2D
@@ -19,12 +20,15 @@ script/source = "extends Node2D
 @onready var debug_layer: DebugLayer = $Debug_Layer
 @onready var stage_mgr: StageManager = $StageManager
 @onready var inv_ui: InventoryUI = $UI_Layer/InventoryUI
+@onready var game_over_ui: GameOverUI = $UI_Layer/GameOverUI
 
 func _ready() -> void:
 	if ui and player:
 		ui.connect_player(player)
 	if inv_ui and player:
 		inv_ui.connect_player(player)
+	if game_over_ui and player:
+		game_over_ui.connect_player(player)
 	if debug_layer and player:
 		debug_layer.connect_player(player)
 "
@@ -446,6 +450,9 @@ theme_override_font_sizes/font_size = 6
 text = "[B] Túi Đồ"
 
 [node name="InventoryUI" parent="UI_Layer" instance=ExtResource("10_inv")]
+visible = false
+
+[node name="GameOverUI" parent="UI_Layer" instance=ExtResource("11_game_over")]
 visible = false
 
 [node name="StageBanner" type="PanelContainer" parent="UI_Layer"]
