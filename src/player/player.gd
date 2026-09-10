@@ -2,8 +2,9 @@ class_name Player
 extends CharacterBody2D
 
 ## Player Controller (Project Dual Blade)
-## Máy trạng thái hữu hạn (FSM) hoàn chỉnh kèm Input Buffering, Combo 2-hit, 
-## Shadow Dash i-frame, Cross-Parry 0.15s, Double Jump & Wall Slide/Jump.
+## Máy trạng thái hữu hạn (FSM) hoàn chỉnh kèm Input Buffering, Combo 4-hit, 
+## Không chiến (Air Slash), Shadow Dash i-frame + Dư ảnh GhostTrail, 
+## Cross-Parry 0.15s, Double Jump & Wall Slide/Jump, và Kỹ năng Option Pool.
 
 # ------------------------------------------------------------------------------
 # 1. ENUM VÀ SIGNALS
@@ -15,6 +16,9 @@ enum State {
 	FALL,
 	ATTACK_1,
 	ATTACK_2,
+	ATTACK_3,
+	ATTACK_4,
+	AIR_ATTACK,
 	DASH,
 	PARRY,
 	HURT,
@@ -24,6 +28,10 @@ enum State {
 signal hp_changed(current_hp: float, max_hp: float)
 signal flow_changed(stacks: int, is_full: bool)
 signal state_changed(new_state_name: String, is_iframe: bool)
+signal flasks_changed(current: int, maximum: int)
+signal weapon_equipped(tier_name: String, atk: float, crit: float)
+signal crystals_changed(count: int)
+signal inventory_changed(items: Array[Dictionary])
 
 # ------------------------------------------------------------------------------
 # 2. THÔNG SỐ VẬT LÝ & DI CHUYỂN
@@ -43,18 +51,16 @@ signal state_changed(new_state_name: String, is_iframe: bool)
 @export_group("Combat Stats")
 @export var max_hp: float = 100.0
 var current_hp: float = 100.0
-@export var base_atk: float = 12.0 # Bậc D: 12, C: 21, B: 36, A: 61, R: 100, SR: 168, SSR: 270 (Detail.md)
+@export var base_atk: float = 12.0
 @export var crit_rate: float = 0.05
 var current_weapon_tier: String = "tier_d"
+var current_weapon_data: Dictionary = {}
+var weapon_options: Array[Dictionary] = []
+
 var life_flasks: int = 1
 var max_flasks: int = 3
 var upgrade_crystals: int = 0
-var inventory: Array[Dictionary] = [] # Danh sách trang bị và vật phẩm trong túi đồ
-
-signal flasks_changed(current: int, maximum: int)
-signal weapon_equipped(tier_name: String, atk: float, crit: float)
-signal crystals_changed(count: int)
-signal inventory_changed(items: Array[Dictionary])
+var inventory: Array[Dictionary] = []
 
 # ------------------------------------------------------------------------------
 # 3. BIẾN QUẢN LÝ FSM & SKILLS
@@ -64,17 +70,18 @@ var can_double_jump: bool = false
 var facing_direction: int = 1 # 1: Phải, -1: Trái
 var is_iframe: bool = false
 
-# Dash
+# Dash & Afterimage
 const DASH_SPEED: float = 340.0
 const DASH_DURATION: float = 0.2
 var dash_timer: float = 0.0
+var ghost_spawn_timer: float = 0.0
 
-# Cross-Parry (Cửa sổ 0.15 giây ~ 9 frames)
+# Cross-Parry (0.15s)
 const PARRY_WINDOW: float = 0.15
 var parry_timer: float = 0.0
 var is_parrying: bool = false
 
-# Flow Meter (Thanh Cuồng Bạo 5 nấc, 2.5s decay)
+# Flow Meter (5 nấc, 2.5s decay)
 const MAX_FLOW: int = 5
 const FLOW_DECAY_DURATION: float = 2.5
 var current_flow: int = 0
@@ -84,6 +91,10 @@ var flow_timer: float = 0.0
 var has_buffered_attack: bool = false
 const BUFFER_WINDOW: float = 0.25
 var buffer_timer: float = 0.0
+
+# Air Attack
+var air_attack_timer: float = 0.0
+const AIR_ATTACK_DURATION: float = 0.25
 
 # Hit-stop
 var hit_stop_timer: float = 0.0
@@ -111,6 +122,7 @@ func _ready() -> void:
 	emit_signal("flow_changed", current_flow, false)
 	emit_signal("flasks_changed", life_flasks, max_flasks)
 	emit_signal("crystals_changed", upgrade_crystals)
+	
 	equip_weapon_tier("tier_d")
 	_change_state(State.IDLE)
 	
@@ -120,13 +132,13 @@ func _ready() -> void:
 		hurtbox.hit_received.connect(_on_hurtbox_hit_received)
 
 func _physics_process(delta: float) -> void:
-	# Xử lý hit-stop (đóng băng khung hình khi parry thành công hoặc trúng đòn chí mạng)
 	if hit_stop_timer > 0.0:
 		hit_stop_timer -= delta
 		return
 
 	_update_flow_meter(delta)
 	_update_input_buffering(delta)
+	_update_ghost_trail(delta)
 
 	if is_dropping_through:
 		drop_through_timer -= delta
@@ -147,6 +159,12 @@ func _physics_process(delta: float) -> void:
 			_state_attack_1(delta)
 		State.ATTACK_2:
 			_state_attack_2(delta)
+		State.ATTACK_3:
+			_state_attack_3(delta)
+		State.ATTACK_4:
+			_state_attack_4(delta)
+		State.AIR_ATTACK:
+			_state_air_attack(delta)
 		State.DASH:
 			_state_dash(delta)
 		State.PARRY:
@@ -179,30 +197,54 @@ func _change_state(new_state: State) -> void:
 	var state_name: String = str(State.keys()[current_state])
 	emit_signal("state_changed", state_name, is_iframe)
 
-	# Chuyển đổi AnimationPlayer tương ứng
-	match current_state:
-		State.IDLE:
-			anim_player.play("idle")
-		State.RUN:
-			anim_player.play("run")
-		State.JUMP:
-			anim_player.play("jump")
-		State.FALL:
-			anim_player.play("fall")
-		State.ATTACK_1:
-			anim_player.play("attack_1")
-			has_buffered_attack = false
-		State.ATTACK_2:
-			anim_player.play("attack_2")
-			has_buffered_attack = false
-		State.DASH:
-			anim_player.play("dash")
-		State.PARRY:
-			anim_player.play("parry")
-		State.HURT:
-			anim_player.play("hurt")
-		State.DEAD:
-			anim_player.play("dead")
+	if anim_player:
+		match current_state:
+			State.IDLE:
+				anim_player.play("idle")
+			State.RUN:
+				anim_player.play("run")
+			State.JUMP:
+				anim_player.play("jump")
+			State.FALL:
+				anim_player.play("fall")
+			State.ATTACK_1:
+				anim_player.play("attack_1")
+				has_buffered_attack = false
+				_set_hitbox_damage_mult(1.0)
+			State.ATTACK_2:
+				anim_player.play("attack_2")
+				has_buffered_attack = false
+				_set_hitbox_damage_mult(1.1)
+			State.ATTACK_3:
+				anim_player.play("attack_3")
+				has_buffered_attack = false
+				_set_hitbox_damage_mult(1.25)
+			State.ATTACK_4:
+				anim_player.play("attack_4")
+				has_buffered_attack = false
+				_set_hitbox_damage_mult(1.6)
+			State.AIR_ATTACK:
+				anim_player.play("attack_2")
+				has_buffered_attack = false
+				_set_hitbox_damage_mult(1.2)
+				air_attack_timer = AIR_ATTACK_DURATION
+			State.DASH:
+				anim_player.play("dash")
+			State.PARRY:
+				anim_player.play("parry")
+			State.HURT:
+				anim_player.play("hurt")
+			State.DEAD:
+				anim_player.play("dead")
+	else:
+		if current_state == State.AIR_ATTACK:
+			air_attack_timer = AIR_ATTACK_DURATION
+
+func _set_hitbox_damage_mult(mult: float) -> void:
+	if hitbox:
+		var bonus_mult = 1.2 if is_full_flow() else 1.0
+		hitbox.damage = base_atk * mult * bonus_mult
+		hitbox.is_crit = (randf() < crit_rate)
 
 func _state_idle(delta: float) -> void:
 	_apply_gravity(delta)
@@ -272,7 +314,6 @@ func _state_run(delta: float) -> void:
 			_change_state(State.IDLE)
 
 func _drop_through_platform() -> void:
-	# Tạm thời tắt collision mask layer 1 trong 0.22s để rơi xuyên qua bục One-Way
 	is_dropping_through = true
 	drop_through_timer = 0.22
 	set_collision_mask_value(1, false)
@@ -290,7 +331,6 @@ func _state_jump(delta: float) -> void:
 	_check_air_actions()
 
 func _state_fall(delta: float) -> void:
-	# Kiểm tra Wall Slide khi trượt tường
 	if is_on_wall() and velocity.y > 0.0:
 		velocity.y = min(velocity.y + gravity * delta, wall_slide_speed)
 		if Input.is_action_just_pressed("jump"):
@@ -322,7 +362,8 @@ func _check_air_actions() -> void:
 		_start_dash()
 		return
 	if Input.is_action_just_pressed("attack"):
-		_change_state(State.ATTACK_1)
+		# Air Slash (lơ lửng trên không 0.25s)
+		_change_state(State.AIR_ATTACK)
 		return
 
 func _handle_air_horizontal_movement(delta: float) -> void:
@@ -334,44 +375,99 @@ func _handle_air_horizontal_movement(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0.0, friction * 0.3 * delta)
 
 # ------------------------------------------------------------------------------
-# 7. COMBO TẤN CÔNG & INPUT BUFFERING
+# 7. COMBO TẤN CÔNG 4 NHÁT & AIR ATTACK
 # ------------------------------------------------------------------------------
 func _state_attack_1(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0.0, friction * 2.0 * delta)
-	
 	if Input.is_action_just_pressed("attack"):
 		has_buffered_attack = true
 		buffer_timer = BUFFER_WINDOW
 
 func _state_attack_2(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0.0, friction * 2.0 * delta)
+	if Input.is_action_just_pressed("attack"):
+		has_buffered_attack = true
+		buffer_timer = BUFFER_WINDOW
 
-# Hàm callback được AnimationPlayer gọi khi kết thúc animation chém
-func on_attack_animation_finished(attack_name: String) -> void:
-	if attack_name == "attack_1":
-		if has_buffered_attack:
-			has_buffered_attack = false
-			velocity.x = facing_direction * 50.0 # Bật nhẹ về phía trước nhát 2
-			_change_state(State.ATTACK_2)
-		else:
-			_change_state(State.IDLE if is_on_floor() else State.FALL)
-	elif attack_name == "attack_2":
+func _state_attack_3(delta: float) -> void:
+	velocity.x = move_toward(velocity.x, 0.0, friction * 2.0 * delta)
+	if Input.is_action_just_pressed("attack"):
+		has_buffered_attack = true
+		buffer_timer = BUFFER_WINDOW
+
+func _state_attack_4(delta: float) -> void:
+	velocity.x = move_toward(velocity.x, 0.0, friction * 1.5 * delta)
+
+func _state_air_attack(delta: float) -> void:
+	# Treo lơ lửng trên không (0.25s) để né quét sàn
+	velocity.y = 20.0
+	_handle_air_horizontal_movement(delta)
+	air_attack_timer -= delta
+	if air_attack_timer <= 0.0 or is_on_floor():
 		_change_state(State.IDLE if is_on_floor() else State.FALL)
 
+func on_attack_animation_finished(attack_name: String) -> void:
+	match attack_name:
+		"attack_1":
+			if has_buffered_attack:
+				has_buffered_attack = false
+				velocity.x = facing_direction * 65.0
+				_change_state(State.ATTACK_2)
+			else:
+				_change_state(State.IDLE if is_on_floor() else State.FALL)
+		"attack_2":
+			if has_buffered_attack:
+				has_buffered_attack = false
+				velocity.x = facing_direction * 80.0
+				_change_state(State.ATTACK_3)
+			else:
+				_change_state(State.IDLE if is_on_floor() else State.FALL)
+		"attack_3":
+			if has_buffered_attack:
+				has_buffered_attack = false
+				velocity.x = facing_direction * 110.0 # Bật tiến finisher
+				_change_state(State.ATTACK_4)
+			else:
+				_change_state(State.IDLE if is_on_floor() else State.FALL)
+		"attack_4":
+			# Finisher lùi nhẹ an toàn
+			velocity.x = -facing_direction * 40.0
+			_change_state(State.IDLE if is_on_floor() else State.FALL)
+		_:
+			_change_state(State.IDLE if is_on_floor() else State.FALL)
+
 # ------------------------------------------------------------------------------
-# 8. SHADOW DASH & CROSS-PARRY
+# 8. SHADOW DASH & CROSS-PARRY & GHOST TRAIL
 # ------------------------------------------------------------------------------
 func _start_dash() -> void:
 	_change_state(State.DASH)
 	dash_timer = DASH_DURATION
 	velocity.x = facing_direction * DASH_SPEED
 	velocity.y = 0.0
+	_spawn_ghost_trail(Color(0.2, 0.8, 1.0, 0.7))
 
 func _state_dash(delta: float) -> void:
 	dash_timer -= delta
 	velocity.y = 0.0
 	if dash_timer <= 0.0:
 		_change_state(State.IDLE if is_on_floor() else State.FALL)
+
+func _update_ghost_trail(delta: float) -> void:
+	ghost_spawn_timer -= delta
+	if ghost_spawn_timer <= 0.0:
+		if current_state == State.DASH:
+			ghost_spawn_timer = 0.05
+			_spawn_ghost_trail(Color(0.2, 0.8, 1.0, 0.75))
+		elif is_full_flow() and (current_state == State.RUN or current_state == State.ATTACK_1 or current_state == State.ATTACK_2 or current_state == State.ATTACK_3 or current_state == State.ATTACK_4):
+			ghost_spawn_timer = 0.08
+			_spawn_ghost_trail(Color(1.0, 0.85, 0.2, 0.6))
+
+func _spawn_ghost_trail(color: Color) -> void:
+	if not sprite or not get_parent():
+		return
+	var trail = GhostTrail.new()
+	get_parent().add_child(trail)
+	trail.setup(sprite, color)
 
 func _start_parry() -> void:
 	_change_state(State.PARRY)
@@ -386,51 +482,49 @@ func _state_parry(delta: float) -> void:
 		_change_state(State.IDLE)
 
 func _on_hurtbox_hit_received(incoming_hitbox: Hitbox) -> void:
-	# 1. Đang trong khung i-frame (Dash) -> Miễn nhiễm sát thương
 	if is_iframe:
 		return
 
-	# 2. Đang trong trạng thái Cross-Parry
 	if is_parrying:
 		if incoming_hitbox.is_unparryable:
-			# Đòn báo đỏ không thể đỡ -> dính trọn đòn!
 			_take_damage(incoming_hitbox.damage)
 		else:
-			# PARRY THÀNH CÔNG!
 			_on_parry_success(incoming_hitbox.owner)
 		return
 
-	# 3. Dính đòn bình thường
 	_take_damage(incoming_hitbox.damage)
 
 func _on_parry_success(enemy_node: Node) -> void:
-	hit_stop_timer = 0.1 # Khựng hình 0.1s
+	hit_stop_timer = 0.1
 	parry_timer = 0.0
 	is_parrying = false
+	add_flow(2)
 	
-	# Giữ hoặc tăng Flow khi parry thành công
-	add_flow(1)
-	
-	# Dịch chuyển tức thì ra sau lưng đối thủ
 	if enemy_node and enemy_node is Node2D:
 		var enemy_pos: Vector2 = (enemy_node as Node2D).global_position
 		global_position = enemy_pos + Vector2(-facing_direction * 35.0, 0.0)
+		_spawn_ghost_trail(Color(1.0, 0.9, 0.2, 0.9))
 		
-	_change_state(State.IDLE)
+	# Check Option Phản Kích Tử Thần (SR)
+	for opt in weapon_options:
+		if opt.get("counter_heal", 0.0) > 0.0:
+			current_hp = min(max_hp, current_hp + max_hp * opt["counter_heal"])
+			emit_signal("hp_changed", current_hp, max_hp)
+		
+	_change_state(State.ATTACK_2)
 
 func _take_damage(amount: float) -> void:
 	current_hp = max(0.0, current_hp - amount)
 	emit_signal("hp_changed", current_hp, max_hp)
-	_reset_flow() # Dính đòn làm mất thanh Cuồng Bạo lập tức
+	_reset_flow()
 	
-	# Spawn Damage Number and Blood Splatter
 	var cam: Camera2D = get_node_or_null("Camera2D")
 	if cam:
 		VFXManager.screen_shake(cam, 5.0, 0.15)
 	VFXManager.spawn_combat_impact(get_parent(), global_position + Vector2(0, -14), Vector2(-facing_direction, 0.0), amount, false, true)
 	
 	if sprite:
-		sprite.modulate = Color(2.5, 0.5, 0.5, 1.0) # Flash red
+		sprite.modulate = Color(2.5, 0.5, 0.5, 1.0)
 		await get_tree().create_timer(0.08).timeout
 		if is_instance_valid(sprite):
 			sprite.modulate = Color.WHITE
@@ -439,13 +533,12 @@ func _take_damage(amount: float) -> void:
 		_change_state(State.DEAD)
 	else:
 		_change_state(State.HURT)
-		# Khựng đau 0.2s rồi hồi phục
 		await get_tree().create_timer(0.2).timeout
 		if current_state == State.HURT:
 			_change_state(State.IDLE)
 
 # ------------------------------------------------------------------------------
-# 9. FLOW METER (THANH CUỒNG BẠO)
+# 9. FLOW METER & ATTACK FEEDBACK
 # ------------------------------------------------------------------------------
 func _update_flow_meter(delta: float) -> void:
 	if current_flow > 0:
@@ -469,14 +562,18 @@ func is_full_flow() -> bool:
 
 func _on_attack_landed(target) -> void:
 	add_flow(1)
-	# 1. Kích hoạt Freeze Frame / Hit-Stop đanh thép (0.06s)
 	HitStopManager.freeze(get_tree(), 0.06, 0.05)
 	
-	# 2. Truyền lực đẩy Knockback dồn dập vào kẻ địch theo hướng chém
 	if target and target.owner:
 		var target_entity = target.owner
 		if target_entity.has_method("apply_knockback"):
 			target_entity.apply_knockback(Vector2(facing_direction, 0.0), 130.0)
+
+	# Option Huyết Khát (B) & Nạp Khí
+	for opt in weapon_options:
+		if opt.get("vamp_pct", 0.0) > 0.0:
+			current_hp = min(max_hp, current_hp + max_hp * opt["vamp_pct"])
+			emit_signal("hp_changed", current_hp, max_hp)
 
 func _update_input_buffering(delta: float) -> void:
 	if has_buffered_attack:
@@ -485,7 +582,7 @@ func _update_input_buffering(delta: float) -> void:
 			has_buffered_attack = false
 
 # ------------------------------------------------------------------------------
-# 10. TIỆN ÍCH VẬT LÝ & HƯỚNG XOAY
+# 10. TIỆN ÍCH VẬT LÝ, BÌNH MÁU & TRANG BỊ
 # ------------------------------------------------------------------------------
 func _apply_gravity(delta: float) -> void:
 	velocity.y += gravity * delta
@@ -519,16 +616,13 @@ func add_crystals(count: int = 1) -> void:
 	upgrade_crystals += count
 	emit_signal("crystals_changed", upgrade_crystals)
 
+func equip_weapon_dict(item_dict: Dictionary) -> void:
+	current_weapon_data = item_dict
+	weapon_options = item_dict.get("options", [])
+	equip_weapon_tier(item_dict.get("tier", "tier_d"))
+
 func equip_weapon_tier(tier: String) -> void:
 	current_weapon_tier = tier
-	# Values from detail.md Section D.III:
-	# Tier D: ATK 12, Crit 5%
-	# Tier C: ATK 21, Crit 7%
-	# Tier B: ATK 36, Crit 10%
-	# Tier A: ATK 61, Crit 14%
-	# Tier R: ATK 100, Crit 18%
-	# Tier SR: ATK 168, Crit 23%
-	# Tier SSR: ATK 270, Crit 28%
 	match tier:
 		"tier_d":
 			base_atk = 12.0
@@ -552,11 +646,17 @@ func equip_weapon_tier(tier: String) -> void:
 			base_atk = 270.0
 			crit_rate = 0.28
 	
+	# Cộng dồn chỉ số từ Weapon Options
+	for opt in weapon_options:
+		if opt.has("atk_pct"):
+			base_atk *= (1.0 + opt["atk_pct"])
+		if opt.has("crit_pct"):
+			crit_rate += opt["crit_pct"]
+
 	if hitbox:
 		hitbox.damage = base_atk
 		hitbox.is_crit = (randf() < crit_rate)
 
-	# Hiệu ứng đổi trang bị: Vòng sáng bừng màu phẩm chất + Floating Level-up text
 	_play_equip_vfx(tier)
 	emit_signal("weapon_equipped", current_weapon_tier, base_atk, crit_rate)
 
@@ -573,12 +673,10 @@ func _play_equip_vfx(tier: String) -> void:
 	var glow_color = tier_colors.get(tier, Color.WHITE)
 	
 	if sprite:
-		var orig_mod = sprite.modulate
 		var tween = create_tween()
 		tween.tween_property(sprite, "modulate", glow_color * 2.2, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tween.tween_property(sprite, "modulate", Color.WHITE, 0.25)
 		
-	# Floating notification text
 	if get_parent():
 		var dmg_num = DamageNumber.new()
 		dmg_num.global_position = global_position + Vector2(0, -28)
@@ -588,3 +686,12 @@ func _play_equip_vfx(tier: String) -> void:
 func add_to_inventory(item_dict: Dictionary) -> void:
 	inventory.append(item_dict)
 	emit_signal("inventory_changed", inventory)
+
+func salvage_weapon(index: int) -> bool:
+	if index < 0 or index >= inventory.size():
+		return false
+	var item = inventory[index]
+	inventory.remove_at(index)
+	add_crystals(2)
+	emit_signal("inventory_changed", inventory)
+	return true

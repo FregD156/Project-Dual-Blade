@@ -4,15 +4,16 @@ extends Control
 ## Giao diện Túi Đồ (Inventory Panel) chuẩn Pixel-Art
 ## Phím tắt mở/đóng: [B] hoặc [I]
 ## Hiển thị:
-## - Vũ khí đang trang bị & chỉ số ATK, Crit, Bình máu, Tinh thể
+## - Vũ khí đang trang bị & chỉ số ATK, Crit, Dòng Option (Detail.md)
 ## - Lưới ô trang bị (Grid 4x3) chứa vũ khí & vật phẩm nhặt được
-## - Bấm chuột vào ô vũ khí để ĐỔI TRANG BỊ tức thì kèm hiệu ứng hào quang
+## - Bấm chuột TRÁI để Trang bị | Bấm chuột PHẢI để Phân rã (Salvage) lấy Tinh thể
 
 @onready var grid_container: GridContainer = $CenterContainer/Panel/Margin/VBox/Scroll/GridContainer
 @onready var equipped_icon: TextureRect = $CenterContainer/Panel/Margin/VBox/EquippedSection/EquippedIcon
 @onready var equipped_tier_lbl: Label = $CenterContainer/Panel/Margin/VBox/EquippedSection/VBoxStats/TierLabel
 @onready var equipped_atk_lbl: Label = $CenterContainer/Panel/Margin/VBox/EquippedSection/VBoxStats/AtkLabel
 @onready var equipped_crit_lbl: Label = $CenterContainer/Panel/Margin/VBox/EquippedSection/VBoxStats/CritLabel
+@onready var options_lbl: Label = get_node_or_null("CenterContainer/Panel/Margin/VBox/OptionsLabel")
 @onready var count_flasks_lbl: Label = $CenterContainer/Panel/Margin/VBox/Footer/FlaskCountLabel
 @onready var count_crystals_lbl: Label = $CenterContainer/Panel/Margin/VBox/Footer/CrystalCountLabel
 @onready var close_btn: Button = $CenterContainer/Panel/Margin/VBox/Header/CloseBtn
@@ -83,11 +84,11 @@ func _on_weapon_equipped(_tier: String, _atk: float, _crit: float) -> void:
 
 func _on_flasks_changed(current: int, maximum: int) -> void:
 	if count_flasks_lbl:
-		count_flasks_lbl.text = "Bình máu: %d/%d" % [current, maximum]
+		count_flasks_lbl.text = "Bình: %d/%d" % [current, maximum]
 
 func _on_crystals_changed(count: int) -> void:
 	if count_crystals_lbl:
-		count_crystals_lbl.text = "Tinh thể: %d" % count
+		count_crystals_lbl.text = "Thạch: %d" % count
 
 func refresh_ui() -> void:
 	if not player_ref or not is_instance_valid(player_ref):
@@ -109,6 +110,15 @@ func refresh_ui() -> void:
 	if equipped_crit_lbl:
 		equipped_crit_lbl.text = "Chí Mạng: %d%%" % round(player_ref.crit_rate * 100.0)
 
+	if options_lbl:
+		if player_ref.weapon_options.size() == 0:
+			options_lbl.text = "Option: (Chưa có dòng phụ)"
+		else:
+			var opt_texts = []
+			for opt in player_ref.weapon_options:
+				opt_texts.append("• " + opt.get("desc", ""))
+			options_lbl.text = "Option: " + " | ".join(opt_texts)
+
 	if count_flasks_lbl:
 		count_flasks_lbl.text = "Bình: %d/%d" % [player_ref.life_flasks, player_ref.max_flasks]
 
@@ -119,11 +129,9 @@ func refresh_ui() -> void:
 	if not grid_container:
 		return
 
-	# Xóa các slot cũ
 	for child in grid_container.get_children():
 		child.queue_free()
 
-	# Tạo danh sách các slot (ít nhất 12 slot 4x3)
 	var items = player_ref.inventory
 	var slot_count = max(12, ((items.size() + 3) / 4) * 4)
 
@@ -136,23 +144,48 @@ func refresh_ui() -> void:
 			var item_data = items[i]
 			var tier = item_data.get("tier", "tier_d")
 			var item_name = item_data.get("name", "Vũ Khí")
+			var item_idx = i
 			
 			if WEAPON_TEXTURES.has(tier):
 				btn.icon = WEAPON_TEXTURES[tier]
 				btn.expand_icon = true
-				btn.tooltip_text = "%s\nBấm để trang bị" % item_name
+				
+				var tooltip_lines = [item_name]
+				var opts = item_data.get("options", [])
+				for opt in opts:
+					tooltip_lines.append("+ " + opt.get("desc", ""))
+				tooltip_lines.append("[Trái]: Trang bị  |  [Phải]: Phân rã (+2 Thạch)")
+				btn.tooltip_text = "\n".join(tooltip_lines)
 			
 			var border_color = TIER_COLORS.get(tier, Color.WHITE)
 			btn.modulate = border_color
-			btn.pressed.connect(func(): _equip_item_from_inventory(tier))
+			
+			# Input handling for Left Click (Equip) and Right Click (Salvage)
+			btn.gui_input.connect(func(event: InputEvent):
+				if event is InputEventMouseButton and event.pressed:
+					if event.button_index == MOUSE_BUTTON_LEFT:
+						_equip_item_from_inventory(item_idx)
+					elif event.button_index == MOUSE_BUTTON_RIGHT:
+						_salvage_item(item_idx)
+			)
 		else:
-			# Ô trống
 			btn.disabled = true
 			btn.modulate = Color(0.25, 0.25, 0.25, 0.4)
 
 		grid_container.add_child(btn)
 
-func _equip_item_from_inventory(tier: String) -> void:
-	if player_ref and player_ref.has_method("equip_weapon_tier"):
-		player_ref.equip_weapon_tier(tier)
-		refresh_ui()
+func _equip_item_from_inventory(index: int) -> void:
+	if not player_ref or index < 0 or index >= player_ref.inventory.size():
+		return
+	var item_data = player_ref.inventory[index]
+	if player_ref.has_method("equip_weapon_dict"):
+		player_ref.equip_weapon_dict(item_data)
+	elif player_ref.has_method("equip_weapon_tier"):
+		player_ref.equip_weapon_tier(item_data.get("tier", "tier_d"))
+	refresh_ui()
+
+func _salvage_item(index: int) -> void:
+	if not player_ref:
+		return
+	player_ref.salvage_weapon(index)
+	refresh_ui()
