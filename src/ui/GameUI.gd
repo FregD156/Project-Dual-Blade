@@ -208,7 +208,7 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 
 	if is_full:
 		if flow_title:
-			flow_title.text = "FLOW [XUẤT QUỶ]"
+			flow_title.text = "FLOW [U/E TẤT SÁT]"
 			flow_title.modulate = Color(1.0, 0.85, 0.25)
 		if not pulse_tween or not pulse_tween.is_valid():
 			pulse_tween = create_tween().set_loops()
@@ -224,3 +224,4 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 		if flow_title:
 			flow_title.text = "FLOW"
 			flow_title.modulate = Color(0.0, 0.9, 1.0, 1.0)
+

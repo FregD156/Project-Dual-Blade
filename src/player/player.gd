@@ -21,6 +21,7 @@ enum State {
 	AIR_ATTACK,
 	DASH,
 	PARRY,
+	BLADE_DANCE,
 	HURT,
 	DEAD
 }
@@ -109,6 +110,15 @@ var buffer_timer: float = 0.0
 var air_attack_timer: float = 0.0
 const AIR_ATTACK_DURATION: float = 0.25
 
+# Chiêu thức Tất Sát: Blade Dance (Vũ Điệu Bão Đao)
+var blade_dance_timer: float = 0.0
+var blade_dance_slashes_left: int = 0
+var blade_dance_slash_interval: float = 0.0
+var is_infinite_slash: bool = false
+const BLADE_DANCE_SLASH_INTERVAL_BASE: float = 0.06
+const BLADE_DANCE_SLASH_COUNT_BASE: int = 7
+const BLADE_DANCE_SLASH_COUNT_SSR: int = 12
+
 # Hit-stop
 var hit_stop_timer: float = 0.0
 
@@ -189,6 +199,8 @@ func _physics_process(delta: float) -> void:
 			_state_dash(delta)
 		State.PARRY:
 			_state_parry(delta)
+		State.BLADE_DANCE:
+			_state_blade_dance(delta)
 		State.HURT:
 			_state_hurt(delta)
 		State.DEAD:
@@ -210,7 +222,7 @@ func _state_hurt(delta: float) -> void:
 # ------------------------------------------------------------------------------
 func _change_state(new_state: State) -> void:
 	current_state = new_state
-	is_iframe = (current_state == State.DASH)
+	is_iframe = (current_state == State.DASH or current_state == State.BLADE_DANCE)
 	if hurtbox:
 		hurtbox.is_invincible = is_iframe
 
@@ -252,6 +264,8 @@ func _change_state(new_state: State) -> void:
 				anim_player.play("dash")
 			State.PARRY:
 				anim_player.play("parry")
+			State.BLADE_DANCE:
+				anim_player.play("attack_3")
 			State.HURT:
 				anim_player.play("hurt")
 			State.DEAD:
@@ -279,6 +293,10 @@ func _state_idle(delta: float) -> void:
 
 	can_double_jump = true
 
+	if Input.is_action_just_pressed("blade_dance"):
+		if _can_cast_blade_dance():
+			_start_blade_dance()
+			return
 	if Input.is_action_just_pressed("attack"):
 		_change_state(State.ATTACK_1)
 		return
@@ -308,7 +326,11 @@ func _state_run(delta: float) -> void:
 		return
 
 	can_double_jump = true
-
+ 
+	if Input.is_action_just_pressed("blade_dance"):
+		if _can_cast_blade_dance():
+			_start_blade_dance()
+			return
 	if Input.is_action_just_pressed("attack"):
 		_change_state(State.ATTACK_1)
 		return
@@ -376,6 +398,10 @@ func _state_fall(delta: float) -> void:
 	_check_air_actions()
 
 func _check_air_actions() -> void:
+	if Input.is_action_just_pressed("blade_dance"):
+		if _can_cast_blade_dance():
+			_start_blade_dance()
+			return
 	if Input.is_action_just_pressed("jump") and can_double_jump:
 		velocity.y = double_jump_velocity
 		can_double_jump = false
@@ -491,6 +517,102 @@ func _spawn_ghost_trail(color: Color) -> void:
 	var trail = GhostTrail.new()
 	get_parent().add_child(trail)
 	trail.setup(sprite, color)
+
+func _can_cast_blade_dance() -> bool:
+	return current_flow >= MAX_FLOW and current_state != State.DEAD and current_state != State.HURT and current_state != State.BLADE_DANCE
+
+func _start_blade_dance() -> void:
+	if not _can_cast_blade_dance():
+		return
+		
+	# Tiêu hao toàn bộ thanh Flow
+	_reset_flow()
+	
+	# Kiểm tra Lõi Thức Tỉnh SSR "Diệt Thế Thần Khí" (Vô Hạn Trảm 12 nhát)
+	is_infinite_slash = false
+	for opt in weapon_options:
+		if opt.get("infinite_slash", false):
+			is_infinite_slash = true
+			break
+			
+	blade_dance_slashes_left = BLADE_DANCE_SLASH_COUNT_SSR if is_infinite_slash else BLADE_DANCE_SLASH_COUNT_BASE
+	blade_dance_slash_interval = 0.0
+	blade_dance_timer = (blade_dance_slashes_left + 1) * BLADE_DANCE_SLASH_INTERVAL_BASE + 0.15
+	
+	_change_state(State.BLADE_DANCE)
+	velocity = Vector2.ZERO
+	
+	# Hiệu ứng mờ dần nhân vật như tan biến vào hư ảnh
+	if sprite:
+		var tw = create_tween()
+		tw.tween_property(sprite, "modulate:a", 0.35, 0.08)
+		
+	var cam: Camera2D = get_node_or_null("Camera2D")
+	if cam:
+		VFXManager.screen_shake(cam, 6.0, 0.2)
+
+func _state_blade_dance(delta: float) -> void:
+	velocity = Vector2.ZERO
+	blade_dance_timer -= delta
+	blade_dance_slash_interval -= delta
+	
+	if blade_dance_slashes_left > 0 and blade_dance_slash_interval <= 0.0:
+		blade_dance_slash_interval = BLADE_DANCE_SLASH_INTERVAL_BASE
+		blade_dance_slashes_left -= 1
+		_execute_blade_dance_slash()
+		
+	if blade_dance_timer <= 0.0 or blade_dance_slashes_left <= 0:
+		_finish_blade_dance()
+
+func _execute_blade_dance_slash() -> void:
+	# Tìm mục tiêu trong vùng kích hoạt hoặc chém quét toàn màn hình nếu SSR
+	var enemies = get_tree().get_nodes_in_group("enemies")
+	var range_limit = 9999.0 if is_infinite_slash else 180.0
+	var valid_enemies: Array[Node] = []
+	
+	for e in enemies:
+		if e is Node2D and is_instance_valid(e) and (not ("current_state" in e) or e.current_state != 4): # không phải DEAD
+			var d = global_position.distance_to(e.global_position)
+			if d <= range_limit:
+				valid_enemies.append(e)
+				
+	# Hệ số sát thương mỗi nhát chém bão đao: 1.5x ATK (SSR là 2.2x)
+	var slash_dmg = base_atk * (2.2 if is_infinite_slash else 1.5)
+	var slash_pos = global_position + Vector2(randf_range(-40, 40) * facing_direction, randf_range(-25, 10))
+	
+	if valid_enemies.size() > 0:
+		# Ưu tiên mục tiêu gần hoặc chém ngẫu nhiên mục tiêu trong tầm
+		var target_enemy = valid_enemies[randi() % valid_enemies.size()]
+		slash_pos = target_enemy.global_position + Vector2(randf_range(-12, 12), randf_range(-18, 5))
+		
+		# Gây sát thương trực tiếp lên kẻ địch qua hitbox ảo
+		if target_enemy.has_method("_on_hit_received"):
+			var virtual_hitbox = Hitbox.new()
+			virtual_hitbox.damage = slash_dmg
+			virtual_hitbox.skill_mult = 1.0
+			virtual_hitbox.is_crit = (randf() < (crit_rate + 0.15))
+			target_enemy._on_hit_received(virtual_hitbox)
+			virtual_hitbox.queue_free()
+			
+	# Spawn hiệu ứng chém điện quang và vệt dư ảnh bão đao
+	var slash_dir = Vector2(randf_range(-1.0, 1.0), randf_range(-0.8, 0.8)).normalized()
+	var trail_color = Color(1.0, 0.2, 0.8, 0.95) if is_infinite_slash else Color(0.0, 0.9, 1.0, 0.9)
+	_spawn_ghost_trail(trail_color)
+	
+	if get_parent():
+		VFXManager.spawn_combat_impact(get_parent(), slash_pos, slash_dir, slash_dmg, true, false)
+		
+	var cam: Camera2D = get_node_or_null("Camera2D")
+	if cam:
+		VFXManager.screen_shake(cam, 3.5, 0.06)
+
+func _finish_blade_dance() -> void:
+	if sprite:
+		var tw = create_tween()
+		tw.tween_property(sprite, "modulate:a", 1.0, 0.1)
+		
+	_spawn_ghost_trail(Color(1.0, 0.9, 0.2, 0.9))
+	_change_state(State.IDLE if is_on_floor() else State.FALL)
 
 func _start_parry() -> void:
 	_change_state(State.PARRY)
@@ -645,6 +767,16 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if pressed_flask:
 		use_flask()
+		return
+
+	var pressed_blade_dance = false
+	if InputMap.has_action("blade_dance") and event.is_action_pressed("blade_dance"):
+		pressed_blade_dance = true
+	elif event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_U or event.keycode == KEY_E):
+		pressed_blade_dance = true
+
+	if pressed_blade_dance and _can_cast_blade_dance():
+		_start_blade_dance()
 
 func use_flask() -> void:
 	if life_flasks > 0 and current_hp < max_hp:
