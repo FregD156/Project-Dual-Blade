@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://cmain_production_04"]
+[gd_scene load_steps=19 format=3 uid="uid://cmain_production_05"]
 
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player_scn"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/world1_bastion_bg.png" id="2_bg"]
@@ -32,8 +32,14 @@ size = Vector2(1600, 20)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
 size = Vector2(20, 400)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
-size = Vector2(96, 12)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_left_platform"]
+size = Vector2(130, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_right_mid_platform"]
+size = Vector2(160, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_top_right_platform"]
+size = Vector2(90, 8)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_enemy"]
 radius = 8.0
@@ -45,12 +51,7 @@ size = Vector2(24, 30)
 [node name="Main" type="Node2D"]
 script = SubResource("GDScript_main")
 
-[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
-
-[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
-motion_scale = Vector2(0.3, 0.1)
-
-[node name="BackgroundSprite" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
+[node name="BackgroundSprite" type="Sprite2D" parent="."]
 texture_filter = 0
 position = Vector2(240, 135)
 scale = Vector2(0.355, 0.355)
@@ -61,7 +62,7 @@ texture = ExtResource("2_bg")
 [node name="Environment" type="Node2D" parent="World"]
 
 [node name="Ground" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(240, 210)
+position = Vector2(240, 192)
 collision_layer = 1
 collision_mask = 2
 
@@ -70,7 +71,7 @@ position = Vector2(0, 10)
 shape = SubResource("RectangleShape2D_ground")
 
 [node name="WallLeft" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(-100, 100)
+position = Vector2(-80, 100)
 collision_layer = 1
 collision_mask = 2
 
@@ -78,78 +79,42 @@ collision_mask = 2
 shape = SubResource("RectangleShape2D_wall")
 
 [node name="WallRight" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(580, 100)
+position = Vector2(560, 100)
 collision_layer = 1
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/WallRight"]
 shape = SubResource("RectangleShape2D_wall")
 
-[node name="HighPlatformLeft" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(130, 140)
+[node name="LeftUpperPlatform" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(75, 108)
 collision_layer = 1
 collision_mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/HighPlatformLeft"]
-position = Vector2(0, 6)
-shape = SubResource("RectangleShape2D_platform")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/LeftUpperPlatform"]
+position = Vector2(0, 5)
+shape = SubResource("RectangleShape2D_left_platform")
 one_way_collision = true
 
-[node name="PlatformVisual" type="ColorRect" parent="World/Environment/HighPlatformLeft"]
-offset_left = -48.0
-offset_right = 48.0
-offset_bottom = 12.0
-color = Color(0.18, 0.22, 0.3, 1)
-
-[node name="PlatformHighlight" type="ColorRect" parent="World/Environment/HighPlatformLeft/PlatformVisual"]
-layout_mode = 0
-offset_right = 96.0
-offset_bottom = 2.0
-color = Color(0.35, 0.45, 0.6, 1)
-
-[node name="HighPlatformRight" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(350, 140)
+[node name="RightMidPlatform" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(390, 108)
 collision_layer = 1
 collision_mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/HighPlatformRight"]
-position = Vector2(0, 6)
-shape = SubResource("RectangleShape2D_platform")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/RightMidPlatform"]
+position = Vector2(0, 5)
+shape = SubResource("RectangleShape2D_right_mid_platform")
 one_way_collision = true
 
-[node name="PlatformVisual" type="ColorRect" parent="World/Environment/HighPlatformRight"]
-offset_left = -48.0
-offset_right = 48.0
-offset_bottom = 12.0
-color = Color(0.18, 0.22, 0.3, 1)
-
-[node name="PlatformHighlight" type="ColorRect" parent="World/Environment/HighPlatformRight/PlatformVisual"]
-layout_mode = 0
-offset_right = 96.0
-offset_bottom = 2.0
-color = Color(0.35, 0.45, 0.6, 1)
-
-[node name="MidPlatformCenter" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(240, 175)
+[node name="TopRightRuinedPlatform" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(407, 26)
 collision_layer = 1
 collision_mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/MidPlatformCenter"]
-position = Vector2(0, 6)
-shape = SubResource("RectangleShape2D_platform")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/TopRightRuinedPlatform"]
+position = Vector2(0, 4)
+shape = SubResource("RectangleShape2D_top_right_platform")
 one_way_collision = true
-
-[node name="PlatformVisual" type="ColorRect" parent="World/Environment/MidPlatformCenter"]
-offset_left = -48.0
-offset_right = 48.0
-offset_bottom = 12.0
-color = Color(0.2, 0.24, 0.32, 1)
-
-[node name="PlatformHighlight" type="ColorRect" parent="World/Environment/MidPlatformCenter/PlatformVisual"]
-layout_mode = 0
-offset_right = 96.0
-offset_bottom = 2.0
-color = Color(0.4, 0.5, 0.65, 1)
 
 [node name="EnemySpawner" type="Node2D" parent="World"]
 script = ExtResource("11_spawner")
@@ -157,21 +122,21 @@ script = ExtResource("11_spawner")
 [node name="SpawnPoints" type="Node2D" parent="World/EnemySpawner"]
 
 [node name="MeleeLeft" type="Marker2D" parent="World/EnemySpawner/SpawnPoints"]
-position = Vector2(160, 210)
+position = Vector2(100, 192)
 
 [node name="MeleeRight" type="Marker2D" parent="World/EnemySpawner/SpawnPoints"]
-position = Vector2(340, 210)
+position = Vector2(360, 192)
 
 [node name="SniperHigh" type="Marker2D" parent="World/EnemySpawner/SpawnPoints"]
-position = Vector2(130, 140)
+position = Vector2(390, 108)
 
 [node name="Entities" type="Node2D" parent="World"]
 
 [node name="Player" parent="World/Entities" instance=ExtResource("1_player_scn")]
-position = Vector2(240, 210)
+position = Vector2(230, 192)
 
 [node name="EnemyGuardLeft" type="CharacterBody2D" parent="World/Entities"]
-position = Vector2(160, 210)
+position = Vector2(100, 192)
 collision_layer = 2
 collision_mask = 1
 script = ExtResource("3_enemy")
@@ -275,7 +240,7 @@ position = Vector2(0, -14)
 shape = SubResource("CapsuleShape2D_enemy")
 
 [node name="EnemyGuardRight" type="CharacterBody2D" parent="World/Entities"]
-position = Vector2(340, 210)
+position = Vector2(360, 192)
 collision_layer = 2
 collision_mask = 1
 script = ExtResource("3_enemy")
