@@ -6,7 +6,7 @@ extends Node2D
 ## X.1 -> X.4: Quái thường khởi động (Rusty Guard, Chain Hound, Archer)
 ## X.5: Quái Tinh Anh (Thủ Lĩnh Đao Phủ Quỷ - Elite Demon Executioner)
 ## X.6 -> X.8: Đẩy cao độ khó (Mật độ quái dày, bắn tỉa & giáp nặng)
-## X.9: Trạm Nghỉ An Toàn (Safe Haven - Hồi máu, Rèn đồ, Checkpoint)
+## X.9: Trạm Nghỉ An Toàn (Safe Haven - Hồi máu, Rèn đồ, Bàn Thợ Rèn & Đài Tế)
 ## X.10: Sàn Đấu Đại Trùm (Thống Lĩnh Thiết Vệ - Boss Ironclad Commander)
 
 signal stage_changed(stage_str: String, stage_name: String)
@@ -29,8 +29,10 @@ const ENEMY_HOUND = preload("res://scenes/enemies/EnemyChainHound.tscn")
 const ENEMY_ARCHER = preload("res://scenes/enemies/EnemyArcher.tscn")
 const ENEMY_ELITE = preload("res://scenes/enemies/EnemyEliteExecutioner.tscn")
 const ENEMY_BOSS = preload("res://scenes/enemies/EnemyBossCommander.tscn")
+const SAFE_ALTAR = preload("res://scenes/SafeHavenAltar.tscn")
 
 var active_enemies: Array[EnemyBase] = []
+var active_altar: Node2D = null
 var stage_in_progress: bool = false
 var enemies_to_spawn: int = 0
 
@@ -46,6 +48,9 @@ func start_stage(world_idx: int, stage_idx: int) -> void:
 	current_stage = stage_idx
 	stage_in_progress = true
 	
+	# Đặt lại vị trí người chơi về điểm xuất phát bên trái
+	_reposition_player()
+	
 	if portal_node:
 		portal_node.visible = false
 		portal_node.set_deferred("monitoring", false)
@@ -58,6 +63,20 @@ func start_stage(world_idx: int, stage_idx: int) -> void:
 	
 	_spawn_stage_wave(current_stage)
 
+func _reposition_player() -> void:
+	if not entities_node:
+		entities_node = get_node_or_null("../World/Entities")
+	var player: Player = null
+	if entities_node:
+		player = entities_node.get_node_or_null("Player")
+	if not player and get_tree():
+		var players = get_tree().get_nodes_in_group("player")
+		if players.size() > 0:
+			player = players[0]
+	if player and is_instance_valid(player):
+		player.global_position = Vector2(100, 192)
+		player.velocity = Vector2.ZERO
+
 func _get_stage_title(stage: int) -> String:
 	match stage:
 		1: return "Cổ Thành Khởi Đầu"
@@ -68,7 +87,7 @@ func _get_stage_title(stage: int) -> String:
 		6: return "Thành Lũy Đổ Nát"
 		7: return "Hào Chông Tàn Sát"
 		8: return "Tử Địa Giáp Đen"
-		9: return "TRẠM NGHỈ AN TOÀN (Lão Thợ Rèn)"
+		9: return "TRẠM NGHỈ AN TOÀN (Lão Thợ Rèn & Đài Tế)"
 		10: return "ĐẠI TRÙM - Thống Lĩnh Thiết Vệ"
 		_: return "Sàn Đấu Vượt Ải"
 
@@ -84,14 +103,23 @@ func _show_banner(text: String) -> void:
 		tween.tween_callback(func(): banner_panel.visible = false)
 
 func _spawn_stage_wave(stage: int) -> void:
-	# Clear any previous enemies
+	# Clear previous enemies
 	for e in active_enemies:
 		if is_instance_valid(e):
 			e.queue_free()
 	active_enemies.clear()
+	
+	# Clear previous altar if any
+	if active_altar and is_instance_valid(active_altar):
+		active_altar.queue_free()
+		active_altar = null
 
 	if stage == 9:
-		# Safe Haven: Không có quái, mở cổng ngay
+		# Safe Haven: Không có quái, dựng Đài Tế Hồi Phục & Bàn Thợ Rèn
+		if SAFE_ALTAR and entities_node:
+			active_altar = SAFE_ALTAR.instantiate()
+			active_altar.global_position = Vector2(500, 192)
+			entities_node.add_child(active_altar)
 		_on_wave_cleared()
 		return
 
@@ -163,6 +191,13 @@ func _spawn_stage_wave(stage: int) -> void:
 		var enemy: EnemyBase = scn.instantiate()
 		enemy.global_position = pos
 		enemy.died.connect(_on_enemy_died)
+		
+		# Kết nối thanh máu Boss nếu là boss
+		if enemy is EnemyBossCommander:
+			var ui = get_node_or_null("../UI_Layer")
+			if ui and ui.has_method("bind_boss"):
+				ui.bind_boss(enemy)
+				
 		entities_node.add_child(enemy)
 		active_enemies.append(enemy)
 

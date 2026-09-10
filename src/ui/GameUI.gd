@@ -2,12 +2,13 @@ class_name GameUI
 extends CanvasLayer
 
 ## Giao diện HUD chuẩn Dark Fantasy Pixel-Art (Ergonomic HUD)
-## Tính năng nâng cấp:
+## Tính năng:
 ## 1. Thanh máu Huyết Nguyệt 2 lớp: Viền hợp kim đen bóng, Lớp máu đỏ thẫm ruby, Lớp Catch-up vàng kim
 ## 2. Text HP: "HP: 75/100" sắc nét
 ## 3. Cụm FLOW 5 ô vuông Neon Cyan (#00e5ff) với hiệu ứng Pulse bừng sáng khi đầy 5 vạch (Xuất Quỷ)
 ## 4. Bảng trang bị vũ khí + Hiển thị số lượng Bình Máu & Tinh thể Nâng cấp
 ## 5. Nút mở nhanh Túi Đồ [B]
+## 6. Boss HP Bar hoành tráng phong cách Souls-like (Boss 1.10 Thống Lĩnh Thiết Vệ)
 
 @onready var hp_catchup: ColorRect = $TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/Background/CatchupFill
 @onready var hp_fill: ColorRect = $TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/Background/Fill
@@ -28,10 +29,18 @@ extends CanvasLayer
 @onready var crystal_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/FlaskPanel/CrystalLabel")
 @onready var bag_btn: Button = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/BagBtn")
 
+# Boss Bar Nodes
+@onready var boss_bar_container: Control = get_node_or_null("BossBarContainer")
+@onready var boss_name_label: Label = get_node_or_null("BossBarContainer/VBox/BossName")
+@onready var boss_hp_fill: ColorRect = get_node_or_null("BossBarContainer/VBox/BarBorder/Background/Fill")
+@onready var boss_hp_catchup: ColorRect = get_node_or_null("BossBarContainer/VBox/BarBorder/Background/Catchup")
+
 const HP_BAR_MAX_WIDTH: float = 106.0
+const BOSS_BAR_MAX_WIDTH: float = 236.0
 
 var catchup_tween: Tween = null
 var pulse_tween: Tween = null
+var boss_catchup_tween: Tween = null
 
 const WEAPON_TEXTURES = {
 	"tier_d": preload("res://assets/sprites/items/sliced/weapon_tier_d.png"),
@@ -42,6 +51,10 @@ const WEAPON_TEXTURES = {
 	"tier_sr": preload("res://assets/sprites/items/sliced/weapon_tier_sr.png"),
 	"tier_ssr": preload("res://assets/sprites/items/sliced/weapon_tier_ssr.png")
 }
+
+func _ready() -> void:
+	if boss_bar_container:
+		boss_bar_container.visible = false
 
 func connect_player(player: Player) -> void:
 	if not player:
@@ -63,11 +76,46 @@ func connect_player(player: Player) -> void:
 	
 	if bag_btn:
 		bag_btn.pressed.connect(func():
-			var inv = get_parent().get_node_or_null("InventoryUI")
+			var inv = get_parent().get_node_or_null("UI_Layer/InventoryUI")
 			if not inv:
 				inv = get_tree().root.find_child("InventoryUI", true, false)
 			if inv and inv.has_method("toggle_inventory"):
 				inv.toggle_inventory()
+		)
+
+func bind_boss(boss: EnemyBossCommander) -> void:
+	if not boss:
+		return
+	if boss_bar_container:
+		boss_bar_container.visible = true
+	boss.boss_hp_updated.connect(_on_boss_hp_updated)
+	boss.boss_defeated.connect(_on_boss_defeated)
+	_on_boss_hp_updated(boss.current_hp, boss.max_hp, boss.enemy_name)
+
+func _on_boss_hp_updated(current: float, maximum: float, boss_name: String) -> void:
+	if not boss_bar_container:
+		return
+	boss_bar_container.visible = true
+	if boss_name_label:
+		boss_name_label.text = boss_name
+	var ratio = clampf(current / max(1.0, maximum), 0.0, 1.0)
+	var target_width = BOSS_BAR_MAX_WIDTH * ratio
+	if boss_hp_fill:
+		boss_hp_fill.size.x = target_width
+	if boss_hp_catchup:
+		if boss_catchup_tween:
+			boss_catchup_tween.kill()
+		boss_catchup_tween = create_tween()
+		boss_catchup_tween.tween_interval(0.2)
+		boss_catchup_tween.tween_property(boss_hp_catchup, "size:x", target_width, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+func _on_boss_defeated() -> void:
+	if boss_bar_container:
+		var tween = create_tween()
+		tween.tween_property(boss_bar_container, "modulate:a", 0.0, 1.5)
+		tween.tween_callback(func():
+			boss_bar_container.visible = false
+			boss_bar_container.modulate.a = 1.0
 		)
 
 func _on_flasks_changed(current: int, maximum: int) -> void:

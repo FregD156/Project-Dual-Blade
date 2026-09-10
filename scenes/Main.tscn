@@ -481,6 +481,71 @@ text = "1.1: CỔ THÀNH KHỞI ĐẦU"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="BossBarContainer" type="Control" parent="UI_Layer"]
+visible = false
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -42.0
+offset_right = 120.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="UI_Layer/BossBarContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 2
+
+[node name="BossName" type="Label" parent="UI_Layer/BossBarContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.25, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 7
+text = "THỐNG LĨNH THIẾT VỆ"
+horizontal_alignment = 1
+
+[node name="BarBorder" type="ColorRect" parent="UI_Layer/BossBarContainer/VBox"]
+custom_minimum_size = Vector2(240, 10)
+layout_mode = 2
+color = Color(0.45, 0.45, 0.55, 1)
+
+[node name="Background" type="ColorRect" parent="UI_Layer/BossBarContainer/VBox/BarBorder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 1.0
+offset_right = -2.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.12, 1)
+
+[node name="Catchup" type="ColorRect" parent="UI_Layer/BossBarContainer/VBox/BarBorder/Background"]
+layout_mode = 0
+offset_right = 236.0
+offset_bottom = 8.0
+color = Color(0.9, 0.75, 0.2, 1)
+
+[node name="Fill" type="ColorRect" parent="UI_Layer/BossBarContainer/VBox/BarBorder/Background"]
+layout_mode = 0
+offset_right = 236.0
+offset_bottom = 8.0
+color = Color(0.85, 0.15, 0.2, 1)
+
 [node name="Debug_Layer" type="CanvasLayer" parent="."]
 layer = 100
 script = ExtResource("4_debug_ui")
