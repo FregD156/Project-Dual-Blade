@@ -76,6 +76,8 @@ func _reposition_player() -> void:
 	if player and is_instance_valid(player):
 		player.global_position = Vector2(100, 192)
 		player.velocity = Vector2.ZERO
+		if player.has_method("refill_armor_after_round"):
+			player.refill_armor_after_round()
 
 func _get_stage_title(stage: int) -> String:
 	match stage:

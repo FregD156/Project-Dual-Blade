@@ -32,7 +32,11 @@ const TEXTURES = {
 	"tier_a": preload("res://assets/sprites/items/sliced/weapon_tier_a.png"),
 	"tier_r": preload("res://assets/sprites/items/sliced/weapon_tier_r.png"),
 	"tier_sr": preload("res://assets/sprites/items/sliced/weapon_tier_sr.png"),
-	"tier_ssr": preload("res://assets/sprites/items/sliced/weapon_tier_ssr.png")
+	"tier_ssr": preload("res://assets/sprites/items/sliced/weapon_tier_ssr.png"),
+	"armor_helmet": preload("res://assets/sprites/armor/armor_helmet.png"),
+	"armor_chest": preload("res://assets/sprites/armor/armor_chest.png"),
+	"armor_arms": preload("res://assets/sprites/armor/armor_arms.png"),
+	"armor_legs": preload("res://assets/sprites/armor/armor_legs.png")
 }
 
 const TIER_GLOW_COLORS = {
@@ -56,6 +60,11 @@ func _ready() -> void:
 	
 	if TEXTURES.has(item_type) and sprite:
 		sprite.texture = TEXTURES[item_type]
+	elif item_type.begins_with("armor_") and sprite:
+		for key in ["armor_helmet", "armor_chest", "armor_arms", "armor_legs"]:
+			if item_type.begins_with(key):
+				sprite.texture = TEXTURES[key]
+				break
 		
 	# Nảy văng lên ngẫu nhiên khi rớt ra từ quái
 	velocity = Vector2(randf_range(-45, 45), randf_range(-90, -60))
@@ -140,3 +149,15 @@ func _apply_pickup(player: Player) -> void:
 					player.equip_weapon_dict(item_data)
 				elif player.has_method("equip_weapon_tier"):
 					player.equip_weapon_tier(item_type)
+			elif item_type.begins_with("armor_"):
+				# Format: "armor_<part>_<tier>" (vd: "armor_helmet_tier_b")
+				var tokens = item_type.replace("armor_", "").split("_")
+				if tokens.size() >= 2:
+					var part = tokens[0]
+					var tier = "tier_" + tokens[tokens.size() - 1]
+					var armor_item = ArmorSystem.create_armor_item(part, tier)
+					if player.has_method("add_to_inventory"):
+						player.add_to_inventory(armor_item)
+					if player.has_method("equip_armor_piece"):
+						# Tự động trang bị nếu phẩm cấp tốt hơn hoặc chưa có
+						player.equip_armor_piece(armor_item)

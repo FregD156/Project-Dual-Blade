@@ -32,6 +32,8 @@ signal flasks_changed(current: int, maximum: int)
 signal weapon_equipped(tier_name: String, atk: float, crit: float)
 signal crystals_changed(count: int)
 signal inventory_changed(items: Array[Dictionary])
+signal armor_changed(current_armor: float, max_armor: float)
+signal armor_equipped(equipped_armor: Dictionary)
 signal player_died()
 
 # ------------------------------------------------------------------------------
@@ -62,6 +64,16 @@ var life_flasks: int = 1
 var max_flasks: int = 3
 var upgrade_crystals: int = 0
 var inventory: Array[Dictionary] = []
+
+# Armor Equipment System (Helmet, Chest, Arms, Legs)
+var equipped_armor: Dictionary = {
+	"helmet": {},
+	"chest": {},
+	"arms": {},
+	"legs": {}
+}
+var max_armor: float = 0.0
+var current_armor: float = 0.0
 
 # ------------------------------------------------------------------------------
 # 3. BIẾN QUẢN LÝ FSM & SKILLS
@@ -125,6 +137,13 @@ func _ready() -> void:
 	emit_signal("crystals_changed", upgrade_crystals)
 	
 	equip_weapon_tier("tier_d")
+	
+	# Trang bị khởi đầu bộ giáp Bậc D
+	equip_armor_piece(ArmorSystem.create_armor_item("helmet", "tier_d"))
+	equip_armor_piece(ArmorSystem.create_armor_item("chest", "tier_d"))
+	equip_armor_piece(ArmorSystem.create_armor_item("arms", "tier_d"))
+	equip_armor_piece(ArmorSystem.create_armor_item("legs", "tier_d"))
+	
 	_change_state(State.IDLE)
 	
 	if hitbox:
@@ -518,8 +537,23 @@ func _on_parry_success(enemy_node: Node) -> void:
 	_change_state(State.ATTACK_2)
 
 func _take_damage(amount: float) -> void:
-	current_hp = max(0.0, current_hp - amount)
-	emit_signal("hp_changed", current_hp, max_hp)
+	var remaining_damage = amount
+	
+	# 1. Hấp thụ qua Lớp Giáp Bảo Vệ trước
+	if current_armor > 0.0:
+		if current_armor >= remaining_damage:
+			current_armor -= remaining_damage
+			remaining_damage = 0.0
+		else:
+			remaining_damage -= current_armor
+			current_armor = 0.0
+		emit_signal("armor_changed", current_armor, max_armor)
+		
+	# 2. Sát thương xuyên qua trừ vào Máu (HP)
+	if remaining_damage > 0.0:
+		current_hp = max(0.0, current_hp - remaining_damage)
+		emit_signal("hp_changed", current_hp, max_hp)
+		
 	_reset_flow()
 	
 	var cam: Camera2D = get_node_or_null("Camera2D")
@@ -707,3 +741,52 @@ func salvage_weapon(index: int) -> bool:
 	add_crystals(2)
 	emit_signal("inventory_changed", inventory)
 	return true
+
+# ------------------------------------------------------------------------------
+# 11. HỆ THỐNG MŨ, GIÁP, TAY, CHÂN (ARMOR EQUIPMENT & REGEN)
+# ------------------------------------------------------------------------------
+func equip_armor_piece(armor_item: Dictionary) -> void:
+	var part = armor_item.get("part", "")
+	if not equipped_armor.has(part):
+		return
+		
+	equipped_armor[part] = armor_item
+	recalculate_armor()
+	emit_signal("armor_equipped", equipped_armor)
+
+func recalculate_armor() -> void:
+	var total_armor = 0.0
+	var armor_pct_bonus = 0.0
+	var flat_bonus = 0.0
+	
+	for part in equipped_armor.keys():
+		var item = equipped_armor[part]
+		if item.is_empty():
+			continue
+		total_armor += item.get("armor_value", 0.0)
+		var opts = item.get("options", [])
+		for opt in opts:
+			armor_pct_bonus += opt.get("armor_pct", 0.0)
+			flat_bonus += opt.get("flat_armor", 0.0)
+			
+	var prev_max = max_armor
+	max_armor = round((total_armor + flat_bonus) * (1.0 + armor_pct_bonus))
+	
+	# Nếu vừa trang bị mới hoặc khởi tạo: Cập nhật current_armor tỉ lệ thuận
+	if prev_max <= 0.0:
+		current_armor = max_armor
+	else:
+		current_armor = clampf(current_armor + (max_armor - prev_max), 0.0, max_armor)
+		
+	emit_signal("armor_changed", current_armor, max_armor)
+
+func refill_armor_after_round() -> void:
+	# Cơ chế hồi phục 100% Giáp sau mỗi round theo yêu cầu người chơi
+	current_armor = max_armor
+	emit_signal("armor_changed", current_armor, max_armor)
+	
+	# Hiệu ứng hồi giáp: Ánh sáng lam/bạc bao quanh nhân vật
+	if sprite:
+		var tween = create_tween()
+		tween.tween_property(sprite, "modulate", Color(0.4, 0.9, 1.8, 1.0), 0.2)
+		tween.tween_property(sprite, "modulate", Color.WHITE, 0.25)

@@ -14,6 +14,15 @@ extends CanvasLayer
 @onready var hp_fill: ColorRect = $TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/Background/Fill
 @onready var hp_label: Label = $TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/HPText
 
+# Armor Panel Nodes (Thanh Giáp cạnh HP)
+@onready var armor_panel: Control = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/ArmorPanel")
+@onready var armor_catchup: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/ArmorPanel/Border/Background/CatchupFill")
+@onready var armor_fill: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/ArmorPanel/Border/Background/Fill")
+@onready var armor_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/ArmorPanel/Border/ArmorText")
+
+const ARMOR_BAR_MAX_WIDTH: float = 76.0
+var armor_catchup_tween: Tween = null
+
 @onready var flow_cells: Array[ColorRect] = [
 	$TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer/Cell1,
 	$TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer/Cell2,
@@ -67,8 +76,11 @@ func connect_player(player: Player) -> void:
 		player.weapon_equipped.connect(_on_weapon_equipped)
 	if player.has_signal("crystals_changed"):
 		player.crystals_changed.connect(_on_crystals_changed)
+	if player.has_signal("armor_changed"):
+		player.armor_changed.connect(_on_armor_changed)
 	
 	_on_hp_changed(player.current_hp, player.max_hp)
+	_on_armor_changed(player.current_armor, player.max_armor)
 	_on_flow_changed(player.current_flow, false)
 	_on_flasks_changed(player.life_flasks, player.max_flasks)
 	_on_weapon_equipped(player.current_weapon_tier, player.base_atk, player.crit_rate)
@@ -163,6 +175,33 @@ func _on_hp_changed(current: float, maximum: float) -> void:
 		
 	if hp_label:
 		hp_label.text = "HP: %d / %d" % [round(current), round(maximum)]
+
+func _on_armor_changed(current: float, maximum: float) -> void:
+	if not armor_panel:
+		return
+		
+	var ratio := clampf(current / max(1.0, maximum), 0.0, 1.0)
+	var target_width := ARMOR_BAR_MAX_WIDTH * ratio
+	
+	if armor_fill:
+		armor_fill.size.x = target_width
+		# Đổi màu cảnh báo khi giáp sắp vỡ
+		if ratio <= 0.0:
+			armor_fill.color = Color(0.2, 0.25, 0.35, 0.3)
+		elif ratio < 0.3:
+			armor_fill.color = Color(1.0, 0.6, 0.2) # Cam cảnh báo
+		else:
+			armor_fill.color = Color(0.2, 0.65, 0.95) # Lam thép sáng
+			
+	if armor_catchup:
+		if armor_catchup_tween:
+			armor_catchup_tween.kill()
+		armor_catchup_tween = create_tween()
+		armor_catchup_tween.tween_interval(0.18)
+		armor_catchup_tween.tween_property(armor_catchup, "size:x", target_width, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		
+	if armor_label:
+		armor_label.text = "GIÁP: %d / %d" % [round(current), round(maximum)]
 
 func _on_flow_changed(stacks: int, is_full: bool) -> void:
 	for i in range(5):

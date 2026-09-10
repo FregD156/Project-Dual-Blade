@@ -31,19 +31,19 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="CenterContainer"]
-custom_minimum_size = Vector2(250, 220)
+custom_minimum_size = Vector2(250, 240)
 layout_mode = 2
 
 [node name="Margin" type="MarginContainer" parent="CenterContainer/Panel"]
 layout_mode = 2
 theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 6
+theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 6
+theme_override_constants/margin_bottom = 5
 
 [node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 3
 
 [node name="Header" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox"]
 layout_mode = 2
@@ -74,7 +74,7 @@ layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="EquippedIcon" type="TextureRect" parent="CenterContainer/Panel/Margin/VBox/EquippedSection"]
-custom_minimum_size = Vector2(24, 24)
+custom_minimum_size = Vector2(22, 22)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
@@ -120,6 +120,59 @@ theme_override_font_sizes/font_size = 5
 text = "Dòng Option: Chưa có"
 autowrap_mode = 3
 
+[node name="ArmorSection" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="ArmorTotalLabel" type="Label" parent="CenterContainer/Panel/Margin/VBox/ArmorSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 6
+text = "Tổng Giáp: 27 / 27 (Hồi đầy mỗi round)"
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ArmorSection"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HelmetSlot" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/ArmorSection/HBox"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/HelmetSlot"]
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ChestSlot" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/ArmorSection/HBox"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/ChestSlot"]
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ArmsSlot" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/ArmorSection/HBox"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/ArmsSlot"]
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LegsSlot" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/ArmorSection/HBox"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/LegsSlot"]
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
 [node name="HSeparator2" type="HSeparator" parent="CenterContainer/Panel/Margin/VBox"]
 layout_mode = 2
 
@@ -130,10 +183,10 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("2_font")
 theme_override_font_sizes/font_size = 6
-text = "Túi đồ (Trái: Trang bị | Phải: Rã đồ nhận Thạch):"
+text = "Túi đồ (Trái: Trang bị | Phải: Rã đồ):"
 
 [node name="Scroll" type="ScrollContainer" parent="CenterContainer/Panel/Margin/VBox"]
-custom_minimum_size = Vector2(0, 68)
+custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0

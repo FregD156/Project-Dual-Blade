@@ -66,6 +66,10 @@ func rest_at_altar() -> void:
 	player_in_range.life_flasks = player_in_range.max_flasks
 	player_in_range.emit_signal("flasks_changed", player_in_range.life_flasks, player_in_range.max_flasks)
 	
+	# Hồi đầy 100% Giáp bảo vệ
+	if player_in_range.has_method("refill_armor_after_round"):
+		player_in_range.refill_armor_after_round()
+	
 	# Hiệu ứng ánh sáng thanh tẩy (Purifying Light)
 	if player_in_range.sprite:
 		var tween = create_tween()
