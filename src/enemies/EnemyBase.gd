@@ -4,6 +4,7 @@ extends CharacterBody2D
 ## Base class for all enemies in Project Dual Blade
 ## Implements:
 ## - Finite State Machine (IDLE, PATROL, CHASE, WINDUP, ATTACK, HURT, DEAD)
+## - Hoạt họa tự động mượt mà (Walk/Run cycle & Attack/Windup poses)
 ## - ARPG Armor Damage Mitigation (K=50) via DamageCalculator
 ## - Telegraphing warning icons (Parry Star vs Danger Eye)
 ## - Dynamic Drop on death (Life Shard, Life Flask, Weapons, Upgrade Crystals)
@@ -38,6 +39,9 @@ var attack_timer: float = 1.0
 var windup_timer: float = 0.0
 var next_attack_unparryable: bool = false
 var knockback_velocity: Vector2 = Vector2.ZERO
+
+# Biến đếm nhịp hoạt họa động cho quái
+var anim_step_timer: float = 0.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var hurtbox: Hurtbox = $Hurtbox
@@ -86,6 +90,31 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	_update_facing()
+	_update_sprite_animation(delta)
+
+func _update_sprite_animation(delta: float) -> void:
+	if not sprite:
+		return
+	if anim_player and anim_player.is_playing():
+		return
+
+	# Cập nhật khung hình hoạt họa theo trạng thái
+	match current_state:
+		State.IDLE:
+			sprite.frame = 0
+		State.CHASE, State.PATROL:
+			if abs(velocity.x) > 5.0:
+				anim_step_timer += delta * 6.0
+				var frames_count = max(1, sprite.hframes)
+				sprite.frame = int(anim_step_timer) % frames_count
+			else:
+				sprite.frame = 0
+		State.WINDUP:
+			sprite.frame = min(sprite.hframes - 1, 1)
+		State.ATTACK:
+			sprite.frame = min(sprite.hframes - 1, 2)
+		State.HURT:
+			sprite.frame = min(sprite.hframes - 1, 1)
 
 func _process_ai_state(delta: float) -> void:
 	if not target_player or not is_instance_valid(target_player):
@@ -178,13 +207,11 @@ func _execute_attack() -> void:
 		
 	current_state = State.IDLE
 	attack_timer = attack_cooldown
-	if sprite:
-		sprite.frame = 0
 
 func _on_hit_received(incoming_hitbox: Hitbox) -> void:
 	if current_state == State.DEAD:
 		return
-
+		
 	var result = DamageCalculator.calculate_damage(
 		incoming_hitbox.damage,
 		incoming_hitbox.skill_mult,
@@ -284,7 +311,9 @@ func _drop_item(item_type: String) -> void:
 	if not drop_item_scene:
 		return
 	var drop = drop_item_scene.instantiate()
-	drop.global_position = global_position + Vector2(randf_range(-12, 12), -10)
+	# Spawn rơi trên mặt sàn chuẩn
+	drop.global_position = Vector2(global_position.x + randf_range(-14, 14), global_position.y - 10)
+	drop.base_ground_pos_y = 192.0
 	drop.item_type = item_type
 	get_parent().add_child(drop)
 

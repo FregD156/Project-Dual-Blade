@@ -1,11 +1,13 @@
 class_name GameUI
 extends CanvasLayer
 
-## Giao diện HUD chuẩn Pixel-Art 16-bit Công thái học (Ergonomic HUD)
-## Tính năng:
-## 1. Thanh máu 2 lớp: Lớp đỏ chính + Lớp vàng/trắng Catch-up Bar (trượt chậm thể hiện sát thương)
-## 2. Text HP: "HP: 75/100" căn chính giữa thanh máu, font pixel sắc nét
-## 3. Cụm FLOW 5 ô vuông Neon Cyan phát sáng (#00e5ff) với hiệu ứng Pulse bừng sáng khi đầy 5 vạch
+## Giao diện HUD chuẩn Dark Fantasy Pixel-Art (Ergonomic HUD)
+## Tính năng nâng cấp:
+## 1. Thanh máu Huyết Nguyệt 2 lớp: Viền hợp kim đen bóng, Lớp máu đỏ thẫm ruby, Lớp Catch-up vàng kim
+## 2. Text HP: "HP: 75/100" sắc nét
+## 3. Cụm FLOW 5 ô vuông Neon Cyan (#00e5ff) với hiệu ứng Pulse bừng sáng khi đầy 5 vạch (Xuất Quỷ)
+## 4. Bảng trang bị vũ khí + Hiển thị số lượng Bình Máu & Tinh thể Nâng cấp
+## 5. Nút mở nhanh Túi Đồ [B]
 
 @onready var hp_catchup: ColorRect = $TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/Background/CatchupFill
 @onready var hp_fill: ColorRect = $TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/Background/Fill
@@ -26,7 +28,7 @@ extends CanvasLayer
 @onready var crystal_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/FlaskPanel/CrystalLabel")
 @onready var bag_btn: Button = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/BagBtn")
 
-const HP_BAR_MAX_WIDTH: float = 126.0
+const HP_BAR_MAX_WIDTH: float = 106.0
 
 var catchup_tween: Tween = null
 var pulse_tween: Tween = null
@@ -82,7 +84,6 @@ func _on_weapon_equipped(tier_name: String, atk: float, crit: float) -> void:
 	if weapon_tier_label:
 		var display_tier = tier_name.replace("tier_", "").to_upper()
 		weapon_tier_label.text = "%s (ATK:%d)" % [display_tier, round(atk)]
-		# Color based on rarity
 		match tier_name:
 			"tier_d": weapon_tier_label.modulate = Color(0.7, 0.7, 0.7)
 			"tier_c": weapon_tier_label.modulate = Color(1.0, 1.0, 1.0)
@@ -98,46 +99,45 @@ func _on_hp_changed(current: float, maximum: float) -> void:
 	
 	if hp_fill:
 		hp_fill.size.x = target_width
-		# Đổi màu cảnh báo máu thấp
+		# Đổi sắc thái thanh máu Ruby / Cảnh báo nguy kịch
 		if ratio < 0.3:
-			hp_fill.color = Color(0.95, 0.15, 0.15)
+			hp_fill.color = Color(1.0, 0.1, 0.1) # Đỏ rực nguy cấp
 		else:
-			hp_fill.color = Color(0.85, 0.22, 0.22)
+			hp_fill.color = Color(0.85, 0.15, 0.22) # Đỏ Ruby Dark Fantasy
 			
-	# Thanh vàng Catch-up trượt chậm dần sau 0.25s
+	# Thanh vàng kim Catch-up trượt đuổi theo sau 0.2s
 	if hp_catchup:
 		if catchup_tween:
 			catchup_tween.kill()
 		catchup_tween = create_tween()
-		catchup_tween.tween_interval(0.25)
-		catchup_tween.tween_property(hp_catchup, "size:x", target_width, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		catchup_tween.tween_interval(0.2)
+		catchup_tween.tween_property(hp_catchup, "size:x", target_width, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		
 	if hp_label:
 		hp_label.text = "HP: %d / %d" % [round(current), round(maximum)]
 
 func _on_flow_changed(stacks: int, is_full: bool) -> void:
-	# Cập nhật 5 ô vuông neon
 	for i in range(5):
 		if i < flow_cells.size():
 			var cell = flow_cells[i]
 			if i < stacks:
-				# Ô đã tích lũy: Sáng bừng Cyan Neon (#00e5ff)
+				# Tích tụ năng lượng: Cyan phát quang
 				cell.color = Color(0.0, 0.9, 1.0, 1.0)
 			else:
-				# Ô trống: Tối viền mờ
-				cell.color = Color(0.12, 0.18, 0.25, 0.5)
+				# Ô tối mờ
+				cell.color = Color(0.1, 0.14, 0.2, 0.45)
 
-	# Hiệu ứng Pulse nhấp nháy toàn cụm khi đạt trạng thái Full Flow
+	# Hiệu ứng bừng sáng khi đạt Max Flow (Xuất Quỷ)
 	if is_full:
 		if flow_title:
 			flow_title.text = "FLOW [XUẤT QUỶ]"
-			flow_title.modulate = Color(1.0, 0.85, 0.2)
+			flow_title.modulate = Color(1.0, 0.85, 0.25)
 		if not pulse_tween or not pulse_tween.is_valid():
 			pulse_tween = create_tween().set_loops()
 			for cell in flow_cells:
-				pulse_tween.parallel().tween_property(cell, "modulate", Color(1.8, 1.8, 1.8, 1.0), 0.25)
+				pulse_tween.parallel().tween_property(cell, "modulate", Color(2.0, 2.0, 2.0, 1.0), 0.22)
 			for cell in flow_cells:
-				pulse_tween.parallel().tween_property(cell, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.25)
+				pulse_tween.parallel().tween_property(cell, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.22)
 	else:
 		if pulse_tween:
 			pulse_tween.kill()

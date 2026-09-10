@@ -2,11 +2,10 @@ class_name DropItem
 extends Area2D
 
 ## DropItem đại diện cho vật phẩm rơi rớt dọc đường theo detail.md
-## - Hạt Sinh Mệnh Nhỏ (life_shard): tự động hút trong 2m (40px), hồi 8% HP
-## - Bình Máu Lớn (life_flask): tăng số bình máu dự trữ, bấm Q để dùng
-## - Trái Tim Huyết Tế (heart_core): hồi 50% HP + buff 10% ATK trong 20s
-## - Tinh Thể Nâng Cấp (upgrade_crystal): nguyên liệu rèn / tẩy dòng
-## - Vũ Khí (tier_d -> tier_ssr): trang bị song đao mới
+## - Rơi tiếp đất chuẩn xác (Ground Snap tại y=192 hoặc trên platform)
+## - Hiệu ứng bay bổng nhấp nhô (Float Bobbing) và tia sáng phẩm cấp
+## - Hạt Sinh Mệnh (life_shard) & Tinh thể (upgrade_crystal) tự động hút khi lại gần
+## - Vũ Khí (tier_d -> tier_ssr), Bình Máu (life_flask), Trái Tim (heart_core)
 
 @export var item_type: String = "life_shard"
 
@@ -16,6 +15,10 @@ extends Area2D
 var velocity: Vector2 = Vector2.ZERO
 var target_player: Player = null
 var is_collected: bool = false
+var is_grounded: bool = false
+var ground_y: float = 192.0
+var base_ground_pos_y: float = 192.0
+var bob_timer: float = 0.0
 
 const TEXTURES = {
 	"life_shard": preload("res://assets/sprites/items/sliced/life_shard.png"),
@@ -32,6 +35,20 @@ const TEXTURES = {
 	"tier_ssr": preload("res://assets/sprites/items/sliced/weapon_tier_ssr.png")
 }
 
+const TIER_GLOW_COLORS = {
+	"tier_d": Color(0.7, 0.7, 0.7),
+	"tier_c": Color(1.0, 1.0, 1.0),
+	"tier_b": Color(0.2, 1.0, 0.3),
+	"tier_a": Color(0.2, 0.6, 1.0),
+	"tier_r": Color(0.8, 0.3, 1.0),
+	"tier_sr": Color(1.0, 0.85, 0.2),
+	"tier_ssr": Color(1.0, 0.3, 0.8),
+	"life_shard": Color(0.3, 1.0, 0.5),
+	"life_flask": Color(1.0, 0.3, 0.3),
+	"heart_core": Color(1.0, 0.1, 0.2),
+	"upgrade_crystal": Color(0.7, 0.4, 1.0)
+}
+
 func _ready() -> void:
 	collision_layer = 128
 	collision_mask = 2 # Detect player
@@ -40,31 +57,45 @@ func _ready() -> void:
 	if TEXTURES.has(item_type) and sprite:
 		sprite.texture = TEXTURES[item_type]
 		
-	# Spawn pop upwards
-	velocity = Vector2(randf_range(-30, 30), -80)
+	# Nảy văng lên ngẫu nhiên khi rớt ra từ quái
+	velocity = Vector2(randf_range(-45, 45), randf_range(-90, -60))
+	base_ground_pos_y = 192.0 # Mặt sàn chính chuẩn của map
 
 func _physics_process(delta: float) -> void:
 	if is_collected:
 		return
 
-	# Fall to ground with simple gravity
-	if velocity.y < 120.0:
-		velocity.y += 200.0 * delta
-	velocity.x = move_toward(velocity.x, 0.0, 100.0 * delta)
-	position += velocity * delta
+	if not is_grounded:
+		# Rơi tự do xuống sàn
+		velocity.y += 350.0 * delta
+		velocity.x = move_toward(velocity.x, 0.0, 80.0 * delta)
+		position += velocity * delta
+		
+		# Chạm đất (ở độ cao sàn 192 hoặc trên bục platform)
+		if position.y >= base_ground_pos_y:
+			position.y = base_ground_pos_y
+			is_grounded = true
+			velocity = Vector2.ZERO
+	else:
+		# Khi đã tiếp đất: Nhấp nhô nhẹ nhàng bồng bềnh 2-3px để người chơi dễ thấy
+		bob_timer += delta * 3.5
+		if sprite:
+			sprite.position.y = sin(bob_timer) * 2.5
 
-	# Life Shard magnet effect within 60px
+	# Nam châm hút Hạt sinh mệnh và Tinh thể khi người chơi tiến lại gần 65px
 	if item_type == "life_shard" or item_type == "upgrade_crystal":
 		if not target_player or not is_instance_valid(target_player):
-			var players = get_tree().get_nodes_in_group("player")
-			if players.size() > 0:
-				target_player = players[0]
+			var tree = get_tree()
+			if tree:
+				var players = tree.get_nodes_in_group("player")
+				if players.size() > 0:
+					target_player = players[0]
 		
 		if target_player:
 			var dist = global_position.distance_to(target_player.global_position)
 			if dist < 65.0:
 				var dir = (target_player.global_position - global_position).normalized()
-				global_position += dir * 180.0 * delta
+				global_position += dir * 200.0 * delta
 
 func _on_body_entered(body: Node2D) -> void:
 	if is_collected:
@@ -74,8 +105,8 @@ func _on_body_entered(body: Node2D) -> void:
 		_apply_pickup(body)
 		
 		var tween = create_tween().set_parallel(true)
-		tween.tween_property(self, "position:y", position.y - 15.0, 0.15)
-		tween.tween_property(self, "modulate:a", 0.0, 0.15)
+		tween.tween_property(self, "position:y", position.y - 16.0, 0.16)
+		tween.tween_property(self, "modulate:a", 0.0, 0.16)
 		tween.chain().tween_callback(queue_free)
 
 func _apply_pickup(player: Player) -> void:
