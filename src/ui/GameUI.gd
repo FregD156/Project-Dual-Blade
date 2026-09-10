@@ -2,26 +2,24 @@ class_name GameUI
 extends CanvasLayer
 
 ## Giao diện HUD chuẩn Dark Fantasy Pixel-Art (Ergonomic HUD)
-## Tính năng:
-## 1. Thanh máu Huyết Nguyệt 2 lớp: Viền hợp kim đen bóng, Lớp máu đỏ thẫm ruby, Lớp Catch-up vàng kim
-## 2. Text HP: "HP: 75/100" sắc nét
-## 3. Cụm FLOW 5 ô vuông Neon Cyan (#00e5ff) với hiệu ứng Pulse bừng sáng khi đầy 5 vạch (Xuất Quỷ)
-## 4. Bảng trang bị vũ khí + Hiển thị số lượng Bình Máu & Tinh thể Nâng cấp
-## 5. Nút mở nhanh Túi Đồ [B]
-## 6. Boss HP Bar hoành tráng phong cách Souls-like (Boss 1.10 Thống Lĩnh Thiết Vệ)
+## Tính năng nâng cấp:
+## 1. Cụm Vitals Đồng Bộ (Unified Health & Shield Bar):
+##    - Đặt chung trong 1 khung VitalPanel hợp kim đúc nguyên khối Dark Fantasy
+##    - Tầng trên (Lớn): Thanh máu Huyết Nguyệt Ruby đỏ thẫm + Lớp Catch-up vàng kim mượt mà + Text HP
+##    - Tầng dưới (Gọn): Thanh Giáp Hộ Mệnh Lam Thạch (Cobalt/Cyan Shield) + Lớp Catch-up bạc sáng + Text Giáp
+## 2. Cụm FLOW 5 ô vuông Neon Cyan (#00e5ff) với hiệu ứng Pulse bừng sáng khi đầy 5 vạch (Xuất Quỷ)
+## 3. Bảng trang bị vũ khí + Hiển thị số lượng Bình Máu & Tinh thể Nâng cấp
+## 4. Nút mở nhanh Túi Đồ [B]
+## 5. Boss HP Bar hoành tráng phong cách Souls-like (Boss 1.10 Thống Lĩnh Thiết Vệ)
 
-@onready var hp_catchup: ColorRect = $TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/Background/CatchupFill
-@onready var hp_fill: ColorRect = $TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/Background/Fill
-@onready var hp_label: Label = $TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/HPText
+@onready var vital_panel: Control = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel")
+@onready var hp_catchup: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background/CatchupFill")
+@onready var hp_fill: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background/Fill")
+@onready var hp_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/HPText")
 
-# Armor Panel Nodes (Thanh Giáp cạnh HP)
-@onready var armor_panel: Control = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/ArmorPanel")
-@onready var armor_catchup: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/ArmorPanel/Border/Background/CatchupFill")
-@onready var armor_fill: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/ArmorPanel/Border/Background/Fill")
-@onready var armor_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/ArmorPanel/Border/ArmorText")
-
-const ARMOR_BAR_MAX_WIDTH: float = 76.0
-var armor_catchup_tween: Tween = null
+@onready var armor_catchup: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background/CatchupFill")
+@onready var armor_fill: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background/Fill")
+@onready var armor_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/ArmorText")
 
 @onready var flow_cells: Array[ColorRect] = [
 	$TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer/Cell1,
@@ -44,10 +42,12 @@ var armor_catchup_tween: Tween = null
 @onready var boss_hp_fill: ColorRect = get_node_or_null("BossBarContainer/VBox/BarBorder/Background/Fill")
 @onready var boss_hp_catchup: ColorRect = get_node_or_null("BossBarContainer/VBox/BarBorder/Background/Catchup")
 
-const HP_BAR_MAX_WIDTH: float = 106.0
+const HP_BAR_MAX_WIDTH: float = 116.0
+const ARMOR_BAR_MAX_WIDTH: float = 116.0
 const BOSS_BAR_MAX_WIDTH: float = 236.0
 
 var catchup_tween: Tween = null
+var armor_catchup_tween: Tween = null
 var pulse_tween: Tween = null
 var boss_catchup_tween: Tween = null
 
@@ -159,13 +159,11 @@ func _on_hp_changed(current: float, maximum: float) -> void:
 	
 	if hp_fill:
 		hp_fill.size.x = target_width
-		# Đổi sắc thái thanh máu Ruby / Cảnh báo nguy kịch
 		if ratio < 0.3:
 			hp_fill.color = Color(1.0, 0.1, 0.1) # Đỏ rực nguy cấp
 		else:
-			hp_fill.color = Color(0.85, 0.15, 0.22) # Đỏ Ruby Dark Fantasy
+			hp_fill.color = Color(0.88, 0.18, 0.25) # Đỏ Ruby Dark Fantasy
 			
-	# Thanh vàng kim Catch-up trượt đuổi theo sau 0.2s
 	if hp_catchup:
 		if catchup_tween:
 			catchup_tween.kill()
@@ -174,24 +172,20 @@ func _on_hp_changed(current: float, maximum: float) -> void:
 		catchup_tween.tween_property(hp_catchup, "size:x", target_width, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		
 	if hp_label:
-		hp_label.text = "HP: %d / %d" % [round(current), round(maximum)]
+		hp_label.text = "HP: %d/%d" % [round(current), round(maximum)]
 
 func _on_armor_changed(current: float, maximum: float) -> void:
-	if not armor_panel:
-		return
-		
 	var ratio := clampf(current / max(1.0, maximum), 0.0, 1.0)
 	var target_width := ARMOR_BAR_MAX_WIDTH * ratio
 	
 	if armor_fill:
 		armor_fill.size.x = target_width
-		# Đổi màu cảnh báo khi giáp sắp vỡ
 		if ratio <= 0.0:
 			armor_fill.color = Color(0.2, 0.25, 0.35, 0.3)
 		elif ratio < 0.3:
-			armor_fill.color = Color(1.0, 0.6, 0.2) # Cam cảnh báo
+			armor_fill.color = Color(1.0, 0.6, 0.2) # Cam cảnh báo giáp sắp vỡ
 		else:
-			armor_fill.color = Color(0.2, 0.65, 0.95) # Lam thép sáng
+			armor_fill.color = Color(0.15, 0.75, 0.95) # Lam Ngọc Cyan phát quang
 			
 	if armor_catchup:
 		if armor_catchup_tween:
@@ -201,20 +195,17 @@ func _on_armor_changed(current: float, maximum: float) -> void:
 		armor_catchup_tween.tween_property(armor_catchup, "size:x", target_width, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		
 	if armor_label:
-		armor_label.text = "GIÁP: %d / %d" % [round(current), round(maximum)]
+		armor_label.text = "GIÁP: %d/%d" % [round(current), round(maximum)]
 
 func _on_flow_changed(stacks: int, is_full: bool) -> void:
 	for i in range(5):
 		if i < flow_cells.size():
 			var cell = flow_cells[i]
 			if i < stacks:
-				# Tích tụ năng lượng: Cyan phát quang
 				cell.color = Color(0.0, 0.9, 1.0, 1.0)
 			else:
-				# Ô tối mờ
 				cell.color = Color(0.1, 0.14, 0.2, 0.45)
 
-	# Hiệu ứng bừng sáng khi đạt Max Flow (Xuất Quỷ)
 	if is_full:
 		if flow_title:
 			flow_title.text = "FLOW [XUẤT QUỶ]"
