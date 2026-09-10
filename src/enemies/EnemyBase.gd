@@ -197,11 +197,14 @@ func _on_hit_received(incoming_hitbox: Hitbox) -> void:
 	current_hp = max(0.0, current_hp - dmg)
 	_update_hp_bar()
 
-	# Knockback
+	# Knockback & Combat VFX
 	var attack_dir = Vector2.RIGHT
 	if incoming_hitbox.owner and incoming_hitbox.owner is Node2D:
 		attack_dir = (global_position - (incoming_hitbox.owner as Node2D).global_position).normalized()
 	knockback_velocity = Vector2(sign(attack_dir.x) if sign(attack_dir.x) != 0 else 1.0, 0.0) * 110.0
+
+	# Spawn Damage Number, Sparks, Blood
+	VFXManager.spawn_combat_impact(get_parent(), global_position + Vector2(0, -14), attack_dir, dmg, incoming_hitbox.is_crit, false)
 
 	# Flash white
 	if sprite:

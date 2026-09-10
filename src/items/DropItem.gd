@@ -95,5 +95,12 @@ func _apply_pickup(player: Player) -> void:
 				player.add_crystals(1)
 		_:
 			if item_type.begins_with("tier_"):
+				if player.has_method("add_to_inventory"):
+					player.add_to_inventory({
+						"type": "weapon",
+						"tier": item_type,
+						"name": "Song Đao " + item_type.replace("tier_", "").to_upper(),
+						"time": Time.get_ticks_msec()
+					})
 				if player.has_method("equip_weapon_tier"):
 					player.equip_weapon_tier(item_type)

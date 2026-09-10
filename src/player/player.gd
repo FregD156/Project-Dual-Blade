@@ -49,10 +49,12 @@ var current_weapon_tier: String = "tier_d"
 var life_flasks: int = 1
 var max_flasks: int = 3
 var upgrade_crystals: int = 0
+var inventory: Array[Dictionary] = [] # Danh sách trang bị và vật phẩm trong túi đồ
 
 signal flasks_changed(current: int, maximum: int)
 signal weapon_equipped(tier_name: String, atk: float, crit: float)
 signal crystals_changed(count: int)
+signal inventory_changed(items: Array[Dictionary])
 
 # ------------------------------------------------------------------------------
 # 3. BIẾN QUẢN LÝ FSM & SKILLS
@@ -421,6 +423,18 @@ func _take_damage(amount: float) -> void:
 	emit_signal("hp_changed", current_hp, max_hp)
 	_reset_flow() # Dính đòn làm mất thanh Cuồng Bạo lập tức
 	
+	# Spawn Damage Number and Blood Splatter
+	var cam: Camera2D = get_node_or_null("Camera2D")
+	if cam:
+		VFXManager.screen_shake(cam, 5.0, 0.15)
+	VFXManager.spawn_combat_impact(get_parent(), global_position + Vector2(0, -14), Vector2(-facing_direction, 0.0), amount, false, true)
+	
+	if sprite:
+		sprite.modulate = Color(2.5, 0.5, 0.5, 1.0) # Flash red
+		await get_tree().create_timer(0.08).timeout
+		if is_instance_valid(sprite):
+			sprite.modulate = Color.WHITE
+
 	if current_hp <= 0.0:
 		_change_state(State.DEAD)
 	else:
@@ -541,5 +555,36 @@ func equip_weapon_tier(tier: String) -> void:
 	if hitbox:
 		hitbox.damage = base_atk
 		hitbox.is_crit = (randf() < crit_rate)
-	
+
+	# Hiệu ứng đổi trang bị: Vòng sáng bừng màu phẩm chất + Floating Level-up text
+	_play_equip_vfx(tier)
 	emit_signal("weapon_equipped", current_weapon_tier, base_atk, crit_rate)
+
+func _play_equip_vfx(tier: String) -> void:
+	var tier_colors = {
+		"tier_d": Color(0.7, 0.7, 0.7),
+		"tier_c": Color(1.0, 1.0, 1.0),
+		"tier_b": Color(0.2, 1.0, 0.3),
+		"tier_a": Color(0.2, 0.6, 1.0),
+		"tier_r": Color(0.8, 0.3, 1.0),
+		"tier_sr": Color(1.0, 0.85, 0.2),
+		"tier_ssr": Color(1.0, 0.3, 0.8)
+	}
+	var glow_color = tier_colors.get(tier, Color.WHITE)
+	
+	if sprite:
+		var orig_mod = sprite.modulate
+		var tween = create_tween()
+		tween.tween_property(sprite, "modulate", glow_color * 2.2, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_property(sprite, "modulate", Color.WHITE, 0.25)
+		
+	# Floating notification text
+	if get_parent():
+		var dmg_num = DamageNumber.new()
+		dmg_num.global_position = global_position + Vector2(0, -28)
+		dmg_num.setup(base_atk, true, glow_color)
+		get_parent().call_deferred("add_child", dmg_num)
+
+func add_to_inventory(item_dict: Dictionary) -> void:
+	inventory.append(item_dict)
+	emit_signal("inventory_changed", inventory)

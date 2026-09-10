@@ -24,6 +24,7 @@ extends CanvasLayer
 @onready var weapon_tier_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/WeaponPanel/WeaponTierLabel")
 @onready var flask_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/FlaskPanel/FlaskLabel")
 @onready var crystal_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/FlaskPanel/CrystalLabel")
+@onready var bag_btn: Button = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/BagBtn")
 
 const HP_BAR_MAX_WIDTH: float = 126.0
 
@@ -57,6 +58,15 @@ func connect_player(player: Player) -> void:
 	_on_flasks_changed(player.life_flasks, player.max_flasks)
 	_on_weapon_equipped(player.current_weapon_tier, player.base_atk, player.crit_rate)
 	_on_crystals_changed(player.upgrade_crystals)
+	
+	if bag_btn:
+		bag_btn.pressed.connect(func():
+			var inv = get_parent().get_node_or_null("InventoryUI")
+			if not inv:
+				inv = get_tree().root.find_child("InventoryUI", true, false)
+			if inv and inv.has_method("toggle_inventory"):
+				inv.toggle_inventory()
+		)
 
 func _on_flasks_changed(current: int, maximum: int) -> void:
 	if flask_label:
