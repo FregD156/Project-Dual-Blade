@@ -355,7 +355,8 @@ func _state_run(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, move_input * move_speed * speed_mult, acceleration * delta)
 	else:
 		_apply_friction(delta)
-		if abs(velocity.x) < 5.0:
+		if abs(velocity.x) < 15.0 or is_on_wall():
+			velocity.x = 0.0
 			_change_state(State.IDLE)
 
 func _drop_through_platform() -> void:
@@ -392,7 +393,8 @@ func _state_fall(delta: float) -> void:
 	_handle_air_horizontal_movement(delta)
 
 	if is_on_floor():
-		_change_state(State.IDLE if velocity.x == 0.0 else State.RUN)
+		var move_in := Input.get_axis("move_left", "move_right")
+		_change_state(State.RUN if move_in != 0.0 else State.IDLE)
 		return
 
 	_check_air_actions()
