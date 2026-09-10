@@ -18,6 +18,9 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_F1 or event.keycode == KEY_QUOTELEFT:
 			toggle_debug_overlay()
+		elif event.keycode == KEY_ESCAPE:
+			# Nhấn ESC trong trận đấu để quay về Main Menu
+			get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
 
 func toggle_debug_overlay() -> void:
 	is_debug_visible = !is_debug_visible
