@@ -13,5 +13,5 @@ func _on_area_entered(other_area: Area2D) -> void:
 	if is_invincible:
 		return
 	if other_area is Hitbox:
-		hit_received.emit(other_area)
-		other_area.hit_landed.emit(self)
+		hit_received.emit.call_deferred(other_area)
+		other_area.hit_landed.emit.call_deferred(self)

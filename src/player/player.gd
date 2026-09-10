@@ -236,6 +236,9 @@ func _change_state(new_state: State) -> void:
 			State.HURT:
 				anim_player.play("hurt")
 			State.DEAD:
+				if hurtbox:
+					hurtbox.set_deferred("monitoring", false)
+					hurtbox.set_deferred("monitorable", false)
 				anim_player.play("dead")
 	else:
 		if current_state == State.AIR_ATTACK:
@@ -600,7 +603,13 @@ func _update_facing_and_hitbox() -> void:
 		hitbox.position.x = abs(hitbox.position.x) * facing_direction
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("use_flask") or (event is InputEventKey and event.pressed and event.keycode == KEY_Q):
+	var pressed_flask = false
+	if InputMap.has_action("use_flask") and event.is_action_pressed("use_flask"):
+		pressed_flask = true
+	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Q:
+		pressed_flask = true
+
+	if pressed_flask:
 		use_flask()
 
 func use_flask() -> void:

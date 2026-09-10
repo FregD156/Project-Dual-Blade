@@ -41,7 +41,7 @@ func show_game_over() -> void:
 	
 	var tween = create_tween()
 	tween.tween_property(self, "modulate:a", 1.0, 0.4)
-	if play_again_btn:
+	if play_again_btn and play_again_btn.focus_mode != Control.FOCUS_NONE:
 		play_again_btn.grab_focus()
 
 func _input(event: InputEvent) -> void:
