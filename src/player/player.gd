@@ -762,7 +762,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	var pressed_flask = false
 	if InputMap.has_action("use_flask") and event.is_action_pressed("use_flask"):
 		pressed_flask = true
-	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Q:
+	elif event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_O or event.keycode == KEY_Q):
 		pressed_flask = true
 
 	if pressed_flask:

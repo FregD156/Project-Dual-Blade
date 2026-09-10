@@ -282,20 +282,20 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 7
-text = "A / D / ← → :"
+text = "A / D / S / W :"
 
 [node name="Desc1" type="Label" parent="ControlsModal/Panel/VBox/Grid"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 7
-text = "Di chuyển trái / phải"
+text = "Di chuyển (Trái/Phải), S: Ngồi/Thả sàn, W: Nhảy"
 
 [node name="Key2" type="Label" parent="ControlsModal/Panel/VBox/Grid"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 7
-text = "SPACE :"
+text = "K / SPACE :"
 
 [node name="Desc2" type="Label" parent="ControlsModal/Panel/VBox/Grid"]
 layout_mode = 2
@@ -314,14 +314,14 @@ text = "J :"
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 7
-text = "Tấn công thường / Combo song đao"
+text = "Tấn công thường / Combo Song Đao 4 nhát"
 
 [node name="Key4" type="Label" parent="ControlsModal/Panel/VBox/Grid"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 7
-text = "K :"
+text = "I :"
 
 [node name="Desc4" type="Label" parent="ControlsModal/Panel/VBox/Grid"]
 layout_mode = 2
@@ -334,7 +334,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.4, 0.9, 1)
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 7
-text = "L / SHIFT :"
+text = "L :"
 
 [node name="Desc5" type="Label" parent="ControlsModal/Panel/VBox/Grid"]
 layout_mode = 2
@@ -344,16 +344,42 @@ text = "Shadow Dash (Lướt bất tử i-frame 0.2s)"
 
 [node name="Key6" type="Label" parent="ControlsModal/Panel/VBox/Grid"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_colors/font_color = Color(1.0, 0.3, 0.7, 1)
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 7
-text = "F1 / ~ :"
+text = "U :"
 
 [node name="Desc6" type="Label" parent="ControlsModal/Panel/VBox/Grid"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_font")
 theme_override_font_sizes/font_size = 7
-text = "Bật / Tắt lớp thông số Debug"
+text = "Blade Dance (Tất sát bão đao khi Full Flow)"
+
+[node name="Key7" type="Label" parent="ControlsModal/Panel/VBox/Grid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.3, 0.3, 1)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 7
+text = "O / Q :"
+
+[node name="Desc7" type="Label" parent="ControlsModal/Panel/VBox/Grid"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 7
+text = "Uống Bình Máu Lớn (Hồi 35% HP)"
+
+[node name="Key8" type="Label" parent="ControlsModal/Panel/VBox/Grid"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1.0, 0.5, 1)
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 7
+text = "B / TAB :"
+
+[node name="Desc8" type="Label" parent="ControlsModal/Panel/VBox/Grid"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 7
+text = "Mở / Đóng Túi Đồ & Trang Bị"
 
 [node name="Spacer" type="Control" parent="ControlsModal/Panel/VBox"]
 layout_mode = 2

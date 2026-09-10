@@ -132,7 +132,7 @@ func _on_boss_defeated() -> void:
 
 func _on_flasks_changed(current: int, maximum: int) -> void:
 	if flask_label:
-		flask_label.text = "[Q] Bình: %d/%d" % [current, maximum]
+		flask_label.text = "[O] Bình: %d/%d" % [current, maximum]
 
 func _on_crystals_changed(count: int) -> void:
 	if crystal_label:
@@ -208,7 +208,7 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 
 	if is_full:
 		if flow_title:
-			flow_title.text = "FLOW [U/E TẤT SÁT]"
+			flow_title.text = "FLOW [U TẤT SÁT]"
 			flow_title.modulate = Color(1.0, 0.85, 0.25)
 		if not pulse_tween or not pulse_tween.is_valid():
 			pulse_tween = create_tween().set_loops()

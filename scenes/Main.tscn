@@ -482,7 +482,7 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 6
-text = "[Q] Bình: 1/3"
+text = "[O] Bình: 1/3"
 vertical_alignment = 1
 
 [node name="CrystalLabel" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlaskPanel"]
