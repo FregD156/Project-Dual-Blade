@@ -5,6 +5,8 @@ extends Area2D
 @export var push_force: float = 80.0
 
 func _ready() -> void:
+	collision_layer = 64
+	collision_mask = 64
 	area_entered.connect(_on_area_entered)
 
 func _on_area_entered(other_area: Area2D) -> void:

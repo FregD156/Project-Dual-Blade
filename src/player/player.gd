@@ -76,6 +76,10 @@ var buffer_timer: float = 0.0
 # Hit-stop
 var hit_stop_timer: float = 0.0
 
+# Drop through one-way platform
+var is_dropping_through: bool = false
+var drop_through_timer: float = 0.0
+
 # ------------------------------------------------------------------------------
 # 4. NODE REFERENCES
 # ------------------------------------------------------------------------------
@@ -107,6 +111,12 @@ func _physics_process(delta: float) -> void:
 
 	_update_flow_meter(delta)
 	_update_input_buffering(delta)
+
+	if is_dropping_through:
+		drop_through_timer -= delta
+		if drop_through_timer <= 0.0:
+			is_dropping_through = false
+			set_collision_mask_value(1, true)
 
 	match current_state:
 		State.IDLE:
@@ -198,6 +208,9 @@ func _state_idle(delta: float) -> void:
 		_start_parry()
 		return
 	if Input.is_action_just_pressed("jump"):
+		if Input.is_action_pressed("move_down"):
+			_drop_through_platform()
+			return
 		velocity.y = jump_velocity
 		_change_state(State.JUMP)
 		return
@@ -225,6 +238,9 @@ func _state_run(delta: float) -> void:
 		_start_parry()
 		return
 	if Input.is_action_just_pressed("jump"):
+		if Input.is_action_pressed("move_down"):
+			_drop_through_platform()
+			return
 		velocity.y = jump_velocity
 		_change_state(State.JUMP)
 		return
@@ -238,6 +254,14 @@ func _state_run(delta: float) -> void:
 		_apply_friction(delta)
 		if abs(velocity.x) < 5.0:
 			_change_state(State.IDLE)
+
+func _drop_through_platform() -> void:
+	# Tạm thời tắt collision mask layer 1 trong 0.22s để rơi xuyên qua bục One-Way
+	is_dropping_through = true
+	drop_through_timer = 0.22
+	set_collision_mask_value(1, false)
+	position.y += 2.0
+	_change_state(State.FALL)
 
 func _state_jump(delta: float) -> void:
 	_apply_gravity(delta)

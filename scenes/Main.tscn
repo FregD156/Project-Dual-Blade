@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://cmain_production_03"]
+[gd_scene load_steps=18 format=3 uid="uid://cmain_production_04"]
 
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player_scn"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/world1_bastion_bg.png" id="2_bg"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://src/ui/DebugLayer.gd" id="8_debug_ui"]
 [ext_resource type="FontFile" path="res://assets/fonts/pixel_font.ttf" id="9_font"]
 [ext_resource type="Script" path="res://src/combat/PushArea.gd" id="10_push"]
+[ext_resource type="Script" path="res://src/enemies/EnemySpawner.gd" id="11_spawner"]
 
 [sub_resource type="GDScript" id="GDScript_main"]
 script/source = "extends Node2D
@@ -17,7 +18,6 @@ script/source = "extends Node2D
 @onready var player: Player = $World/Entities/Player
 @onready var ui: GameUI = $UI_Layer
 @onready var debug_layer: DebugLayer = $Debug_Layer
-@onready var dummy: DummyEnemy = $World/Entities/DummyEnemy
 
 func _ready() -> void:
 	if ui and player:
@@ -30,7 +30,10 @@ func _ready() -> void:
 size = Vector2(1600, 20)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
-size = Vector2(20, 300)
+size = Vector2(20, 400)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
+size = Vector2(96, 12)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_enemy"]
 radius = 8.0
@@ -42,10 +45,15 @@ size = Vector2(24, 30)
 [node name="Main" type="Node2D"]
 script = SubResource("GDScript_main")
 
-[node name="BackgroundSprite" type="Sprite2D" parent="."]
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_scale = Vector2(0.3, 0.1)
+
+[node name="BackgroundSprite" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
 texture_filter = 0
 position = Vector2(240, 135)
-scale = Vector2(0.35, 0.3515625)
+scale = Vector2(0.355, 0.355)
 texture = ExtResource("2_bg")
 
 [node name="World" type="Node2D" parent="."]
@@ -62,7 +70,7 @@ position = Vector2(0, 10)
 shape = SubResource("RectangleShape2D_ground")
 
 [node name="WallLeft" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(-200, 100)
+position = Vector2(-100, 100)
 collision_layer = 1
 collision_mask = 2
 
@@ -70,56 +78,136 @@ collision_mask = 2
 shape = SubResource("RectangleShape2D_wall")
 
 [node name="WallRight" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(680, 100)
+position = Vector2(580, 100)
 collision_layer = 1
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/WallRight"]
 shape = SubResource("RectangleShape2D_wall")
 
+[node name="HighPlatformLeft" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(130, 140)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/HighPlatformLeft"]
+position = Vector2(0, 6)
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="PlatformVisual" type="ColorRect" parent="World/Environment/HighPlatformLeft"]
+offset_left = -48.0
+offset_right = 48.0
+offset_bottom = 12.0
+color = Color(0.18, 0.22, 0.3, 1)
+
+[node name="PlatformHighlight" type="ColorRect" parent="World/Environment/HighPlatformLeft/PlatformVisual"]
+layout_mode = 0
+offset_right = 96.0
+offset_bottom = 2.0
+color = Color(0.35, 0.45, 0.6, 1)
+
+[node name="HighPlatformRight" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(350, 140)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/HighPlatformRight"]
+position = Vector2(0, 6)
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="PlatformVisual" type="ColorRect" parent="World/Environment/HighPlatformRight"]
+offset_left = -48.0
+offset_right = 48.0
+offset_bottom = 12.0
+color = Color(0.18, 0.22, 0.3, 1)
+
+[node name="PlatformHighlight" type="ColorRect" parent="World/Environment/HighPlatformRight/PlatformVisual"]
+layout_mode = 0
+offset_right = 96.0
+offset_bottom = 2.0
+color = Color(0.35, 0.45, 0.6, 1)
+
+[node name="MidPlatformCenter" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(240, 175)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/MidPlatformCenter"]
+position = Vector2(0, 6)
+shape = SubResource("RectangleShape2D_platform")
+one_way_collision = true
+
+[node name="PlatformVisual" type="ColorRect" parent="World/Environment/MidPlatformCenter"]
+offset_left = -48.0
+offset_right = 48.0
+offset_bottom = 12.0
+color = Color(0.2, 0.24, 0.32, 1)
+
+[node name="PlatformHighlight" type="ColorRect" parent="World/Environment/MidPlatformCenter/PlatformVisual"]
+layout_mode = 0
+offset_right = 96.0
+offset_bottom = 2.0
+color = Color(0.4, 0.5, 0.65, 1)
+
+[node name="EnemySpawner" type="Node2D" parent="World"]
+script = ExtResource("11_spawner")
+
+[node name="SpawnPoints" type="Node2D" parent="World/EnemySpawner"]
+
+[node name="MeleeLeft" type="Marker2D" parent="World/EnemySpawner/SpawnPoints"]
+position = Vector2(160, 210)
+
+[node name="MeleeRight" type="Marker2D" parent="World/EnemySpawner/SpawnPoints"]
+position = Vector2(340, 210)
+
+[node name="SniperHigh" type="Marker2D" parent="World/EnemySpawner/SpawnPoints"]
+position = Vector2(130, 140)
+
 [node name="Entities" type="Node2D" parent="World"]
 
 [node name="Player" parent="World/Entities" instance=ExtResource("1_player_scn")]
-position = Vector2(100, 210)
+position = Vector2(240, 210)
 
-[node name="DummyEnemy" type="CharacterBody2D" parent="World/Entities"]
-position = Vector2(280, 210)
+[node name="EnemyGuardLeft" type="CharacterBody2D" parent="World/Entities"]
+position = Vector2(160, 210)
 collision_layer = 2
 collision_mask = 1
 script = ExtResource("3_enemy")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/DummyEnemy"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardLeft"]
 position = Vector2(0, -14)
 shape = SubResource("CapsuleShape2D_enemy")
 
-[node name="Sprite2D" type="Sprite2D" parent="World/Entities/DummyEnemy"]
+[node name="Sprite2D" type="Sprite2D" parent="World/Entities/EnemyGuardLeft"]
 texture_filter = 0
 texture = ExtResource("4_enemy_sheet")
 offset = Vector2(0, -32)
 hframes = 4
 
-[node name="Hurtbox" type="Area2D" parent="World/Entities/DummyEnemy"]
+[node name="Hurtbox" type="Area2D" parent="World/Entities/EnemyGuardLeft"]
 collision_layer = 32
 collision_mask = 16
 script = ExtResource("5_hurtbox")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/DummyEnemy/Hurtbox"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardLeft/Hurtbox"]
 position = Vector2(0, -14)
 shape = SubResource("RectangleShape2D_box")
 
-[node name="AttackHitbox" type="Area2D" parent="World/Entities/DummyEnemy"]
-position = Vector2(-16, -14)
+[node name="AttackHitbox" type="Area2D" parent="World/Entities/EnemyGuardLeft"]
+position = Vector2(16, -14)
 collision_layer = 8
 collision_mask = 4
 script = ExtResource("6_hitbox")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/DummyEnemy/AttackHitbox"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardLeft/AttackHitbox"]
 shape = SubResource("RectangleShape2D_box")
 
-[node name="FloatingUI" type="Node2D" parent="World/Entities/DummyEnemy"]
+[node name="FloatingUI" type="Node2D" parent="World/Entities/EnemyGuardLeft"]
 position = Vector2(0, -42)
 
-[node name="HPBarBorder" type="ColorRect" parent="World/Entities/DummyEnemy/FloatingUI"]
+[node name="HPBarBorder" type="ColorRect" parent="World/Entities/EnemyGuardLeft/FloatingUI"]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -133,7 +221,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.1, 0.12, 0.15, 1)
 
-[node name="HPBarFill" type="ColorRect" parent="World/Entities/DummyEnemy/FloatingUI/HPBarBorder"]
+[node name="HPBarFill" type="ColorRect" parent="World/Entities/EnemyGuardLeft/FloatingUI/HPBarBorder"]
 layout_mode = 0
 offset_left = 1.0
 offset_top = 1.0
@@ -141,7 +229,7 @@ offset_right = 33.0
 offset_bottom = 4.0
 color = Color(0.9, 0.2, 0.2, 1)
 
-[node name="StatusLabel" type="Label" parent="World/Entities/DummyEnemy/FloatingUI"]
+[node name="StatusLabel" type="Label" parent="World/Entities/EnemyGuardLeft/FloatingUI"]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -161,12 +249,12 @@ text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TelegraphIcon" type="Sprite2D" parent="World/Entities/DummyEnemy/FloatingUI"]
+[node name="TelegraphIcon" type="Sprite2D" parent="World/Entities/EnemyGuardLeft/FloatingUI"]
 visible = false
 texture_filter = 0
 position = Vector2(0, -10)
 
-[node name="HPLabel" type="Label" parent="World/Entities/DummyEnemy/FloatingUI"]
+[node name="HPLabel" type="Label" parent="World/Entities/EnemyGuardLeft/FloatingUI"]
 visible = false
 offset_left = -20.0
 offset_top = -2.0
@@ -177,12 +265,117 @@ theme_override_font_sizes/font_size = 6
 text = "200/200"
 horizontal_alignment = 1
 
-[node name="PushArea" type="Area2D" parent="World/Entities/DummyEnemy"]
+[node name="PushArea" type="Area2D" parent="World/Entities/EnemyGuardLeft"]
 collision_layer = 64
 collision_mask = 64
 script = ExtResource("10_push")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/DummyEnemy/PushArea"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardLeft/PushArea"]
+position = Vector2(0, -14)
+shape = SubResource("CapsuleShape2D_enemy")
+
+[node name="EnemyGuardRight" type="CharacterBody2D" parent="World/Entities"]
+position = Vector2(340, 210)
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("3_enemy")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardRight"]
+position = Vector2(0, -14)
+shape = SubResource("CapsuleShape2D_enemy")
+
+[node name="Sprite2D" type="Sprite2D" parent="World/Entities/EnemyGuardRight"]
+texture_filter = 0
+texture = ExtResource("4_enemy_sheet")
+offset = Vector2(0, -32)
+flip_h = true
+hframes = 4
+
+[node name="Hurtbox" type="Area2D" parent="World/Entities/EnemyGuardRight"]
+collision_layer = 32
+collision_mask = 16
+script = ExtResource("5_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardRight/Hurtbox"]
+position = Vector2(0, -14)
+shape = SubResource("RectangleShape2D_box")
+
+[node name="AttackHitbox" type="Area2D" parent="World/Entities/EnemyGuardRight"]
+position = Vector2(-16, -14)
+collision_layer = 8
+collision_mask = 4
+script = ExtResource("6_hitbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardRight/AttackHitbox"]
+shape = SubResource("RectangleShape2D_box")
+
+[node name="FloatingUI" type="Node2D" parent="World/Entities/EnemyGuardRight"]
+position = Vector2(0, -42)
+
+[node name="HPBarBorder" type="ColorRect" parent="World/Entities/EnemyGuardRight/FloatingUI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -17.0
+offset_top = -2.0
+offset_right = 17.0
+offset_bottom = 3.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.12, 0.15, 1)
+
+[node name="HPBarFill" type="ColorRect" parent="World/Entities/EnemyGuardRight/FloatingUI/HPBarBorder"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 33.0
+offset_bottom = 4.0
+color = Color(0.9, 0.2, 0.2, 1)
+
+[node name="StatusLabel" type="Label" parent="World/Entities/EnemyGuardRight/FloatingUI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -40.0
+offset_top = -14.0
+offset_right = 40.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("9_font")
+theme_override_font_sizes/font_size = 7
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TelegraphIcon" type="Sprite2D" parent="World/Entities/EnemyGuardRight/FloatingUI"]
+visible = false
+texture_filter = 0
+position = Vector2(0, -10)
+
+[node name="HPLabel" type="Label" parent="World/Entities/EnemyGuardRight/FloatingUI"]
+visible = false
+offset_left = -20.0
+offset_top = -2.0
+offset_right = 20.0
+offset_bottom = 6.0
+theme_override_fonts/font = ExtResource("9_font")
+theme_override_font_sizes/font_size = 6
+text = "200/200"
+horizontal_alignment = 1
+
+[node name="PushArea" type="Area2D" parent="World/Entities/EnemyGuardRight"]
+collision_layer = 64
+collision_mask = 64
+script = ExtResource("10_push")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardRight/PushArea"]
 position = Vector2(0, -14)
 shape = SubResource("CapsuleShape2D_enemy")
 
@@ -213,7 +406,7 @@ theme_override_constants/margin_right = 8
 [node name="HBoxContainer" type="HBoxContainer" parent="UI_Layer/TopContainer/MarginContainer"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
 [node name="HPPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
 custom_minimum_size = Vector2(130, 18)
@@ -258,13 +451,21 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.12, 0.14, 0.18, 1)
 
+[node name="CatchupFill" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/Background"]
+custom_minimum_size = Vector2(126, 14)
+layout_mode = 0
+offset_right = 126.0
+offset_bottom = 14.0
+mouse_filter = 2
+color = Color(0.95, 0.8, 0.2, 1)
+
 [node name="Fill" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/Background"]
 custom_minimum_size = Vector2(126, 14)
 layout_mode = 0
 offset_right = 126.0
 offset_bottom = 14.0
 mouse_filter = 2
-color = Color(0.85, 0.25, 0.25, 1)
+color = Color(0.85, 0.22, 0.22, 1)
 
 [node name="HPText" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/HPPanel/Border"]
 layout_mode = 1
@@ -277,12 +478,12 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("9_font")
 theme_override_font_sizes/font_size = 8
-text = "100 / 100"
+text = "HP: 100 / 100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="FlowPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(136, 18)
+custom_minimum_size = Vector2(130, 18)
 layout_mode = 2
 mouse_filter = 2
 
@@ -322,22 +523,59 @@ offset_bottom = -2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.1, 0.12, 0.16, 1)
+color = Color(0.08, 0.1, 0.14, 1)
 
-[node name="FlowText" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border"]
+[node name="FlowContainer" type="HBoxContainer" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 48.0
+offset_top = 3.0
+offset_right = -4.0
+offset_bottom = -3.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_constants/separation = 3
+
+[node name="Cell1" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
+custom_minimum_size = Vector2(11, 8)
+layout_mode = 2
+color = Color(0.12, 0.18, 0.25, 0.5)
+
+[node name="Cell2" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
+custom_minimum_size = Vector2(11, 8)
+layout_mode = 2
+color = Color(0.12, 0.18, 0.25, 0.5)
+
+[node name="Cell3" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
+custom_minimum_size = Vector2(11, 8)
+layout_mode = 2
+color = Color(0.12, 0.18, 0.25, 0.5)
+
+[node name="Cell4" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
+custom_minimum_size = Vector2(11, 8)
+layout_mode = 2
+color = Color(0.12, 0.18, 0.25, 0.5)
+
+[node name="Cell5" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
+custom_minimum_size = Vector2(11, 8)
+layout_mode = 2
+color = Color(0.12, 0.18, 0.25, 0.5)
+
+[node name="FlowTitle" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_right = 46.0
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0.9, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("9_font")
-theme_override_font_sizes/font_size = 8
-text = "FLOW  □ □ □ □ □"
-horizontal_alignment = 1
+theme_override_font_sizes/font_size = 7
+text = "FLOW"
 vertical_alignment = 1
 
 [node name="Debug_Layer" type="CanvasLayer" parent="."]
@@ -349,31 +587,45 @@ anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -30.0
+offset_top = -34.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
 theme_override_constants/margin_left = 8
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Debug_Layer/MarginContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="Debug_Layer/MarginContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="InnerMargin" type="MarginContainer" parent="Debug_Layer/MarginContainer/PanelContainer"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Debug_Layer/MarginContainer/PanelContainer/InnerMargin"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 2
 
-[node name="StateLabel" type="Label" parent="Debug_Layer/MarginContainer/VBoxContainer"]
+[node name="StateLabel" type="Label" parent="Debug_Layer/MarginContainer/PanelContainer/InnerMargin/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("9_font")
 theme_override_font_sizes/font_size = 7
 text = "[F1: Toggle Debug] STATE: IDLE | I-FRAME: OFF"
 
-[node name="GuideLabel" type="Label" parent="Debug_Layer/MarginContainer/VBoxContainer"]
+[node name="GuideLabel" type="Label" parent="Debug_Layer/MarginContainer/PanelContainer/InnerMargin/VBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
+theme_override_colors/font_color = Color(0.7, 0.8, 0.95, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("9_font")
 theme_override_font_sizes/font_size = 7
-text = "A/D: Chay | Space: Nhay | J: Combo | K: Parry | L: Dash"
+text = "[A/D]: Chay  |  [SPACE]: Nhay (x2)  |  [S + SPACE]: Tut buc  |  [J]: Combo  |  [K]: Parry  |  [L]: Dash  |  [ESC]: Menu"

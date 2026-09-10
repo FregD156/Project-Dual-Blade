@@ -5,8 +5,8 @@ extends CanvasLayer
 ## Không chặn chuột hay input (mouse_filter = IGNORE)
 ## Ẩn / Hiện bằng phím F1 hoặc phím Tilde (~)
 
-@onready var state_label: Label = $MarginContainer/VBoxContainer/StateLabel
-@onready var guide_label: Label = $MarginContainer/VBoxContainer/GuideLabel
+@onready var state_label: Label = find_child("StateLabel", true, false)
+@onready var guide_label: Label = find_child("GuideLabel", true, false)
 
 var is_debug_visible: bool = true
 

@@ -93,18 +93,19 @@ func _show_telegraph_icon(unparryable: bool) -> void:
 		
 	telegraph_icon.texture = ICON_DANGER if unparryable else ICON_PARRY
 	telegraph_icon.visible = true
-	telegraph_icon.scale = Vector2(0.3, 0.3)
-	telegraph_icon.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	telegraph_icon.scale = Vector2(0.2, 0.2)
+	telegraph_icon.modulate = Color(2.5, 2.5, 2.5, 0.0) if not unparryable else Color(2.0, 0.5, 0.5, 0.0)
 	
-	# Tween hiệu ứng nảy icon và phát sáng mượt mà trên đỉnh đầu
+	# Tween 1: Phóng to nhanh từ 0.2 -> 1.2 trong 0.12s kèm sáng bừng
 	var tween = create_tween().set_parallel(true)
-	tween.tween_property(telegraph_icon, "scale", Vector2(1.2, 1.2), 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_property(telegraph_icon, "modulate:a", 1.0, 0.1)
+	tween.tween_property(telegraph_icon, "scale", Vector2(1.25, 1.25), 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(telegraph_icon, "modulate:a", 1.0, 0.08)
 	
-	# Thu nhẹ về kích thước gốc 1:1 pixel
+	# Tween 2: Giật nảy đàn hồi về 1.0 trong 0.13s (Tổng cửa sổ 0.25s) và chớp màu chuẩn
 	var seq = create_tween()
-	seq.tween_interval(0.15)
-	seq.tween_property(telegraph_icon, "scale", Vector2(1.0, 1.0), 0.1)
+	seq.tween_interval(0.12)
+	seq.parallel().tween_property(telegraph_icon, "scale", Vector2(1.0, 1.0), 0.13).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	seq.parallel().tween_property(telegraph_icon, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.13)
 
 func _hide_telegraph_icon() -> void:
 	if not telegraph_icon:
