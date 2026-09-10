@@ -2,13 +2,12 @@ class_name EnemyBase
 extends CharacterBody2D
 
 ## Base class for all enemies in Project Dual Blade
-## Implements:
-## - Finite State Machine (IDLE, PATROL, CHASE, WINDUP, ATTACK, HURT, DEAD)
-## - Hoạt họa tự động mượt mà (Walk/Run cycle & Attack/Windup poses)
-## - ARPG Armor Damage Mitigation (K=50) via DamageCalculator
-## - Telegraphing warning icons (Parry Star vs Danger Eye)
-## - Dynamic Drop on death (Life Shard, Life Flask, Weapons, Upgrade Crystals)
-## - Soft separation push area
+## Cải tiến & Tối ưu Animation & Chuyển động:
+## - FSM mượt mà: IDLE, CHASE, WINDUP, ATTACK, HURT, DEAD
+## - Hoạt ảnh nhấp nhô & chu kỳ bước đi theo frame chuẩn của từng quái
+## - Khung hình tấn công (Attack pose) & chuẩn bị (Windup pose) rõ ràng
+## - Xoay hướng chuẩn xác (Facing Direction) không bị giật lùi
+## - Hiệu ứng khựng đòn (Hit reaction / Hurt pause) khi bị người chơi chém trúng
 
 signal died(enemy_instance: EnemyBase)
 signal attack_warning_started(is_unparryable: bool)
@@ -42,6 +41,7 @@ var knockback_velocity: Vector2 = Vector2.ZERO
 
 # Biến đếm nhịp hoạt họa động cho quái
 var anim_step_timer: float = 0.0
+var base_sprite_pos_y: float = 0.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var hurtbox: Hurtbox = $Hurtbox
@@ -58,6 +58,8 @@ var drop_item_scene = null
 
 func _ready() -> void:
 	current_hp = max_hp
+	if sprite:
+		base_sprite_pos_y = sprite.position.y
 	if ResourceLoader.exists("res://scenes/DropItem.tscn"):
 		drop_item_scene = load("res://scenes/DropItem.tscn")
 	if hurtbox:
@@ -98,23 +100,51 @@ func _update_sprite_animation(delta: float) -> void:
 	if anim_player and anim_player.is_playing():
 		return
 
-	# Cập nhật khung hình hoạt họa theo trạng thái
+	var hf = max(1, sprite.hframes)
+	
 	match current_state:
 		State.IDLE:
 			sprite.frame = 0
+			# Hiệu ứng thở nhẹ nhàng (Breathing bobbing 1px)
+			anim_step_timer += delta * 2.5
+			sprite.position.y = base_sprite_pos_y + sin(anim_step_timer) * 1.0
+			
 		State.CHASE, State.PATROL:
 			if abs(velocity.x) > 5.0:
-				anim_step_timer += delta * 6.0
-				var frames_count = max(1, sprite.hframes)
-				sprite.frame = int(anim_step_timer) % frames_count
+				anim_step_timer += delta * (8.0 if not is_boss else 5.5)
+				if hf >= 4:
+					# Quái 4 frame: chạy giữa frame 1 và 2 (frame 0 idle, frame 3 attack)
+					sprite.frame = 1 + (int(anim_step_timer) % 2)
+				elif hf == 3:
+					# Quái 3 frame: luân chuyển 0 và 1 (frame 2 attack)
+					sprite.frame = int(anim_step_timer) % 2
+				else:
+					sprite.frame = 0
+				# Độ nảy bước chân
+				sprite.position.y = base_sprite_pos_y + abs(sin(anim_step_timer * 1.8)) * 1.8
 			else:
 				sprite.frame = 0
+				sprite.position.y = base_sprite_pos_y
+				
 		State.WINDUP:
-			sprite.frame = min(sprite.hframes - 1, 1)
+			# Dáng giương vũ khí chuẩn bị đánh
+			sprite.frame = 1 if hf > 1 else 0
+			sprite.position.y = base_sprite_pos_y
+			
 		State.ATTACK:
-			sprite.frame = min(sprite.hframes - 1, 2)
+			# Dáng vung đòn bổ nhào
+			if hf >= 4:
+				sprite.frame = 3
+			elif hf == 3:
+				sprite.frame = 2
+			else:
+				sprite.frame = 0
+			sprite.position.y = base_sprite_pos_y
+			
 		State.HURT:
-			sprite.frame = min(sprite.hframes - 1, 1)
+			# Bị trúng đòn khựng lại
+			sprite.frame = 1 if hf > 1 else 0
+			sprite.position.y = base_sprite_pos_y
 
 func _process_ai_state(delta: float) -> void:
 	if not target_player or not is_instance_valid(target_player):
@@ -191,7 +221,8 @@ func _execute_attack() -> void:
 	if anim_player and anim_player.has_animation("attack"):
 		anim_player.play("attack")
 	elif sprite:
-		sprite.frame = min(sprite.hframes - 1, 2)
+		var hf = sprite.hframes
+		sprite.frame = 3 if hf >= 4 else (2 if hf == 3 else 0)
 		
 	if attack_hitbox:
 		attack_hitbox.damage = attack_damage
@@ -199,14 +230,16 @@ func _execute_attack() -> void:
 		attack_hitbox.monitoring = true
 		attack_hitbox.monitorable = true
 		
-	await get_tree().create_timer(0.2).timeout
+	# Giữ đòn chém 0.28s để người chơi kịp nhìn thấy hoạt ảnh vung đòn
+	await get_tree().create_timer(0.28).timeout
 	
 	if attack_hitbox:
 		attack_hitbox.monitoring = false
 		attack_hitbox.monitorable = false
 		
-	current_state = State.IDLE
-	attack_timer = attack_cooldown
+	if current_state != State.DEAD:
+		current_state = State.IDLE
+		attack_timer = attack_cooldown
 
 func _on_hit_received(incoming_hitbox: Hitbox) -> void:
 	if current_state == State.DEAD:
@@ -232,6 +265,14 @@ func _on_hit_received(incoming_hitbox: Hitbox) -> void:
 
 	# Spawn Damage Number, Sparks, Blood
 	VFXManager.spawn_combat_impact(get_parent(), global_position + Vector2(0, -14), attack_dir, dmg, incoming_hitbox.is_crit, false)
+
+	# Chuyển trạng thái HURT khựng nhẹ trong 0.12s
+	if current_state != State.ATTACK:
+		current_state = State.HURT
+		get_tree().create_timer(0.12).timeout.connect(func():
+			if current_state == State.HURT:
+				current_state = State.IDLE
+		)
 
 	# Flash white
 	if sprite:
@@ -318,7 +359,6 @@ func _drop_item(item_type: String) -> void:
 	if not drop_item_scene:
 		return
 	var drop = drop_item_scene.instantiate()
-	# Spawn rơi trên mặt sàn chuẩn
 	drop.global_position = Vector2(global_position.x + randf_range(-14, 14), global_position.y - 10)
 	drop.base_ground_pos_y = 192.0
 	drop.item_type = item_type
