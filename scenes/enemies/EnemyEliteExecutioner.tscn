@@ -1,0 +1,97 @@
+[gd_scene load_steps=8 format=3 uid="uid://cenemy_elite_executioner"]
+
+[ext_resource type="Script" path="res://src/enemies/EnemyBase.gd" id="1_base"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/elite_demon_executioner_sheet_grid.png" id="2_sheet"]
+[ext_resource type="Script" path="res://src/combat/Hurtbox.gd" id="3_hurtbox"]
+[ext_resource type="Script" path="res://src/combat/HitboxHurtbox.gd" id="4_hitbox"]
+[ext_resource type="Script" path="res://src/combat/PushArea.gd" id="5_push"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_body"]
+radius = 12.0
+height = 36.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_box"]
+size = Vector2(34, 38)
+
+[node name="EnemyEliteExecutioner" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_base")
+enemy_name = "Thủ Lĩnh Đao Phủ Quỷ"
+is_elite = true
+max_hp = 250.0
+def = 6.0
+move_speed = 38.0
+attack_damage = 25.0
+attack_range = 38.0
+detection_range = 200.0
+attack_cooldown = 2.2
+windup_time = 0.8
+unparryable_chance = 0.5
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -18)
+shape = SubResource("CapsuleShape2D_body")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 0
+texture = ExtResource("2_sheet")
+offset = Vector2(0, -40)
+hframes = 3
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 16
+script = ExtResource("3_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -18)
+shape = SubResource("RectangleShape2D_box")
+
+[node name="AttackHitbox" type="Area2D" parent="."]
+position = Vector2(-22, -18)
+collision_layer = 8
+collision_mask = 4
+script = ExtResource("4_hitbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitbox"]
+shape = SubResource("RectangleShape2D_box")
+
+[node name="FloatingUI" type="Node2D" parent="."]
+position = Vector2(0, -56)
+
+[node name="HPBarBorder" type="ColorRect" parent="FloatingUI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -25.0
+offset_top = -2.0
+offset_right = 25.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.12, 0.15, 1)
+
+[node name="HPBarFill" type="ColorRect" parent="FloatingUI/HPBarBorder"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 49.0
+offset_bottom = 5.0
+color = Color(0.95, 0.3, 0.1, 1)
+
+[node name="TelegraphIcon" type="Sprite2D" parent="FloatingUI"]
+visible = false
+texture_filter = 0
+position = Vector2(0, -12)
+
+[node name="PushArea" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 64
+script = ExtResource("5_push")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PushArea"]
+position = Vector2(0, -18)
+shape = SubResource("CapsuleShape2D_body")

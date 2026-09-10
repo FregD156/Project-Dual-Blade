@@ -1,16 +1,14 @@
-[gd_scene load_steps=19 format=3 uid="uid://cmain_production_05"]
+[gd_scene load_steps=22 format=3 uid="uid://cmain_production_06"]
 
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="1_player_scn"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/world1_bastion_bg.png" id="2_bg"]
-[ext_resource type="Script" path="res://src/enemies/DummyEnemy.gd" id="3_enemy"]
-[ext_resource type="Texture2D" path="res://assets/sprites/enemies/rusty_guard_sheet_grid.png" id="4_enemy_sheet"]
-[ext_resource type="Script" path="res://src/combat/Hurtbox.gd" id="5_hurtbox"]
-[ext_resource type="Script" path="res://src/combat/HitboxHurtbox.gd" id="6_hitbox"]
-[ext_resource type="Script" path="res://src/ui/GameUI.gd" id="7_game_ui"]
-[ext_resource type="Script" path="res://src/ui/DebugLayer.gd" id="8_debug_ui"]
-[ext_resource type="FontFile" path="res://assets/fonts/pixel_font.ttf" id="9_font"]
-[ext_resource type="Script" path="res://src/combat/PushArea.gd" id="10_push"]
-[ext_resource type="Script" path="res://src/enemies/EnemySpawner.gd" id="11_spawner"]
+[ext_resource type="Script" path="res://src/ui/GameUI.gd" id="3_game_ui"]
+[ext_resource type="Script" path="res://src/ui/DebugLayer.gd" id="4_debug_ui"]
+[ext_resource type="FontFile" path="res://assets/fonts/pixel_font.ttf" id="5_font"]
+[ext_resource type="Script" path="res://src/combat/PushArea.gd" id="6_push"]
+[ext_resource type="Script" path="res://src/enemies/EnemySpawner.gd" id="7_spawner"]
+[ext_resource type="Script" path="res://src/combat/StageManager.gd" id="8_stage_mgr"]
+[ext_resource type="PackedScene" path="res://scenes/Portal.tscn" id="9_portal"]
 
 [sub_resource type="GDScript" id="GDScript_main"]
 script/source = "extends Node2D
@@ -18,6 +16,7 @@ script/source = "extends Node2D
 @onready var player: Player = $World/Entities/Player
 @onready var ui: GameUI = $UI_Layer
 @onready var debug_layer: DebugLayer = $Debug_Layer
+@onready var stage_mgr: StageManager = $StageManager
 
 func _ready() -> void:
 	if ui and player:
@@ -27,42 +26,58 @@ func _ready() -> void:
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
-size = Vector2(1600, 20)
+size = Vector2(1700, 20)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
-size = Vector2(20, 400)
+size = Vector2(24, 500)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_left_platform"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform_1"]
 size = Vector2(130, 10)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_right_mid_platform"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform_2"]
 size = Vector2(160, 10)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_top_right_platform"]
-size = Vector2(90, 8)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform_3"]
+size = Vector2(140, 10)
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_enemy"]
-radius = 8.0
-height = 28.0
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_box"]
-size = Vector2(24, 30)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform_4"]
+size = Vector2(180, 10)
 
 [node name="Main" type="Node2D"]
 script = SubResource("GDScript_main")
 
-[node name="BackgroundSprite" type="Sprite2D" parent="."]
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_mirroring = Vector2(1440, 0)
+
+[node name="Bg1" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
 texture_filter = 0
 position = Vector2(240, 135)
 scale = Vector2(0.355, 0.355)
 texture = ExtResource("2_bg")
+
+[node name="Bg2" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
+texture_filter = 0
+position = Vector2(720, 135)
+scale = Vector2(0.355, 0.355)
+texture = ExtResource("2_bg")
+
+[node name="Bg3" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
+texture_filter = 0
+position = Vector2(1200, 135)
+scale = Vector2(0.355, 0.355)
+texture = ExtResource("2_bg")
+
+[node name="StageManager" type="Node2D" parent="."]
+script = ExtResource("8_stage_mgr")
 
 [node name="World" type="Node2D" parent="."]
 
 [node name="Environment" type="Node2D" parent="World"]
 
 [node name="Ground" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(240, 192)
+position = Vector2(750, 192)
 collision_layer = 1
 collision_mask = 2
 
@@ -71,7 +86,7 @@ position = Vector2(0, 10)
 shape = SubResource("RectangleShape2D_ground")
 
 [node name="WallLeft" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(-80, 100)
+position = Vector2(-20, 100)
 collision_layer = 1
 collision_mask = 2
 
@@ -79,274 +94,74 @@ collision_mask = 2
 shape = SubResource("RectangleShape2D_wall")
 
 [node name="WallRight" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(560, 100)
+position = Vector2(1520, 100)
 collision_layer = 1
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/WallRight"]
 shape = SubResource("RectangleShape2D_wall")
 
-[node name="LeftUpperPlatform" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(75, 108)
+[node name="Platform1" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(140, 115)
 collision_layer = 1
 collision_mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/LeftUpperPlatform"]
-position = Vector2(0, 5)
-shape = SubResource("RectangleShape2D_left_platform")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/Platform1"]
+shape = SubResource("RectangleShape2D_platform_1")
 one_way_collision = true
 
-[node name="RightMidPlatform" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(390, 108)
+[node name="Platform2" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(480, 115)
 collision_layer = 1
 collision_mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/RightMidPlatform"]
-position = Vector2(0, 5)
-shape = SubResource("RectangleShape2D_right_mid_platform")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/Platform2"]
+shape = SubResource("RectangleShape2D_platform_2")
 one_way_collision = true
 
-[node name="TopRightRuinedPlatform" type="StaticBody2D" parent="World/Environment"]
-position = Vector2(407, 26)
+[node name="Platform3" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(850, 108)
 collision_layer = 1
 collision_mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/TopRightRuinedPlatform"]
-position = Vector2(0, 4)
-shape = SubResource("RectangleShape2D_top_right_platform")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/Platform3"]
+shape = SubResource("RectangleShape2D_platform_3")
+one_way_collision = true
+
+[node name="Platform4" type="StaticBody2D" parent="World/Environment"]
+position = Vector2(1180, 108)
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Environment/Platform4"]
+shape = SubResource("RectangleShape2D_platform_4")
 one_way_collision = true
 
 [node name="EnemySpawner" type="Node2D" parent="World"]
-script = ExtResource("11_spawner")
+script = ExtResource("7_spawner")
 
 [node name="SpawnPoints" type="Node2D" parent="World/EnemySpawner"]
 
 [node name="MeleeLeft" type="Marker2D" parent="World/EnemySpawner/SpawnPoints"]
-position = Vector2(100, 192)
+position = Vector2(300, 192)
 
 [node name="MeleeRight" type="Marker2D" parent="World/EnemySpawner/SpawnPoints"]
-position = Vector2(360, 192)
+position = Vector2(700, 192)
 
 [node name="SniperHigh" type="Marker2D" parent="World/EnemySpawner/SpawnPoints"]
-position = Vector2(390, 108)
+position = Vector2(850, 108)
+
+[node name="Portal" parent="World" instance=ExtResource("9_portal")]
+position = Vector2(1380, 192)
 
 [node name="Entities" type="Node2D" parent="World"]
 
 [node name="Player" parent="World/Entities" instance=ExtResource("1_player_scn")]
-position = Vector2(230, 192)
-
-[node name="EnemyGuardLeft" type="CharacterBody2D" parent="World/Entities"]
 position = Vector2(100, 192)
-collision_layer = 2
-collision_mask = 1
-script = ExtResource("3_enemy")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardLeft"]
-position = Vector2(0, -14)
-shape = SubResource("CapsuleShape2D_enemy")
-
-[node name="Sprite2D" type="Sprite2D" parent="World/Entities/EnemyGuardLeft"]
-texture_filter = 0
-texture = ExtResource("4_enemy_sheet")
-offset = Vector2(0, -32)
-hframes = 4
-
-[node name="Hurtbox" type="Area2D" parent="World/Entities/EnemyGuardLeft"]
-collision_layer = 32
-collision_mask = 16
-script = ExtResource("5_hurtbox")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardLeft/Hurtbox"]
-position = Vector2(0, -14)
-shape = SubResource("RectangleShape2D_box")
-
-[node name="AttackHitbox" type="Area2D" parent="World/Entities/EnemyGuardLeft"]
-position = Vector2(16, -14)
-collision_layer = 8
-collision_mask = 4
-script = ExtResource("6_hitbox")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardLeft/AttackHitbox"]
-shape = SubResource("RectangleShape2D_box")
-
-[node name="FloatingUI" type="Node2D" parent="World/Entities/EnemyGuardLeft"]
-position = Vector2(0, -42)
-
-[node name="HPBarBorder" type="ColorRect" parent="World/Entities/EnemyGuardLeft/FloatingUI"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -17.0
-offset_top = -2.0
-offset_right = 17.0
-offset_bottom = 3.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.1, 0.12, 0.15, 1)
-
-[node name="HPBarFill" type="ColorRect" parent="World/Entities/EnemyGuardLeft/FloatingUI/HPBarBorder"]
-layout_mode = 0
-offset_left = 1.0
-offset_top = 1.0
-offset_right = 33.0
-offset_bottom = 4.0
-color = Color(0.9, 0.2, 0.2, 1)
-
-[node name="StatusLabel" type="Label" parent="World/Entities/EnemyGuardLeft/FloatingUI"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -40.0
-offset_top = -14.0
-offset_right = 40.0
-offset_bottom = -2.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("9_font")
-theme_override_font_sizes/font_size = 7
-text = ""
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="TelegraphIcon" type="Sprite2D" parent="World/Entities/EnemyGuardLeft/FloatingUI"]
-visible = false
-texture_filter = 0
-position = Vector2(0, -10)
-
-[node name="HPLabel" type="Label" parent="World/Entities/EnemyGuardLeft/FloatingUI"]
-visible = false
-offset_left = -20.0
-offset_top = -2.0
-offset_right = 20.0
-offset_bottom = 6.0
-theme_override_fonts/font = ExtResource("9_font")
-theme_override_font_sizes/font_size = 6
-text = "200/200"
-horizontal_alignment = 1
-
-[node name="PushArea" type="Area2D" parent="World/Entities/EnemyGuardLeft"]
-collision_layer = 64
-collision_mask = 64
-script = ExtResource("10_push")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardLeft/PushArea"]
-position = Vector2(0, -14)
-shape = SubResource("CapsuleShape2D_enemy")
-
-[node name="EnemyGuardRight" type="CharacterBody2D" parent="World/Entities"]
-position = Vector2(360, 192)
-collision_layer = 2
-collision_mask = 1
-script = ExtResource("3_enemy")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardRight"]
-position = Vector2(0, -14)
-shape = SubResource("CapsuleShape2D_enemy")
-
-[node name="Sprite2D" type="Sprite2D" parent="World/Entities/EnemyGuardRight"]
-texture_filter = 0
-texture = ExtResource("4_enemy_sheet")
-offset = Vector2(0, -32)
-flip_h = true
-hframes = 4
-
-[node name="Hurtbox" type="Area2D" parent="World/Entities/EnemyGuardRight"]
-collision_layer = 32
-collision_mask = 16
-script = ExtResource("5_hurtbox")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardRight/Hurtbox"]
-position = Vector2(0, -14)
-shape = SubResource("RectangleShape2D_box")
-
-[node name="AttackHitbox" type="Area2D" parent="World/Entities/EnemyGuardRight"]
-position = Vector2(-16, -14)
-collision_layer = 8
-collision_mask = 4
-script = ExtResource("6_hitbox")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardRight/AttackHitbox"]
-shape = SubResource("RectangleShape2D_box")
-
-[node name="FloatingUI" type="Node2D" parent="World/Entities/EnemyGuardRight"]
-position = Vector2(0, -42)
-
-[node name="HPBarBorder" type="ColorRect" parent="World/Entities/EnemyGuardRight/FloatingUI"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -17.0
-offset_top = -2.0
-offset_right = 17.0
-offset_bottom = 3.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.1, 0.12, 0.15, 1)
-
-[node name="HPBarFill" type="ColorRect" parent="World/Entities/EnemyGuardRight/FloatingUI/HPBarBorder"]
-layout_mode = 0
-offset_left = 1.0
-offset_top = 1.0
-offset_right = 33.0
-offset_bottom = 4.0
-color = Color(0.9, 0.2, 0.2, 1)
-
-[node name="StatusLabel" type="Label" parent="World/Entities/EnemyGuardRight/FloatingUI"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -40.0
-offset_top = -14.0
-offset_right = 40.0
-offset_bottom = -2.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("9_font")
-theme_override_font_sizes/font_size = 7
-text = ""
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="TelegraphIcon" type="Sprite2D" parent="World/Entities/EnemyGuardRight/FloatingUI"]
-visible = false
-texture_filter = 0
-position = Vector2(0, -10)
-
-[node name="HPLabel" type="Label" parent="World/Entities/EnemyGuardRight/FloatingUI"]
-visible = false
-offset_left = -20.0
-offset_top = -2.0
-offset_right = 20.0
-offset_bottom = 6.0
-theme_override_fonts/font = ExtResource("9_font")
-theme_override_font_sizes/font_size = 6
-text = "200/200"
-horizontal_alignment = 1
-
-[node name="PushArea" type="Area2D" parent="World/Entities/EnemyGuardRight"]
-collision_layer = 64
-collision_mask = 64
-script = ExtResource("10_push")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Entities/EnemyGuardRight/PushArea"]
-position = Vector2(0, -14)
-shape = SubResource("CapsuleShape2D_enemy")
 
 [node name="UI_Layer" type="CanvasLayer" parent="."]
 layer = 10
-script = ExtResource("7_game_ui")
+script = ExtResource("3_game_ui")
 
 [node name="TopContainer" type="Control" parent="UI_Layer"]
 layout_mode = 3
@@ -364,17 +179,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 8
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
 
 [node name="HBoxContainer" type="HBoxContainer" parent="UI_Layer/TopContainer/MarginContainer"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 6
 
 [node name="HPPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(130, 18)
+custom_minimum_size = Vector2(110, 18)
 layout_mode = 2
 mouse_filter = 2
 
@@ -417,17 +232,17 @@ mouse_filter = 2
 color = Color(0.12, 0.14, 0.18, 1)
 
 [node name="CatchupFill" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/Background"]
-custom_minimum_size = Vector2(126, 14)
+custom_minimum_size = Vector2(106, 14)
 layout_mode = 0
-offset_right = 126.0
+offset_right = 106.0
 offset_bottom = 14.0
 mouse_filter = 2
 color = Color(0.95, 0.8, 0.2, 1)
 
 [node name="Fill" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/HPPanel/Border/Background"]
-custom_minimum_size = Vector2(126, 14)
+custom_minimum_size = Vector2(106, 14)
 layout_mode = 0
-offset_right = 126.0
+offset_right = 106.0
 offset_bottom = 14.0
 mouse_filter = 2
 color = Color(0.85, 0.22, 0.22, 1)
@@ -441,14 +256,14 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("9_font")
-theme_override_font_sizes/font_size = 8
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 7
 text = "HP: 100 / 100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="FlowPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(130, 18)
+custom_minimum_size = Vector2(110, 18)
 layout_mode = 2
 mouse_filter = 2
 
@@ -495,36 +310,36 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 48.0
+offset_left = 40.0
 offset_top = 3.0
 offset_right = -4.0
 offset_bottom = -3.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 3
+theme_override_constants/separation = 2
 
 [node name="Cell1" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(11, 8)
+custom_minimum_size = Vector2(9, 8)
 layout_mode = 2
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell2" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(11, 8)
+custom_minimum_size = Vector2(9, 8)
 layout_mode = 2
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell3" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(11, 8)
+custom_minimum_size = Vector2(9, 8)
 layout_mode = 2
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell4" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(11, 8)
+custom_minimum_size = Vector2(9, 8)
 layout_mode = 2
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell5" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(11, 8)
+custom_minimum_size = Vector2(9, 8)
 layout_mode = 2
 color = Color(0.12, 0.18, 0.25, 0.5)
 
@@ -532,20 +347,121 @@ color = Color(0.12, 0.18, 0.25, 0.5)
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_left = 6.0
-offset_right = 46.0
+offset_left = 4.0
+offset_right = 38.0
 grow_vertical = 2
 theme_override_colors/font_color = Color(0, 0.9, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("9_font")
+theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 7
 text = "FLOW"
 vertical_alignment = 1
 
+[node name="WeaponPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(100, 18)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Border" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/WeaponPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.2, 0.22, 0.28, 1)
+
+[node name="WeaponIcon" type="TextureRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/WeaponPanel"]
+texture_filter = 0
+layout_mode = 0
+offset_left = 2.0
+offset_top = 1.0
+offset_right = 18.0
+offset_bottom = 17.0
+expand_mode = 1
+
+[node name="WeaponTierLabel" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/WeaponPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 6
+text = "D (ATK:12)"
+vertical_alignment = 1
+
+[node name="FlaskPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(110, 18)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="FlaskLabel" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlaskPanel"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 55.0
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9, 0.3, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 6
+text = "[Q] Bình: 1/3"
+vertical_alignment = 1
+
+[node name="CrystalLabel" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlaskPanel"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -50.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.8, 0.5, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 6
+text = "Thạch: 0"
+vertical_alignment = 1
+
+[node name="StageBanner" type="PanelContainer" parent="UI_Layer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -25.0
+offset_right = 160.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="BannerLabel" type="Label" parent="UI_Layer/StageBanner"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 10
+text = "1.1: CỔ THÀNH KHỞI ĐẦU"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Debug_Layer" type="CanvasLayer" parent="."]
 layer = 100
-script = ExtResource("8_debug_ui")
+script = ExtResource("4_debug_ui")
 
 [node name="MarginContainer" type="MarginContainer" parent="Debug_Layer"]
 anchors_preset = 12
@@ -582,7 +498,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("9_font")
+theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 7
 text = "[F1: Toggle Debug] STATE: IDLE | I-FRAME: OFF"
 
@@ -591,6 +507,6 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.8, 0.95, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("9_font")
+theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 7
-text = "[A/D]: Chay  |  [SPACE]: Nhay (x2)  |  [S + SPACE]: Tut buc  |  [J]: Combo  |  [K]: Parry  |  [L]: Dash  |  [ESC]: Menu"
+text = "[A/D]: Chạy  |  [SPACE]: Nhảy (x2)  |  [S+SPACE]: Tụt bục  |  [J]: Combo  |  [K]: Parry  |  [L]: Dash  |  [Q]: Bình Máu"

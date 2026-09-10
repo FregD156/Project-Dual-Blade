@@ -20,19 +20,67 @@ extends CanvasLayer
 ]
 @onready var flow_title: Label = $TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/FlowTitle
 
+@onready var weapon_icon: TextureRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/WeaponPanel/WeaponIcon")
+@onready var weapon_tier_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/WeaponPanel/WeaponTierLabel")
+@onready var flask_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/FlaskPanel/FlaskLabel")
+@onready var crystal_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/FlaskPanel/CrystalLabel")
+
 const HP_BAR_MAX_WIDTH: float = 126.0
 
 var catchup_tween: Tween = null
 var pulse_tween: Tween = null
+
+const WEAPON_TEXTURES = {
+	"tier_d": preload("res://assets/sprites/items/sliced/weapon_tier_d.png"),
+	"tier_c": preload("res://assets/sprites/items/sliced/weapon_tier_c.png"),
+	"tier_b": preload("res://assets/sprites/items/sliced/weapon_tier_b.png"),
+	"tier_a": preload("res://assets/sprites/items/sliced/weapon_tier_a.png"),
+	"tier_r": preload("res://assets/sprites/items/sliced/weapon_tier_r.png"),
+	"tier_sr": preload("res://assets/sprites/items/sliced/weapon_tier_sr.png"),
+	"tier_ssr": preload("res://assets/sprites/items/sliced/weapon_tier_ssr.png")
+}
 
 func connect_player(player: Player) -> void:
 	if not player:
 		return
 	player.hp_changed.connect(_on_hp_changed)
 	player.flow_changed.connect(_on_flow_changed)
+	if player.has_signal("flasks_changed"):
+		player.flasks_changed.connect(_on_flasks_changed)
+	if player.has_signal("weapon_equipped"):
+		player.weapon_equipped.connect(_on_weapon_equipped)
+	if player.has_signal("crystals_changed"):
+		player.crystals_changed.connect(_on_crystals_changed)
 	
 	_on_hp_changed(player.current_hp, player.max_hp)
 	_on_flow_changed(player.current_flow, false)
+	_on_flasks_changed(player.life_flasks, player.max_flasks)
+	_on_weapon_equipped(player.current_weapon_tier, player.base_atk, player.crit_rate)
+	_on_crystals_changed(player.upgrade_crystals)
+
+func _on_flasks_changed(current: int, maximum: int) -> void:
+	if flask_label:
+		flask_label.text = "[Q] Bình: %d/%d" % [current, maximum]
+
+func _on_crystals_changed(count: int) -> void:
+	if crystal_label:
+		crystal_label.text = "Thạch: %d" % count
+
+func _on_weapon_equipped(tier_name: String, atk: float, crit: float) -> void:
+	if WEAPON_TEXTURES.has(tier_name) and weapon_icon:
+		weapon_icon.texture = WEAPON_TEXTURES[tier_name]
+	if weapon_tier_label:
+		var display_tier = tier_name.replace("tier_", "").to_upper()
+		weapon_tier_label.text = "%s (ATK:%d)" % [display_tier, round(atk)]
+		# Color based on rarity
+		match tier_name:
+			"tier_d": weapon_tier_label.modulate = Color(0.7, 0.7, 0.7)
+			"tier_c": weapon_tier_label.modulate = Color(1.0, 1.0, 1.0)
+			"tier_b": weapon_tier_label.modulate = Color(0.2, 1.0, 0.3)
+			"tier_a": weapon_tier_label.modulate = Color(0.2, 0.6, 1.0)
+			"tier_r": weapon_tier_label.modulate = Color(0.8, 0.3, 1.0)
+			"tier_sr": weapon_tier_label.modulate = Color(1.0, 0.85, 0.2)
+			"tier_ssr": weapon_tier_label.modulate = Color(1.0, 0.3, 0.5)
 
 func _on_hp_changed(current: float, maximum: float) -> void:
 	var ratio := clampf(current / max(1.0, maximum), 0.0, 1.0)

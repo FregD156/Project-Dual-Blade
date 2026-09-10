@@ -43,6 +43,16 @@ signal state_changed(new_state_name: String, is_iframe: bool)
 @export_group("Combat Stats")
 @export var max_hp: float = 100.0
 var current_hp: float = 100.0
+@export var base_atk: float = 12.0 # Bậc D: 12, C: 21, B: 36, A: 61, R: 100, SR: 168, SSR: 270 (Detail.md)
+@export var crit_rate: float = 0.05
+var current_weapon_tier: String = "tier_d"
+var life_flasks: int = 1
+var max_flasks: int = 3
+var upgrade_crystals: int = 0
+
+signal flasks_changed(current: int, maximum: int)
+signal weapon_equipped(tier_name: String, atk: float, crit: float)
+signal crystals_changed(count: int)
 
 # ------------------------------------------------------------------------------
 # 3. BIẾN QUẢN LÝ FSM & SKILLS
@@ -93,9 +103,13 @@ var drop_through_timer: float = 0.0
 # 5. GODOT ENGINE CALLBACKS
 # ------------------------------------------------------------------------------
 func _ready() -> void:
+	add_to_group("player")
 	current_hp = max_hp
 	emit_signal("hp_changed", current_hp, max_hp)
 	emit_signal("flow_changed", current_flow, false)
+	emit_signal("flasks_changed", life_flasks, max_flasks)
+	emit_signal("crystals_changed", upgrade_crystals)
+	equip_weapon_tier("tier_d")
 	_change_state(State.IDLE)
 	
 	if hitbox:
@@ -469,5 +483,63 @@ func _update_facing_and_hitbox() -> void:
 	if sprite:
 		sprite.flip_h = (facing_direction < 0)
 	if hitbox:
-		# Lật hitbox về phía trước mặt nhân vật
 		hitbox.position.x = abs(hitbox.position.x) * facing_direction
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("use_flask") or (event is InputEventKey and event.pressed and event.keycode == KEY_Q):
+		use_flask()
+
+func use_flask() -> void:
+	if life_flasks > 0 and current_hp < max_hp:
+		life_flasks -= 1
+		var heal = max_hp * 0.35
+		current_hp = min(max_hp, current_hp + heal)
+		emit_signal("hp_changed", current_hp, max_hp)
+		emit_signal("flasks_changed", life_flasks, max_flasks)
+
+func add_flask(count: int = 1) -> void:
+	life_flasks = clampi(life_flasks + count, 0, max_flasks)
+	emit_signal("flasks_changed", life_flasks, max_flasks)
+
+func add_crystals(count: int = 1) -> void:
+	upgrade_crystals += count
+	emit_signal("crystals_changed", upgrade_crystals)
+
+func equip_weapon_tier(tier: String) -> void:
+	current_weapon_tier = tier
+	# Values from detail.md Section D.III:
+	# Tier D: ATK 12, Crit 5%
+	# Tier C: ATK 21, Crit 7%
+	# Tier B: ATK 36, Crit 10%
+	# Tier A: ATK 61, Crit 14%
+	# Tier R: ATK 100, Crit 18%
+	# Tier SR: ATK 168, Crit 23%
+	# Tier SSR: ATK 270, Crit 28%
+	match tier:
+		"tier_d":
+			base_atk = 12.0
+			crit_rate = 0.05
+		"tier_c":
+			base_atk = 21.0
+			crit_rate = 0.07
+		"tier_b":
+			base_atk = 36.0
+			crit_rate = 0.10
+		"tier_a":
+			base_atk = 61.0
+			crit_rate = 0.14
+		"tier_r":
+			base_atk = 100.0
+			crit_rate = 0.18
+		"tier_sr":
+			base_atk = 168.0
+			crit_rate = 0.23
+		"tier_ssr":
+			base_atk = 270.0
+			crit_rate = 0.28
+	
+	if hitbox:
+		hitbox.damage = base_atk
+		hitbox.is_crit = (randf() < crit_rate)
+	
+	emit_signal("weapon_equipped", current_weapon_tier, base_atk, crit_rate)

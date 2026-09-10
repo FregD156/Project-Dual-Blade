@@ -1,0 +1,52 @@
+[gd_scene load_steps=3 format=3 uid="uid://cportal_system_01"]
+
+[ext_resource type="FontFile" path="res://assets/fonts/pixel_font.ttf" id="1_font"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_portal"]
+size = Vector2(32, 54)
+
+[node name="Portal" type="Area2D"]
+collision_layer = 128
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -27)
+shape = SubResource("RectangleShape2D_portal")
+
+[node name="PortalGlow" type="ColorRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -52.0
+offset_right = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2, 0.8, 1, 0.5)
+
+[node name="PortalCore" type="ColorRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -10.0
+offset_top = -48.0
+offset_right = 10.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.9, 1, 1, 0.85)
+
+[node name="Label" type="Label" parent="."]
+offset_left = -60.0
+offset_top = -68.0
+offset_right = 60.0
+offset_bottom = -54.0
+theme_override_fonts/font = ExtResource("1_font")
+theme_override_font_sizes/font_size = 7
+text = "[E] TIẾN VÀO ẢI TIẾP THEO"
+horizontal_alignment = 1
+vertical_alignment = 1
