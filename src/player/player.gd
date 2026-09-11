@@ -644,6 +644,18 @@ func _start_parry() -> void:
 	parry_timer = PARRY_WINDOW
 	is_parrying = true
 	velocity = Vector2.ZERO
+	
+	# Hiển thị khiên chắn hộ thể khi nhấn phím K
+	if get_parent():
+		var block_vfx = ShieldBlockVFX.new()
+		get_parent().add_child(block_vfx)
+		var block_pos = global_position + Vector2(facing_direction * 14.0, -14.0)
+		var tier = equipped_shield.get("tier", "tier_d")
+		var vfx_color = Color(0.1, 0.8, 1.0, 1.0)
+		match tier:
+			"tier_sr": vfx_color = Color(1.0, 0.85, 0.2, 1.0)
+			"tier_ssr": vfx_color = Color(1.0, 0.25, 0.8, 1.0)
+		block_vfx.setup(block_pos, facing_direction, vfx_color)
 
 func _state_parry(delta: float) -> void:
 	parry_timer -= delta
@@ -798,6 +810,10 @@ func add_flow(amount: int = 1) -> void:
 	current_flow = clampi(current_flow + amount, 0, MAX_FLOW)
 	flow_timer = FLOW_DECAY_DURATION
 	emit_signal("flow_changed", current_flow, is_full_flow())
+	
+	# Khi chém đủ 5 Flow: Tự động giải phóng Tuyệt kĩ Tất Sát (Blade Dance)
+	if is_full_flow() and _can_cast_blade_dance():
+		call_deferred("_start_blade_dance")
 
 func _reset_flow() -> void:
 	if current_flow != 0:
