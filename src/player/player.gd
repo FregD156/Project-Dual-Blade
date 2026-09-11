@@ -98,10 +98,11 @@ const DASH_DURATION: float = 0.2
 var dash_timer: float = 0.0
 var ghost_spawn_timer: float = 0.0
 
-# Cross-Parry (0.15s)
-const PARRY_WINDOW: float = 0.15
+# Shield Blocking & Cross-Parry
+const PARRY_WINDOW: float = 0.15 # 0.15s đầu tiên khi mới giương khiên là cửa sổ Perfect Parry
 var parry_timer: float = 0.0
 var is_parrying: bool = false
+var persistent_shield_vfx: Node2D = null
 
 # Flow Meter (5 nấc, 2.5s decay)
 const MAX_FLOW: int = 5
@@ -230,6 +231,9 @@ func _state_hurt(delta: float) -> void:
 # 6. FSM LOGIC TỪNG TRẠNG THÁI
 # ------------------------------------------------------------------------------
 func _change_state(new_state: State) -> void:
+	if new_state != State.PARRY:
+		is_parrying = false
+		_remove_persistent_shield_vfx()
 	current_state = new_state
 	is_iframe = (current_state == State.DASH or current_state == State.BLADE_DANCE)
 	if hurtbox:
@@ -312,7 +316,7 @@ func _state_idle(delta: float) -> void:
 	if Input.is_action_just_pressed("dash"):
 		_start_dash()
 		return
-	if Input.is_action_just_pressed("parry"):
+	if Input.is_action_pressed("parry"):
 		_start_parry()
 		return
 	if Input.is_action_just_pressed("jump"):
@@ -346,7 +350,7 @@ func _state_run(delta: float) -> void:
 	if Input.is_action_just_pressed("dash"):
 		_start_dash()
 		return
-	if Input.is_action_just_pressed("parry"):
+	if Input.is_action_pressed("parry"):
 		_start_parry()
 		return
 	if Input.is_action_just_pressed("jump"):
@@ -409,6 +413,9 @@ func _state_fall(delta: float) -> void:
 	_check_air_actions()
 
 func _check_air_actions() -> void:
+	if Input.is_action_pressed("parry"):
+		_start_parry()
+		return
 	if Input.is_action_just_pressed("blade_dance"):
 		if _can_cast_blade_dance():
 			_start_blade_dance()
@@ -645,34 +652,65 @@ func _start_parry() -> void:
 	parry_timer = PARRY_WINDOW
 	is_parrying = true
 	velocity = Vector2.ZERO
-	
-	# Hiển thị khiên chắn hộ thể khi nhấn phím K
+	_spawn_persistent_shield_vfx()
+
+func _spawn_persistent_shield_vfx() -> void:
+	_remove_persistent_shield_vfx()
 	if get_parent():
-		var block_vfx = ShieldBlockVFX.new()
-		get_parent().add_child(block_vfx)
+		persistent_shield_vfx = ShieldBlockVFX.new()
+		get_parent().add_child(persistent_shield_vfx)
 		var block_pos = global_position + Vector2(facing_direction * 14.0, -14.0)
 		var tier = equipped_shield.get("tier", "tier_d")
 		var vfx_color = Color(0.1, 0.8, 1.0, 1.0)
 		match tier:
 			"tier_sr": vfx_color = Color(1.0, 0.85, 0.2, 1.0)
 			"tier_ssr": vfx_color = Color(1.0, 0.25, 0.8, 1.0)
-		block_vfx.setup(block_pos, facing_direction, vfx_color)
+		persistent_shield_vfx.setup(block_pos, facing_direction, vfx_color, true)
+
+func _remove_persistent_shield_vfx() -> void:
+	if persistent_shield_vfx and is_instance_valid(persistent_shield_vfx):
+		persistent_shield_vfx.queue_free()
+		persistent_shield_vfx = null
 
 func _state_parry(delta: float) -> void:
-	parry_timer -= delta
-	if parry_timer <= 0.0:
+	# 0.15s đầu tiên khi mới giương khiên là cửa sổ Perfect Parry
+	if parry_timer > 0.0:
+		parry_timer -= delta
+	
+	velocity = Vector2.ZERO
+	
+	# Cập nhật vị trí và hướng của vòm khiên theo nhân vật khi đang giữ
+	if persistent_shield_vfx and is_instance_valid(persistent_shield_vfx):
+		persistent_shield_vfx.global_position = global_position + Vector2(facing_direction * 14.0, -14.0)
+		persistent_shield_vfx.facing_dir = facing_direction
+	
+	# Khi người chơi THẢ PHÍM K (không còn giữ khiên):
+	if not Input.is_action_pressed("parry"):
 		is_parrying = false
-		_change_state(State.IDLE)
+		_remove_persistent_shield_vfx()
+		_change_state(State.IDLE if is_on_floor() else State.FALL)
 
 func _on_hurtbox_hit_received(incoming_hitbox: Hitbox) -> void:
 	if is_iframe:
 		return
 
 	if is_parrying:
+		# Nếu đòn đánh có cờ không thể đỡ/parry (unparryable)
 		if incoming_hitbox.is_unparryable:
 			_take_damage(incoming_hitbox.damage)
-		else:
+			return
+			
+		# Nếu trong 0.15s đầu tiên khi mới giương khiên: Kích hoạt PERFECT PARRY!
+		if parry_timer > 0.0:
 			_on_parry_success(incoming_hitbox.owner)
+			return
+			
+		# Nếu giữ khiên sau 0.15s: Đỡ đòn bằng Khiên Chắn (Block & Mitigation)
+		_on_shield_block_success(incoming_hitbox)
+		# Khi giữ khiên chặn đứng, giảm tối thiểu 70% sát thương hoặc hấp thụ qua giáp
+		var blocked_damage = incoming_hitbox.damage * (1.0 - max(0.70, shield_damage_reduction))
+		if blocked_damage > 0.0:
+			_take_damage(blocked_damage)
 		return
 
 	# Kiểm tra Chặn Đòn từ Khiên Hộ Thân (Shield Block Chance)
@@ -742,6 +780,7 @@ func _on_parry_success(enemy_node: Node) -> void:
 	hit_stop_timer = 0.1
 	parry_timer = 0.0
 	is_parrying = false
+	_remove_persistent_shield_vfx()
 	add_flow(2)
 	
 	if enemy_node and enemy_node is Node2D:
