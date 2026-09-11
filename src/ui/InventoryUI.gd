@@ -9,6 +9,7 @@ extends Control
 ## - Lưới ô trang bị (Grid) chứa vũ khí & các mảnh giáp nhặt được
 ## - Bấm chuột TRÁI để Trang bị | Bấm chuột PHẢI để Phân rã (Salvage) lấy Tinh thể
 
+@onready var panel_container: PanelContainer = $CenterContainer/Panel
 @onready var grid_container: GridContainer = $CenterContainer/Panel/Margin/VBox/Scroll/GridContainer
 @onready var equipped_icon: TextureRect = $CenterContainer/Panel/Margin/VBox/EquippedSection/EquippedIcon
 @onready var equipped_tier_lbl: Label = $CenterContainer/Panel/Margin/VBox/EquippedSection/VBoxStats/TierLabel
@@ -30,6 +31,8 @@ extends Control
 @onready var close_btn: Button = $CenterContainer/Panel/Margin/VBox/Header/CloseBtn
 
 var player_ref: Player = null
+var open_tween: Tween = null
+const ITEM_SLOT_TEXTURE = preload("res://assets/sprites/ui/item_slot_frame.png")
 
 const WEAPON_TEXTURES = {
 	"tier_d": preload("res://assets/sprites/items/sliced/weapon_tier_d.png"),
@@ -108,9 +111,29 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func toggle_inventory() -> void:
-	visible = !visible
-	if visible:
+	if not visible:
+		visible = true
 		refresh_ui()
+		if panel_container:
+			panel_container.pivot_offset = panel_container.size * 0.5
+			panel_container.scale = Vector2(0.85, 0.85)
+			if open_tween:
+				open_tween.kill()
+			open_tween = create_tween()
+			open_tween.tween_property(panel_container, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	else:
+		if panel_container:
+			if open_tween:
+				open_tween.kill()
+			open_tween = create_tween()
+			open_tween.tween_property(panel_container, "scale", Vector2(0.88, 0.88), 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			open_tween.tween_callback(func():
+				visible = false
+				if panel_container:
+					panel_container.scale = Vector2.ONE
+			)
+		else:
+			visible = false
 
 func connect_player(player: Player) -> void:
 	player_ref = player
@@ -255,9 +278,22 @@ func refresh_ui() -> void:
 	var slot_count = max(12, ((items.size() + 3) / 4) * 4)
 
 	for i in range(slot_count):
+		var slot_panel = PanelContainer.new()
+		slot_panel.custom_minimum_size = Vector2(26, 26)
+		slot_panel.mouse_filter = Control.MOUSE_FILTER_PASS
+		
+		# Khung viền Gothic cho từng ô item
+		var frame_rect = TextureRect.new()
+		frame_rect.texture = ITEM_SLOT_TEXTURE
+		frame_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		frame_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		frame_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+		slot_panel.add_child(frame_rect)
+
 		var btn = Button.new()
-		btn.custom_minimum_size = Vector2(24, 24)
+		btn.custom_minimum_size = Vector2(26, 26)
 		btn.focus_mode = Control.FOCUS_NONE
+		btn.flat = true
 
 		if i < items.size():
 			var item_data = items[i]
@@ -303,7 +339,19 @@ func refresh_ui() -> void:
 					btn.tooltip_text = "\n".join(tooltip_lines)
 			
 			var border_color = TIER_COLORS.get(tier, Color.WHITE)
-			btn.modulate = border_color
+			frame_rect.modulate = border_color
+			
+			# Hiệu ứng phóng to nhẹ khi rê chuột vào (Hover Zoom Animation)
+			btn.mouse_entered.connect(func():
+				var tw = create_tween()
+				tw.tween_property(slot_panel, "scale", Vector2(1.12, 1.12), 0.08)
+				tw.tween_property(frame_rect, "modulate", Color(1.5, 1.5, 1.5, 1.0), 0.08)
+			)
+			btn.mouse_exited.connect(func():
+				var tw = create_tween()
+				tw.tween_property(slot_panel, "scale", Vector2.ONE, 0.08)
+				tw.tween_property(frame_rect, "modulate", border_color, 0.08)
+			)
 			
 			# Input handling for Left Click (Equip) and Right Click (Salvage)
 			btn.gui_input.connect(func(event: InputEvent):
@@ -315,9 +363,11 @@ func refresh_ui() -> void:
 			)
 		else:
 			btn.disabled = true
-			btn.modulate = Color(0.25, 0.25, 0.25, 0.4)
+			frame_rect.modulate = Color(0.25, 0.25, 0.25, 0.35)
 
-		grid_container.add_child(btn)
+		slot_panel.pivot_offset = Vector2(13, 13)
+		slot_panel.add_child(btn)
+		grid_container.add_child(slot_panel)
 
 func _equip_item_from_inventory(index: int) -> void:
 	if not player_ref or index < 0 or index >= player_ref.inventory.size():
@@ -333,10 +383,21 @@ func _equip_item_from_inventory(index: int) -> void:
 			player_ref.equip_weapon_dict(item_data)
 		elif player_ref.has_method("equip_weapon_tier"):
 			player_ref.equip_weapon_tier(item_data.get("tier", "tier_d"))
+	
+	# Hiệu ứng lóe sáng khi trang bị thành công (Equip Pulse)
+	if equipped_icon:
+		var tw = create_tween()
+		tw.tween_property(equipped_icon, "scale", Vector2(1.35, 1.35), 0.08)
+		tw.tween_property(equipped_icon, "scale", Vector2.ONE, 0.12)
 	refresh_ui()
 
 func _salvage_item(index: int) -> void:
 	if not player_ref:
 		return
 	player_ref.salvage_weapon(index)
+	# Hiệu ứng nảy số thạch tím
+	if count_crystals_lbl:
+		var tw = create_tween()
+		tw.tween_property(count_crystals_lbl, "modulate", Color(2.2, 0.6, 2.5, 1.0), 0.08)
+		tw.tween_property(count_crystals_lbl, "modulate", Color.WHITE, 0.15)
 	refresh_ui()

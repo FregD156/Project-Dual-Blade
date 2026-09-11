@@ -84,25 +84,33 @@ func _process(delta: float) -> void:
 	
 	# 1. Shimmer quét qua thanh máu & giáp tạo hiệu ứng phản quang lấp lánh
 	if hp_shimmer and hp_fill and hp_fill.size.x > 0:
-		var cycle = fmod(t * 1.5, 2.5)
+		var cycle = fmod(t * 1.6, 2.4)
 		if cycle < 1.0:
 			hp_shimmer.position.x = cycle * hp_fill.size.x
-			hp_shimmer.modulate.a = 0.5 * sin(cycle * PI)
+			hp_shimmer.modulate.a = 0.55 * sin(cycle * PI)
 		else:
 			hp_shimmer.modulate.a = 0.0
 
 	if armor_shimmer and armor_fill and armor_fill.size.x > 0:
-		var cycle_a = fmod(t * 1.8 + 0.5, 2.2)
+		var cycle_a = fmod(t * 1.9 + 0.6, 2.0)
 		if cycle_a < 1.0:
 			armor_shimmer.position.x = cycle_a * armor_fill.size.x
-			armor_shimmer.modulate.a = 0.6 * sin(cycle_a * PI)
+			armor_shimmer.modulate.a = 0.65 * sin(cycle_a * PI)
 		else:
 			armor_shimmer.modulate.a = 0.0
 
-	# 2. Hiệu ứng ngọc Ruby phát sáng xung nhịp (Pulsing Gem Heartbeat)
+	# 2. Hiệu ứng ngọc Ruby phát sáng xung nhịp theo nhịp tim sinh mệnh (Heartbeat)
 	if ruby_gem:
-		var gem_pulse = 1.0 + 0.08 * sin(t * 3.5)
+		var hp_ratio: float = clampf(previous_hp / 100.0, 0.0, 1.0)
+		# Máu càng thấp thì nhịp tim đập càng gấp gáp và cường độ rung giật càng mạnh
+		var pulse_freq = 3.2 if hp_ratio >= 0.3 else 8.0
+		var pulse_intensity = 0.08 if hp_ratio >= 0.3 else 0.22
+		var gem_pulse = 1.0 + pulse_intensity * sin(t * pulse_freq)
 		ruby_gem.scale = Vector2(gem_pulse, gem_pulse)
+		if hp_ratio < 0.3:
+			ruby_gem.modulate = Color(1.8, 0.4, 0.4, 1.0)
+		else:
+			ruby_gem.modulate = Color(1.0, 1.0, 1.0, 1.0)
 
 func connect_player(player: Player) -> void:
 	if not player:
@@ -197,6 +205,7 @@ func _on_hp_changed(current: float, maximum: float) -> void:
 	var ratio := clampf(current / max(1.0, maximum), 0.0, 1.0)
 	var target_width := HP_BAR_MAX_WIDTH * ratio
 	var is_taking_damage = current < previous_hp
+	var is_healing = current > previous_hp
 	previous_hp = current
 	
 	if hp_fill:
@@ -204,7 +213,12 @@ func _on_hp_changed(current: float, maximum: float) -> void:
 		var tw = create_tween()
 		tw.tween_property(hp_fill, "size:x", target_width, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		
-		if ratio < 0.3:
+		if is_healing:
+			# Hiệu ứng hồi máu: Lóe sáng xanh ngọc bích
+			var tw_heal = create_tween()
+			tw_heal.tween_property(hp_fill, "modulate", Color(0.4, 2.2, 0.8, 1.0), 0.1)
+			tw_heal.tween_property(hp_fill, "modulate", Color.WHITE, 0.25)
+		elif ratio < 0.3:
 			hp_fill.color = Color(1.0, 0.12, 0.12) # Báo động đỏ
 		else:
 			hp_fill.color = Color(0.92, 0.16, 0.26) # Ruby Huyết Nguyệt
@@ -213,33 +227,47 @@ func _on_hp_changed(current: float, maximum: float) -> void:
 	if hp_catchup:
 		if catchup_tween:
 			catchup_tween.kill()
-		catchup_tween = create_tween()
-		catchup_tween.tween_interval(0.22)
-		catchup_tween.tween_property(hp_catchup, "size:x", target_width, 0.38).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		if is_healing:
+			hp_catchup.size.x = target_width
+		else:
+			catchup_tween = create_tween()
+			catchup_tween.tween_interval(0.22)
+			catchup_tween.tween_property(hp_catchup, "size:x", target_width, 0.38).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 	# Hiệu ứng Rung lắc khung máu (HUD Impact Shake) khi trúng sát thương
 	if is_taking_damage and vital_panel:
 		if vital_shake_tween:
 			vital_shake_tween.kill()
 		vital_shake_tween = create_tween()
-		vital_shake_tween.tween_property(vital_panel, "position:y", 2.0, 0.04)
-		vital_shake_tween.tween_property(vital_panel, "position:y", -2.0, 0.04)
-		vital_shake_tween.tween_property(vital_panel, "position:y", 0.0, 0.05)
+		vital_shake_tween.tween_property(vital_panel, "position:y", 3.0, 0.03)
+		vital_shake_tween.tween_property(vital_panel, "position:y", -2.5, 0.03)
+		vital_shake_tween.tween_property(vital_panel, "position:y", 1.0, 0.03)
+		vital_shake_tween.tween_property(vital_panel, "position:y", 0.0, 0.04)
 		
 	if hp_label:
 		hp_label.text = "HP: %d/%d" % [round(current), round(maximum)]
+		if is_taking_damage:
+			hp_label.modulate = Color(2.0, 0.4, 0.4)
+			var tw_lbl = create_tween()
+			tw_lbl.tween_property(hp_label, "modulate", Color.WHITE, 0.2)
 
 func _on_armor_changed(current: float, maximum: float) -> void:
 	var ratio := clampf(current / max(1.0, maximum), 0.0, 1.0)
 	var target_width := ARMOR_BAR_MAX_WIDTH * ratio
 	var is_armor_damaged = current < previous_armor
+	var is_armor_refilled = current > previous_armor
 	previous_armor = current
 	
 	if armor_fill:
 		var tw = create_tween()
 		tw.tween_property(armor_fill, "size:x", target_width, 0.08)
 		
-		if ratio <= 0.0:
+		if is_armor_refilled:
+			# Hiệu ứng nạp lại đầy giáp (Round Start): Lóe sáng điện quang Cyan rực rỡ
+			var tw_recharge = create_tween()
+			tw_recharge.tween_property(armor_fill, "modulate", Color(0.8, 2.5, 3.0, 1.0), 0.12)
+			tw_recharge.tween_property(armor_fill, "modulate", Color.WHITE, 0.2)
+		elif ratio <= 0.0:
 			armor_fill.color = Color(0.2, 0.25, 0.35, 0.3)
 		elif ratio < 0.3:
 			armor_fill.color = Color(1.0, 0.65, 0.2) # Cam cảnh báo giáp sắp vỡ
@@ -249,9 +277,12 @@ func _on_armor_changed(current: float, maximum: float) -> void:
 	if armor_catchup:
 		if armor_catchup_tween:
 			armor_catchup_tween.kill()
-		armor_catchup_tween = create_tween()
-		armor_catchup_tween.tween_interval(0.16)
-		armor_catchup_tween.tween_property(armor_catchup, "size:x", target_width, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		if is_armor_refilled:
+			armor_catchup.size.x = target_width
+		else:
+			armor_catchup_tween = create_tween()
+			armor_catchup_tween.tween_interval(0.16)
+			armor_catchup_tween.tween_property(armor_catchup, "size:x", target_width, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		
 	# Hiệu ứng nổ tia xanh khi giáp bị vỡ về 0
 	if is_armor_damaged and current <= 0.0 and armor_fill:
@@ -271,11 +302,11 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 			var cell = flow_cells[i]
 			if i < stacks:
 				cell.color = Color(0.0, 0.95, 1.0, 1.0) # Cyan ngọc bích
-				# Hiệu ứng nạp khí: Ô mới kích hoạt nở to bừng sáng
+				# Hiệu ứng nạp khí: Ô mới kích hoạt nở to bừng sáng (Pop & Bloom)
 				if gained_flow and i == stacks - 1:
 					var tw_pop = create_tween()
-					tw_pop.tween_property(cell, "scale", Vector2(1.4, 1.4), 0.08)
-					tw_pop.tween_property(cell, "modulate", Color(2.5, 2.5, 3.0, 1.0), 0.08)
+					tw_pop.tween_property(cell, "scale", Vector2(1.5, 1.5), 0.06)
+					tw_pop.tween_property(cell, "modulate", Color(3.0, 3.0, 3.5, 1.0), 0.06)
 					tw_pop.tween_property(cell, "scale", Vector2.ONE, 0.12)
 					tw_pop.tween_property(cell, "modulate", Color.WHITE, 0.12)
 			else:
@@ -289,9 +320,9 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 			pulse_tween = create_tween().set_loops()
 			# Hiệu ứng cầu vồng ma thuật xung nhịp toàn bộ 5 ô ngọc
 			for cell in flow_cells:
-				pulse_tween.parallel().tween_property(cell, "modulate", Color(2.5, 1.8, 0.5, 1.0), 0.2)
+				pulse_tween.parallel().tween_property(cell, "modulate", Color(2.5, 1.8, 0.5, 1.0), 0.18)
 			for cell in flow_cells:
-				pulse_tween.parallel().tween_property(cell, "modulate", Color(0.3, 2.0, 2.5, 1.0), 0.2)
+				pulse_tween.parallel().tween_property(cell, "modulate", Color(0.3, 2.0, 2.5, 1.0), 0.18)
 	else:
 		if pulse_tween:
 			pulse_tween.kill()

@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" path="res://src/ui/InventoryUI.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://assets/fonts/pixel_font.ttf" id="2_font"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/inventory_hud_frame.png" id="3_frame"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/item_slot_frame.png" id="4_slot"]
 
 [node name="InventoryUI" type="Control"]
 layout_mode = 3
@@ -34,12 +36,18 @@ grow_vertical = 2
 custom_minimum_size = Vector2(250, 240)
 layout_mode = 2
 
+[node name="GothicFrame" type="TextureRect" parent="CenterContainer/Panel"]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("3_frame")
+expand_mode = 1
+
 [node name="Margin" type="MarginContainer" parent="CenterContainer/Panel"]
 layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 5
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
 
 [node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin"]
 layout_mode = 2

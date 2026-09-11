@@ -938,7 +938,11 @@ func add_crystals(count: int = 1) -> void:
 
 func equip_weapon_dict(item_dict: Dictionary) -> void:
 	current_weapon_data = item_dict
-	weapon_options = item_dict.get("options", [])
+	weapon_options.clear()
+	var raw_opts = item_dict.get("options", [])
+	for opt in raw_opts:
+		if opt is Dictionary:
+			weapon_options.append(opt)
 	equip_weapon_tier(item_dict.get("tier", "tier_d"))
 
 func equip_weapon_tier(tier: String) -> void:
