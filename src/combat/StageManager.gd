@@ -192,6 +192,7 @@ func _spawn_stage_wave(stage: int) -> void:
 		var pos: Vector2 = item["pos"]
 		var enemy: EnemyBase = scn.instantiate()
 		enemy.global_position = pos
+		enemy.stage_number = current_stage
 		enemy.died.connect(_on_enemy_died)
 		
 		# Kết nối thanh máu Boss nếu là boss

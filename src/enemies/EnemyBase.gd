@@ -18,6 +18,7 @@ enum State { IDLE, PATROL, CHASE, WINDUP, ATTACK, HURT, DEAD }
 @export var enemy_name: String = "Enemy"
 @export var is_elite: bool = false
 @export var is_boss: bool = false
+@export var stage_number: int = 1
 
 @export_group("Stats")
 @export var max_hp: float = 80.0
@@ -331,32 +332,112 @@ func _spawn_loot_drops() -> void:
 	if randf() < 0.4:
 		_drop_item("upgrade_crystal")
 
-	var weapon_chance = 0.25 if not is_elite else 0.85
+	# --------------------------------------------------------------------------
+	# CƠ CHẾ RƠI TRANG BỊ MỚI PHỤC VỤ HỆ THỐNG GHÉP 5-LÊN-1
+	# --------------------------------------------------------------------------
+	# 1. Tỉ lệ và số lượng rơi:
+	#    - Quái thường: 45% rơi đồ (1 món)
+	#    - Elite: 100% rơi (2 món)
+	#    - Boss: 100% rơi (3 - 4 món)
+	var equip_chance = 0.45 if not is_elite else 1.0
+	var drop_count = 1
 	if is_boss:
-		weapon_chance = 1.0
+		drop_count = randi_range(3, 4)
+	elif is_elite:
+		drop_count = 2
 
-	if randf() < weapon_chance:
-		var tier = "tier_d"
-		if is_boss:
-			var r = randf()
-			tier = "tier_ssr" if r < 0.15 else ("tier_sr" if r < 0.5 else "tier_r")
-		elif is_elite:
-			var r = randf()
-			tier = "tier_r" if r < 0.2 else ("tier_a" if r < 0.6 else "tier_b")
+	if randf() < equip_chance:
+		for i in range(drop_count):
+			var tier = _roll_equipment_tier()
+			var item_key = _pick_smart_equipment_item(tier)
+			_drop_item(item_key)
+
+func _roll_equipment_tier() -> String:
+	if is_boss:
+		# Boss 1.10 rơi đồ từ B đến SSR
+		var r = randf()
+		if r < 0.20:
+			return "tier_ssr"
+		elif r < 0.55:
+			return "tier_sr"
+		elif r < 0.85:
+			return "tier_r"
 		else:
-			var r = randf()
-			tier = "tier_b" if r < 0.1 else ("tier_c" if r < 0.4 else "tier_d")
-			
-		# Phân phối tỉ lệ rơi: 40% Vũ khí, 35% Mảnh giáp, 25% Khiên Hộ Thân
-		var drop_roll = randf()
-		if drop_roll < 0.40:
-			_drop_item(tier) # Vũ khí Song Đao
-		elif drop_roll < 0.75:
-			var parts = ["armor_helmet_", "armor_chest_", "armor_arms_", "armor_legs_"]
-			var chosen_part = parts[randi() % parts.size()]
-			_drop_item(chosen_part + tier) # Giáp 4 món
+			return "tier_a"
+	elif is_elite:
+		# Elite Mid-boss rơi C, B, A hoặc R
+		var r = randf()
+		if stage_number >= 8:
+			return "tier_r" if r < 0.25 else ("tier_a" if r < 0.65 else "tier_b")
 		else:
-			_drop_item("shield_" + tier) # Khiên Hộ Thân
+			return "tier_a" if r < 0.25 else ("tier_b" if r < 0.70 else "tier_c")
+	else:
+		# Quái thường: Phẩm cấp tịnh tiến theo Stage
+		var r = randf()
+		if stage_number <= 3:
+			# Map 1.1 - 1.3: 75% Tier D, 25% Tier C
+			return "tier_c" if r < 0.25 else "tier_d"
+		elif stage_number <= 7:
+			# Map 1.4 - 1.7: 45% Tier D, 45% Tier C, 10% Tier B
+			if r < 0.10:
+				return "tier_b"
+			elif r < 0.55:
+				return "tier_c"
+			else:
+				return "tier_d"
+		else:
+			# Map 1.8+: 35% Tier C, 45% Tier B, 20% Tier A
+			if r < 0.20:
+				return "tier_a"
+			elif r < 0.65:
+				return "tier_b"
+			else:
+				return "tier_c"
+
+func _pick_smart_equipment_item(tier: String) -> String:
+	# Kiểm tra túi đồ của người chơi để kích hoạt Smart Fill
+	# Nếu người chơi đang có 3 hoặc 4 món của một nhóm cùng tier, ưu tiên nhả món đó để kích hoạt Ghép 5!
+	var target_group = ""
+	if target_player and "inventory" in target_player:
+		var inv: Array = target_player.inventory
+		var counts: Dictionary = {} # group_prefix -> count
+		for item in inv:
+			if item.get("tier", "") == tier:
+				var t = item.get("type", "weapon")
+				if t == "armor":
+					var p = item.get("part", "chest")
+					counts["armor_" + p] = counts.get("armor_" + p, 0) + 1
+				elif t == "shield":
+					counts["shield"] = counts.get("shield", 0) + 1
+				else:
+					counts["weapon"] = counts.get("weapon", 0) + 1
+		
+		# Tìm xem có nhóm nào đang có 3 hoặc 4 món không
+		for grp in counts.keys():
+			if counts[grp] in [3, 4]:
+				target_group = grp
+				break
+
+	# Nếu có nhóm gần đủ 5 món, ưu tiên 45% tỉ lệ rơi trúng nhóm đó
+	if target_group != "" and randf() < 0.45:
+		if target_group.begins_with("armor_"):
+			var part = target_group.replace("armor_", "")
+			return "armor_%s_%s" % [part, tier]
+		elif target_group == "shield":
+			return "shield_" + tier
+		else:
+			return tier # vũ khí (format "tier_d")
+
+	# Phân bổ mặc định: 35% Vũ Khí, 45% Mảnh Giáp (4 bộ phận), 20% Khiên
+	var roll = randf()
+	if roll < 0.35:
+		return tier # Vũ khí (ví dụ "tier_d")
+	elif roll < 0.80:
+		var parts = ["armor_helmet_", "armor_chest_", "armor_arms_", "armor_legs_"]
+		var chosen_part = parts[randi() % parts.size()]
+		return chosen_part + tier
+	else:
+		return "shield_" + tier
 
 func _drop_item(item_type: String) -> void:
 	if not drop_item_scene:
