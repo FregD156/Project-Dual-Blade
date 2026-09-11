@@ -212,7 +212,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.42, 0.45, 0.52, 1)
+color = Color(0, 0, 0, 0)
 
 [node name="InnerBorder" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border"]
 layout_mode = 1
@@ -226,7 +226,7 @@ offset_bottom = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.04, 0.05, 0.07, 1)
+color = Color(0, 0, 0, 0)
 
 [node name="Background" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border"]
 layout_mode = 1
@@ -240,7 +240,7 @@ offset_bottom = -2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.08, 0.06, 0.1, 1)
+color = Color(0, 0, 0, 0)
 
 [node name="VBox" type="VBoxContainer" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background"]
 layout_mode = 1
@@ -387,7 +387,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.2, 0.45, 0.55, 1)
+color = Color(0, 0, 0, 0)
 
 [node name="InnerBorder" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border"]
 layout_mode = 1
@@ -401,7 +401,7 @@ offset_bottom = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.03, 0.05, 0.08, 1)
+color = Color(0, 0, 0, 0)
 
 [node name="Background" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border"]
 layout_mode = 1
@@ -415,7 +415,7 @@ offset_bottom = -2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.04, 0.09, 0.12, 1)
+color = Color(0, 0, 0, 0)
 
 [node name="FlowContainer" type="HBoxContainer" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background"]
 layout_mode = 1

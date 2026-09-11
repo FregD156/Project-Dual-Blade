@@ -18,6 +18,7 @@ extends CanvasLayer
 ## 5. Boss Bar Souls-like hoành tráng phong cách Dark Souls / Elden Ring
 
 @onready var vital_panel: Control = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel")
+@onready var vitals_frame: TextureRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/GothicFrame")
 @onready var hp_catchup: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background/CatchupFill")
 @onready var hp_fill: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background/Fill")
 @onready var hp_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/HPText")
@@ -30,6 +31,7 @@ extends CanvasLayer
 @onready var armor_shimmer: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background/Shimmer")
 
 @onready var flow_panel: Control = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/FlowPanel")
+@onready var flow_frame: TextureRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/FlowPanel/GothicFrame")
 @onready var flow_cells: Array[ColorRect] = [
 	$TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer/Cell1,
 	$TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer/Cell2,
@@ -58,6 +60,8 @@ const BOSS_BAR_MAX_WIDTH: float = 236.0
 var catchup_tween: Tween = null
 var armor_catchup_tween: Tween = null
 var pulse_tween: Tween = null
+var flow_frame_tween: Tween = null
+var vitals_frame_tween: Tween = null
 var boss_catchup_tween: Tween = null
 var vital_shake_tween: Tween = null
 
@@ -234,15 +238,28 @@ func _on_hp_changed(current: float, maximum: float) -> void:
 			catchup_tween.tween_interval(0.22)
 			catchup_tween.tween_property(hp_catchup, "size:x", target_width, 0.38).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
-	# Hiệu ứng Rung lắc khung máu (HUD Impact Shake) khi trúng sát thương
-	if is_taking_damage and vital_panel:
-		if vital_shake_tween:
-			vital_shake_tween.kill()
-		vital_shake_tween = create_tween()
-		vital_shake_tween.tween_property(vital_panel, "position:y", 3.0, 0.03)
-		vital_shake_tween.tween_property(vital_panel, "position:y", -2.5, 0.03)
-		vital_shake_tween.tween_property(vital_panel, "position:y", 1.0, 0.03)
-		vital_shake_tween.tween_property(vital_panel, "position:y", 0.0, 0.04)
+	# Hiệu ứng Rung lắc & lóe đỏ khung máu Gothic (HUD Impact Shake & Flash) khi trúng sát thương
+	if is_taking_damage:
+		if vital_panel:
+			if vital_shake_tween:
+				vital_shake_tween.kill()
+			vital_shake_tween = create_tween()
+			vital_shake_tween.tween_property(vital_panel, "position:y", 3.0, 0.03)
+			vital_shake_tween.tween_property(vital_panel, "position:y", -2.5, 0.03)
+			vital_shake_tween.tween_property(vital_panel, "position:y", 1.0, 0.03)
+			vital_shake_tween.tween_property(vital_panel, "position:y", 0.0, 0.04)
+		if vitals_frame:
+			if vitals_frame_tween:
+				vitals_frame_tween.kill()
+			vitals_frame_tween = create_tween()
+			vitals_frame_tween.tween_property(vitals_frame, "modulate", Color(2.0, 0.5, 0.5, 1.0), 0.05)
+			vitals_frame_tween.tween_property(vitals_frame, "modulate", Color.WHITE, 0.25)
+	elif is_healing and vitals_frame:
+		if vitals_frame_tween:
+			vitals_frame_tween.kill()
+		vitals_frame_tween = create_tween()
+		vitals_frame_tween.tween_property(vitals_frame, "modulate", Color(0.6, 2.0, 1.0, 1.0), 0.1)
+		vitals_frame_tween.tween_property(vitals_frame, "modulate", Color.WHITE, 0.3)
 		
 	if hp_label:
 		hp_label.text = "HP: %d/%d" % [round(current), round(maximum)]
@@ -267,6 +284,10 @@ func _on_armor_changed(current: float, maximum: float) -> void:
 			var tw_recharge = create_tween()
 			tw_recharge.tween_property(armor_fill, "modulate", Color(0.8, 2.5, 3.0, 1.0), 0.12)
 			tw_recharge.tween_property(armor_fill, "modulate", Color.WHITE, 0.2)
+			if vitals_frame:
+				var tw_f = create_tween()
+				tw_f.tween_property(vitals_frame, "modulate", Color(0.7, 1.8, 2.5, 1.0), 0.12)
+				tw_f.tween_property(vitals_frame, "modulate", Color.WHITE, 0.3)
 		elif ratio <= 0.0:
 			armor_fill.color = Color(0.2, 0.25, 0.35, 0.3)
 		elif ratio < 0.3:
@@ -285,10 +306,15 @@ func _on_armor_changed(current: float, maximum: float) -> void:
 			armor_catchup_tween.tween_property(armor_catchup, "size:x", target_width, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		
 	# Hiệu ứng nổ tia xanh khi giáp bị vỡ về 0
-	if is_armor_damaged and current <= 0.0 and armor_fill:
-		var tw_break = create_tween()
-		tw_break.tween_property(armor_fill, "modulate", Color(2.5, 2.5, 2.5, 1.0), 0.08)
-		tw_break.tween_property(armor_fill, "modulate", Color.WHITE, 0.15)
+	if is_armor_damaged and current <= 0.0:
+		if armor_fill:
+			var tw_break = create_tween()
+			tw_break.tween_property(armor_fill, "modulate", Color(2.5, 2.5, 2.5, 1.0), 0.08)
+			tw_break.tween_property(armor_fill, "modulate", Color.WHITE, 0.15)
+		if vitals_frame:
+			var tw_fb = create_tween()
+			tw_fb.tween_property(vitals_frame, "modulate", Color(0.5, 1.8, 2.5, 1.0), 0.08)
+			tw_fb.tween_property(vitals_frame, "modulate", Color.WHITE, 0.2)
 		
 	if armor_label:
 		armor_label.text = "GIÁP: %d/%d" % [round(current), round(maximum)]
@@ -312,22 +338,34 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 			else:
 				cell.color = Color(0.08, 0.12, 0.18, 0.45)
 
+	# Hiệu ứng lóe khung Flow khi nạp thêm stack
+	if gained_flow and flow_frame and not is_full:
+		var tw_ff = create_tween()
+		tw_ff.tween_property(flow_frame, "modulate", Color(0.8, 2.0, 2.5, 1.0), 0.08)
+		tw_ff.tween_property(flow_frame, "modulate", Color.WHITE, 0.18)
+
 	if is_full:
 		if flow_title:
 			flow_title.text = "⚡ XUẤT QUỶ!"
 			flow_title.modulate = Color(1.0, 0.9, 0.2)
 		if not pulse_tween or not pulse_tween.is_valid():
 			pulse_tween = create_tween().set_loops()
-			# Hiệu ứng cầu vồng ma thuật xung nhịp toàn bộ 5 ô ngọc
+			# Hiệu ứng cầu vồng ma thuật xung nhịp toàn bộ 5 ô ngọc và khung Flow
 			for cell in flow_cells:
 				pulse_tween.parallel().tween_property(cell, "modulate", Color(2.5, 1.8, 0.5, 1.0), 0.18)
+			if flow_frame:
+				pulse_tween.parallel().tween_property(flow_frame, "modulate", Color(1.8, 1.5, 0.6, 1.0), 0.18)
 			for cell in flow_cells:
 				pulse_tween.parallel().tween_property(cell, "modulate", Color(0.3, 2.0, 2.5, 1.0), 0.18)
+			if flow_frame:
+				pulse_tween.parallel().tween_property(flow_frame, "modulate", Color(0.6, 1.8, 2.5, 1.0), 0.18)
 	else:
 		if pulse_tween:
 			pulse_tween.kill()
 		for cell in flow_cells:
 			cell.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		if flow_frame:
+			flow_frame.modulate = Color.WHITE
 		if flow_title:
 			flow_title.text = "FLOW"
 			flow_title.modulate = Color(0.0, 0.9, 1.0, 1.0)
