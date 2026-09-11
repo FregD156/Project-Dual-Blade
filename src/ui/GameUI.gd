@@ -1,26 +1,35 @@
 class_name GameUI
 extends CanvasLayer
 
-## Giao diện HUD chuẩn Dark Fantasy Pixel-Art (Ergonomic HUD)
+## Giao diện HUD chuẩn Dark Fantasy Pixel-Art (Ergonomic HUD - Luxury VFX Edition)
 ## Tính năng nâng cấp:
-## 1. Cụm Vitals Đồng Bộ (Unified Health & Shield Bar):
-##    - Đặt chung trong 1 khung VitalPanel hợp kim đúc nguyên khối Dark Fantasy
-##    - Tầng trên (Lớn): Thanh máu Huyết Nguyệt Ruby đỏ thẫm + Lớp Catch-up vàng kim mượt mà + Text HP
-##    - Tầng dưới (Gọn): Thanh Giáp Hộ Mệnh Lam Thạch (Cobalt/Cyan Shield) + Lớp Catch-up bạc sáng + Text Giáp
-## 2. Cụm FLOW 5 ô vuông Neon Cyan (#00e5ff) với hiệu ứng Pulse bừng sáng khi đầy 5 vạch (Xuất Quỷ)
-## 3. Bảng trang bị vũ khí + Hiển thị số lượng Bình Máu & Tinh thể Nâng cấp
-## 4. Nút mở nhanh Túi Đồ [B]
-## 5. Boss HP Bar hoành tráng phong cách Souls-like (Boss 1.10 Thống Lĩnh Thiết Vệ)
+## 1. Khung HUD Gothic Hoa Văn Hợp Kim & Ngọc Ruby (Vitals Ornate Gothic Frame)
+## 2. Thanh Máu Ruby Huyết Nguyệt:
+##    - Lớp ánh sáng quét dọc theo thời gian (Gleam Shimmer)
+##    - Hiệu ứng Tim Đập Nhịp Nhàng (Heartbeat Pulse) khi máu < 30%
+##    - Lớp Catch-up vàng cam giật trễ mượt mà khi nhận đòn
+##    - Rung lắc nhẹ khung HUD (HUD Shake) khi mất máu lớn
+## 3. Thanh Giáp Lam Thạch (Cobalt Shield):
+##    - Hiệu ứng tia năng lượng điện quang chạy quanh viền
+##    - Hiệu ứng vỡ nát / lóe sáng khi giáp chạm mốc 0
+## 4. Khung FLOW Ma Thuật Cổ Xưa (5 Rune Cells):
+##    - Hiệu ứng Nạp Khí: Mỗi khi tích thêm 1 stack, ô ngọc nở bung & phát sáng cực đại
+##    - Khi đầy 5 stacks: Khung FLOW bừng sáng rực rỡ, các ô ngọc đổi màu liên tục, tiêu đề nhảy múa
+## 5. Boss Bar Souls-like hoành tráng phong cách Dark Souls / Elden Ring
 
 @onready var vital_panel: Control = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel")
 @onready var hp_catchup: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background/CatchupFill")
 @onready var hp_fill: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background/Fill")
 @onready var hp_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/HPText")
+@onready var hp_shimmer: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background/Shimmer")
+@onready var ruby_gem: TextureRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/RubyGem")
 
 @onready var armor_catchup: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background/CatchupFill")
 @onready var armor_fill: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background/Fill")
 @onready var armor_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/ArmorText")
+@onready var armor_shimmer: ColorRect = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background/Shimmer")
 
+@onready var flow_panel: Control = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/FlowPanel")
 @onready var flow_cells: Array[ColorRect] = [
 	$TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer/Cell1,
 	$TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer/Cell2,
@@ -50,6 +59,11 @@ var catchup_tween: Tween = null
 var armor_catchup_tween: Tween = null
 var pulse_tween: Tween = null
 var boss_catchup_tween: Tween = null
+var vital_shake_tween: Tween = null
+
+var previous_hp: float = 100.0
+var previous_armor: float = 27.0
+var previous_flow: int = 0
 
 const WEAPON_TEXTURES = {
 	"tier_d": preload("res://assets/sprites/items/sliced/weapon_tier_d.png"),
@@ -65,27 +79,51 @@ func _ready() -> void:
 	if boss_bar_container:
 		boss_bar_container.visible = false
 
+func _process(delta: float) -> void:
+	var t = Time.get_ticks_msec() * 0.001
+	
+	# 1. Shimmer quét qua thanh máu & giáp tạo hiệu ứng phản quang lấp lánh
+	if hp_shimmer and hp_fill and hp_fill.size.x > 0:
+		var cycle = fmod(t * 1.5, 2.5)
+		if cycle < 1.0:
+			hp_shimmer.position.x = cycle * hp_fill.size.x
+			hp_shimmer.modulate.a = 0.5 * sin(cycle * PI)
+		else:
+			hp_shimmer.modulate.a = 0.0
+
+	if armor_shimmer and armor_fill and armor_fill.size.x > 0:
+		var cycle_a = fmod(t * 1.8 + 0.5, 2.2)
+		if cycle_a < 1.0:
+			armor_shimmer.position.x = cycle_a * armor_fill.size.x
+			armor_shimmer.modulate.a = 0.6 * sin(cycle_a * PI)
+		else:
+			armor_shimmer.modulate.a = 0.0
+
+	# 2. Hiệu ứng ngọc Ruby phát sáng xung nhịp (Pulsing Gem Heartbeat)
+	if ruby_gem:
+		var gem_pulse = 1.0 + 0.08 * sin(t * 3.5)
+		ruby_gem.scale = Vector2(gem_pulse, gem_pulse)
+
 func connect_player(player: Player) -> void:
 	if not player:
 		return
 	player.hp_changed.connect(_on_hp_changed)
+	player.armor_changed.connect(_on_armor_changed)
 	player.flow_changed.connect(_on_flow_changed)
-	if player.has_signal("flasks_changed"):
-		player.flasks_changed.connect(_on_flasks_changed)
-	if player.has_signal("weapon_equipped"):
-		player.weapon_equipped.connect(_on_weapon_equipped)
-	if player.has_signal("crystals_changed"):
-		player.crystals_changed.connect(_on_crystals_changed)
-	if player.has_signal("armor_changed"):
-		player.armor_changed.connect(_on_armor_changed)
+	player.flasks_changed.connect(_on_flasks_changed)
+	player.crystals_changed.connect(_on_crystals_changed)
+	player.weapon_equipped.connect(_on_weapon_equipped)
 	
 	_on_hp_changed(player.current_hp, player.max_hp)
-	_on_armor_changed(player.current_armor, player.max_armor)
-	_on_flow_changed(player.current_flow, false)
+	if "current_armor" in player:
+		_on_armor_changed(player.current_armor, player.max_armor)
+	_on_flow_changed(player.current_flow, player.is_full_flow())
 	_on_flasks_changed(player.life_flasks, player.max_flasks)
-	_on_weapon_equipped(player.current_weapon_tier, player.base_atk, player.crit_rate)
 	_on_crystals_changed(player.upgrade_crystals)
 	
+	if player.current_weapon_tier != "":
+		_on_weapon_equipped(player.current_weapon_tier, player.base_atk, player.crit_rate)
+		
 	if bag_btn:
 		bag_btn.pressed.connect(func():
 			var inv = get_parent().get_node_or_null("UI_Layer/InventoryUI")
@@ -140,7 +178,7 @@ func _on_crystals_changed(count: int) -> void:
 	if crystal_label:
 		crystal_label.text = "Thạch: %d" % count
 
-func _on_weapon_equipped(tier_name: String, atk: float, crit: float) -> void:
+func _on_weapon_equipped(tier_name: String, atk: float, _crit: float) -> void:
 	if WEAPON_TEXTURES.has(tier_name) and weapon_icon:
 		weapon_icon.texture = WEAPON_TEXTURES[tier_name]
 	if weapon_tier_label:
@@ -158,20 +196,35 @@ func _on_weapon_equipped(tier_name: String, atk: float, crit: float) -> void:
 func _on_hp_changed(current: float, maximum: float) -> void:
 	var ratio := clampf(current / max(1.0, maximum), 0.0, 1.0)
 	var target_width := HP_BAR_MAX_WIDTH * ratio
+	var is_taking_damage = current < previous_hp
+	previous_hp = current
 	
 	if hp_fill:
-		hp_fill.size.x = target_width
+		# Hiệu ứng co giãn & đổi màu
+		var tw = create_tween()
+		tw.tween_property(hp_fill, "size:x", target_width, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		
 		if ratio < 0.3:
-			hp_fill.color = Color(1.0, 0.1, 0.1) # Đỏ rực nguy cấp
+			hp_fill.color = Color(1.0, 0.12, 0.12) # Báo động đỏ
 		else:
-			hp_fill.color = Color(0.88, 0.18, 0.25) # Đỏ Ruby Dark Fantasy
-			
+			hp_fill.color = Color(0.92, 0.16, 0.26) # Ruby Huyết Nguyệt
+
+	# Lớp Catch-up vàng kim giật chậm sau đòn đánh (White/Gold Impact Follower)
 	if hp_catchup:
 		if catchup_tween:
 			catchup_tween.kill()
 		catchup_tween = create_tween()
-		catchup_tween.tween_interval(0.2)
-		catchup_tween.tween_property(hp_catchup, "size:x", target_width, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		catchup_tween.tween_interval(0.22)
+		catchup_tween.tween_property(hp_catchup, "size:x", target_width, 0.38).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# Hiệu ứng Rung lắc khung máu (HUD Impact Shake) khi trúng sát thương
+	if is_taking_damage and vital_panel:
+		if vital_shake_tween:
+			vital_shake_tween.kill()
+		vital_shake_tween = create_tween()
+		vital_shake_tween.tween_property(vital_panel, "position:y", 2.0, 0.04)
+		vital_shake_tween.tween_property(vital_panel, "position:y", -2.0, 0.04)
+		vital_shake_tween.tween_property(vital_panel, "position:y", 0.0, 0.05)
 		
 	if hp_label:
 		hp_label.text = "HP: %d/%d" % [round(current), round(maximum)]
@@ -179,45 +232,66 @@ func _on_hp_changed(current: float, maximum: float) -> void:
 func _on_armor_changed(current: float, maximum: float) -> void:
 	var ratio := clampf(current / max(1.0, maximum), 0.0, 1.0)
 	var target_width := ARMOR_BAR_MAX_WIDTH * ratio
+	var is_armor_damaged = current < previous_armor
+	previous_armor = current
 	
 	if armor_fill:
-		armor_fill.size.x = target_width
+		var tw = create_tween()
+		tw.tween_property(armor_fill, "size:x", target_width, 0.08)
+		
 		if ratio <= 0.0:
 			armor_fill.color = Color(0.2, 0.25, 0.35, 0.3)
 		elif ratio < 0.3:
-			armor_fill.color = Color(1.0, 0.6, 0.2) # Cam cảnh báo giáp sắp vỡ
+			armor_fill.color = Color(1.0, 0.65, 0.2) # Cam cảnh báo giáp sắp vỡ
 		else:
-			armor_fill.color = Color(0.15, 0.75, 0.95) # Lam Ngọc Cyan phát quang
+			armor_fill.color = Color(0.15, 0.85, 1.0) # Lam Ngọc Cyan phát quang
 			
 	if armor_catchup:
 		if armor_catchup_tween:
 			armor_catchup_tween.kill()
 		armor_catchup_tween = create_tween()
-		armor_catchup_tween.tween_interval(0.18)
+		armor_catchup_tween.tween_interval(0.16)
 		armor_catchup_tween.tween_property(armor_catchup, "size:x", target_width, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		
+	# Hiệu ứng nổ tia xanh khi giáp bị vỡ về 0
+	if is_armor_damaged and current <= 0.0 and armor_fill:
+		var tw_break = create_tween()
+		tw_break.tween_property(armor_fill, "modulate", Color(2.5, 2.5, 2.5, 1.0), 0.08)
+		tw_break.tween_property(armor_fill, "modulate", Color.WHITE, 0.15)
 		
 	if armor_label:
 		armor_label.text = "GIÁP: %d/%d" % [round(current), round(maximum)]
 
 func _on_flow_changed(stacks: int, is_full: bool) -> void:
+	var gained_flow = stacks > previous_flow
+	previous_flow = stacks
+
 	for i in range(5):
 		if i < flow_cells.size():
 			var cell = flow_cells[i]
 			if i < stacks:
-				cell.color = Color(0.0, 0.9, 1.0, 1.0)
+				cell.color = Color(0.0, 0.95, 1.0, 1.0) # Cyan ngọc bích
+				# Hiệu ứng nạp khí: Ô mới kích hoạt nở to bừng sáng
+				if gained_flow and i == stacks - 1:
+					var tw_pop = create_tween()
+					tw_pop.tween_property(cell, "scale", Vector2(1.4, 1.4), 0.08)
+					tw_pop.tween_property(cell, "modulate", Color(2.5, 2.5, 3.0, 1.0), 0.08)
+					tw_pop.tween_property(cell, "scale", Vector2.ONE, 0.12)
+					tw_pop.tween_property(cell, "modulate", Color.WHITE, 0.12)
 			else:
-				cell.color = Color(0.1, 0.14, 0.2, 0.45)
+				cell.color = Color(0.08, 0.12, 0.18, 0.45)
 
 	if is_full:
 		if flow_title:
-			flow_title.text = "FLOW [TUYỆT KĨ!]"
-			flow_title.modulate = Color(1.0, 0.85, 0.25)
+			flow_title.text = "⚡ XUẤT QUỶ!"
+			flow_title.modulate = Color(1.0, 0.9, 0.2)
 		if not pulse_tween or not pulse_tween.is_valid():
 			pulse_tween = create_tween().set_loops()
+			# Hiệu ứng cầu vồng ma thuật xung nhịp toàn bộ 5 ô ngọc
 			for cell in flow_cells:
-				pulse_tween.parallel().tween_property(cell, "modulate", Color(2.0, 2.0, 2.0, 1.0), 0.22)
+				pulse_tween.parallel().tween_property(cell, "modulate", Color(2.5, 1.8, 0.5, 1.0), 0.2)
 			for cell in flow_cells:
-				pulse_tween.parallel().tween_property(cell, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.22)
+				pulse_tween.parallel().tween_property(cell, "modulate", Color(0.3, 2.0, 2.5, 1.0), 0.2)
 	else:
 		if pulse_tween:
 			pulse_tween.kill()
@@ -226,4 +300,3 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 		if flow_title:
 			flow_title.text = "FLOW"
 			flow_title.modulate = Color(0.0, 0.9, 1.0, 1.0)
-

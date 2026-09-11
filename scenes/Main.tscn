@@ -11,6 +11,9 @@
 [ext_resource type="PackedScene" path="res://scenes/Portal.tscn" id="9_portal"]
 [ext_resource type="PackedScene" path="res://scenes/InventoryUI.tscn" id="10_inv"]
 [ext_resource type="PackedScene" path="res://scenes/GameOverUI.tscn" id="11_game_over"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/vitals_hud_frame.png" id="12_vitals_frame"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/flow_hud_frame.png" id="13_flow_frame"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ruby_gem.png" id="14_ruby_gem"]
 
 [sub_resource type="GDScript" id="GDScript_main"]
 script/source = "extends Node2D
@@ -274,6 +277,13 @@ offset_right = 116.0
 offset_bottom = 10.0
 color = Color(0.88, 0.18, 0.25, 1)
 
+[node name="Shimmer" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_right = 16.0
+offset_bottom = 10.0
+color = Color(1, 1, 1, 0.6)
+
 [node name="HPText" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar"]
 layout_mode = 1
 anchors_preset = 15
@@ -315,6 +325,13 @@ offset_right = 116.0
 offset_bottom = 7.0
 color = Color(0.15, 0.75, 0.95, 1)
 
+[node name="Shimmer" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
+offset_right = 12.0
+offset_bottom = 7.0
+color = Color(1, 1, 1, 0.6)
+
 [node name="ArmorText" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar"]
 layout_mode = 1
 anchors_preset = 15
@@ -330,6 +347,32 @@ theme_override_font_sizes/font_size = 5
 text = "GIÁP: 27/27"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="GothicFrame" type="TextureRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -3.0
+offset_top = -2.0
+offset_right = 3.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("12_vitals_frame")
+expand_mode = 1
+
+[node name="RubyGem" type="TextureRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel"]
+layout_mode = 0
+offset_left = -6.0
+offset_top = 5.0
+offset_right = 6.0
+offset_bottom = 17.0
+pivot_offset = Vector2(6, 6)
+mouse_filter = 2
+texture = ExtResource("14_ruby_gem")
+expand_mode = 1
 
 [node name="FlowPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
 custom_minimum_size = Vector2(110, 18)
@@ -390,26 +433,31 @@ theme_override_constants/separation = 2
 [node name="Cell1" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
 custom_minimum_size = Vector2(9, 8)
 layout_mode = 2
+pivot_offset = Vector2(4.5, 4)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell2" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
 custom_minimum_size = Vector2(9, 8)
 layout_mode = 2
+pivot_offset = Vector2(4.5, 4)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell3" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
 custom_minimum_size = Vector2(9, 8)
 layout_mode = 2
+pivot_offset = Vector2(4.5, 4)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell4" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
 custom_minimum_size = Vector2(9, 8)
 layout_mode = 2
+pivot_offset = Vector2(4.5, 4)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell5" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
 custom_minimum_size = Vector2(9, 8)
 layout_mode = 2
+pivot_offset = Vector2(4.5, 4)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="FlowTitle" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border"]
@@ -426,6 +474,21 @@ theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 7
 text = "FLOW"
 vertical_alignment = 1
+
+[node name="GothicFrame" type="TextureRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -3.0
+offset_top = -2.0
+offset_right = 3.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("13_flow_frame")
+expand_mode = 1
 
 [node name="WeaponPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
 custom_minimum_size = Vector2(100, 18)
