@@ -347,13 +347,16 @@ func _spawn_loot_drops() -> void:
 			var r = randf()
 			tier = "tier_b" if r < 0.1 else ("tier_c" if r < 0.4 else "tier_d")
 			
-		# 50% rơi vũ khí, 50% rơi mảnh giáp (Mũ, Áo, Tay, Chân)
-		if randf() < 0.5:
-			_drop_item(tier) # Vũ khí
-		else:
+		# Phân phối tỉ lệ rơi: 40% Vũ khí, 35% Mảnh giáp, 25% Khiên Hộ Thân
+		var drop_roll = randf()
+		if drop_roll < 0.40:
+			_drop_item(tier) # Vũ khí Song Đao
+		elif drop_roll < 0.75:
 			var parts = ["armor_helmet_", "armor_chest_", "armor_arms_", "armor_legs_"]
 			var chosen_part = parts[randi() % parts.size()]
-			_drop_item(chosen_part + tier)
+			_drop_item(chosen_part + tier) # Giáp 4 món
+		else:
+			_drop_item("shield_" + tier) # Khiên Hộ Thân
 
 func _drop_item(item_type: String) -> void:
 	if not drop_item_scene:

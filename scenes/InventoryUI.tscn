@@ -173,6 +173,15 @@ layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
+[node name="ShieldSlot" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox/ArmorSection/HBox"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/ShieldSlot"]
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
 [node name="HSeparator2" type="HSeparator" parent="CenterContainer/Panel/Margin/VBox"]
 layout_mode = 2
 

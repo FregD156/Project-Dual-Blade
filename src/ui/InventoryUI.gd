@@ -22,6 +22,7 @@ extends Control
 @onready var chest_btn: TextureRect = get_node_or_null("CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/ChestSlot/Icon")
 @onready var arms_btn: TextureRect = get_node_or_null("CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/ArmsSlot/Icon")
 @onready var legs_btn: TextureRect = get_node_or_null("CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/LegsSlot/Icon")
+@onready var shield_btn: TextureRect = get_node_or_null("CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/ShieldSlot/Icon")
 
 @onready var count_flasks_lbl: Label = $CenterContainer/Panel/Margin/VBox/Footer/FlaskCountLabel
 @onready var count_crystals_lbl: Label = $CenterContainer/Panel/Margin/VBox/Footer/CrystalCountLabel
@@ -44,6 +45,16 @@ const ARMOR_TEXTURES = {
 	"chest": preload("res://assets/sprites/armor/armor_chest.png"),
 	"arms": preload("res://assets/sprites/armor/armor_arms.png"),
 	"legs": preload("res://assets/sprites/armor/armor_legs.png")
+}
+
+const SHIELD_TEXTURES = {
+	"tier_d": preload("res://assets/sprites/items/shield/shield_tier_d.png"),
+	"tier_c": preload("res://assets/sprites/items/shield/shield_tier_c.png"),
+	"tier_b": preload("res://assets/sprites/items/shield/shield_tier_b.png"),
+	"tier_a": preload("res://assets/sprites/items/shield/shield_tier_a.png"),
+	"tier_r": preload("res://assets/sprites/items/shield/shield_tier_r.png"),
+	"tier_sr": preload("res://assets/sprites/items/shield/shield_tier_sr.png"),
+	"tier_ssr": preload("res://assets/sprites/items/shield/shield_tier_ssr.png")
 }
 
 const TIER_COLORS = {
@@ -92,7 +103,13 @@ func connect_player(player: Player) -> void:
 		player_ref.armor_changed.connect(_on_armor_changed)
 	if player_ref.has_signal("armor_equipped"):
 		player_ref.armor_equipped.connect(_on_armor_equipped)
+	if player_ref.has_signal("shield_equipped"):
+		player_ref.shield_equipped.connect(_on_shield_equipped)
 	refresh_ui()
+
+func _on_shield_equipped(_shield: Dictionary) -> void:
+	if visible:
+		refresh_ui()
 
 func _on_inventory_changed(_items: Array[Dictionary]) -> void:
 	if visible:
@@ -147,9 +164,12 @@ func refresh_ui() -> void:
 				opt_texts.append("• " + opt.get("desc", ""))
 			options_lbl.text = "Option: " + " | ".join(opt_texts)
 
-	# 2. Update Armor Equipment Section (Helmet, Chest, Arms, Legs)
+	# 2. Update Armor & Shield Equipment Section
 	if armor_total_lbl:
-		armor_total_lbl.text = "Tổng Giáp: %d / %d (Hồi đầy mỗi round)" % [round(player_ref.current_armor), round(player_ref.max_armor)]
+		var shield_txt = ""
+		if not player_ref.equipped_shield.is_empty():
+			shield_txt = " | Khiên: %d%% Chặn" % round(player_ref.block_chance * 100.0)
+		armor_total_lbl.text = "Tổng Giáp: %d/%d%s (Hồi đầy mỗi round)" % [round(player_ref.current_armor), round(player_ref.max_armor), shield_txt]
 
 	var armor_slots = {
 		"helmet": helmet_btn,
@@ -174,13 +194,32 @@ func refresh_ui() -> void:
 		else:
 			icon_rect.modulate = Color(0.3, 0.3, 0.3, 0.5)
 
+	# Hiển thị Khiên Hộ Thân đang trang bị
+	if shield_btn:
+		var s_item = player_ref.equipped_shield
+		if not s_item.is_empty():
+			var s_tier = s_item.get("tier", "tier_d")
+			shield_btn.texture = SHIELD_TEXTURES.get(s_tier, null)
+			shield_btn.modulate = TIER_COLORS.get(s_tier, Color.WHITE)
+			var s_tooltip = "%s\nMáu: +%d | Giáp: +%d | Chặn đòn: %d%%" % [
+				s_item.get("name", "Khiên"),
+				s_item.get("bonus_hp", 0),
+				s_item.get("bonus_armor", 0),
+				round(player_ref.block_chance * 100.0)
+			]
+			for opt in s_item.get("options", []):
+				s_tooltip += "\n+ " + opt.get("desc", "")
+			shield_btn.tooltip_text = s_tooltip
+		else:
+			shield_btn.modulate = Color(0.3, 0.3, 0.3, 0.5)
+
 	if count_flasks_lbl:
 		count_flasks_lbl.text = "Bình: %d/%d" % [player_ref.life_flasks, player_ref.max_flasks]
 
 	if count_crystals_lbl:
 		count_crystals_lbl.text = "Thạch: %d" % player_ref.upgrade_crystals
 
-	# 3. Populate Grid Slots (Weapons & Armors in Inventory)
+	# 3. Populate Grid Slots (Weapons, Armors, Shields in Inventory)
 	if not grid_container:
 		return
 
@@ -211,6 +250,22 @@ func refresh_ui() -> void:
 				for opt in item_data.get("options", []):
 					tooltip_lines.append("+ " + opt.get("desc", ""))
 				tooltip_lines.append("[Trái]: Mặc Giáp  |  [Phải]: Phân rã (+2 Thạch)")
+				btn.tooltip_text = "\n".join(tooltip_lines)
+			elif item_type == "shield":
+				if SHIELD_TEXTURES.has(tier):
+					btn.icon = SHIELD_TEXTURES[tier]
+					btn.expand_icon = true
+				var tooltip_lines = [
+					item_name,
+					"Máu: +%d | Giáp: +%d | Chặn: %d%%" % [
+						item_data.get("bonus_hp", 0),
+						item_data.get("bonus_armor", 0),
+						round(item_data.get("block_chance", 0.0) * 100.0)
+					]
+				]
+				for opt in item_data.get("options", []):
+					tooltip_lines.append("+ " + opt.get("desc", ""))
+				tooltip_lines.append("[Trái]: Cầm Khiên  |  [Phải]: Phân rã (+2 Thạch)")
 				btn.tooltip_text = "\n".join(tooltip_lines)
 			else:
 				if WEAPON_TEXTURES.has(tier):
@@ -243,8 +298,11 @@ func _equip_item_from_inventory(index: int) -> void:
 	if not player_ref or index < 0 or index >= player_ref.inventory.size():
 		return
 	var item_data = player_ref.inventory[index]
-	if item_data.get("type", "") == "armor":
+	var item_type = item_data.get("type", "")
+	if item_type == "armor":
 		player_ref.equip_armor_piece(item_data)
+	elif item_type == "shield":
+		player_ref.equip_shield(item_data)
 	else:
 		if player_ref.has_method("equip_weapon_dict"):
 			player_ref.equip_weapon_dict(item_data)

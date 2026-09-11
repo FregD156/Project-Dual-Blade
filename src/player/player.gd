@@ -35,6 +35,7 @@ signal crystals_changed(count: int)
 signal inventory_changed(items: Array[Dictionary])
 signal armor_changed(current_armor: float, max_armor: float)
 signal armor_equipped(equipped_armor: Dictionary)
+signal shield_equipped(shield_data: Dictionary)
 signal player_died()
 
 # ------------------------------------------------------------------------------
@@ -54,6 +55,7 @@ signal player_died()
 
 @export_group("Combat Stats")
 @export var max_hp: float = 100.0
+var base_max_hp: float = 100.0
 var current_hp: float = 100.0
 @export var base_atk: float = 12.0
 @export var crit_rate: float = 0.05
@@ -75,6 +77,11 @@ var equipped_armor: Dictionary = {
 }
 var max_armor: float = 0.0
 var current_armor: float = 0.0
+
+# Shield Equipment System (Khiên Hộ Thân)
+var equipped_shield: Dictionary = {}
+var block_chance: float = 0.0
+var shield_damage_reduction: float = 0.0
 
 # ------------------------------------------------------------------------------
 # 3. BIẾN QUẢN LÝ FSM & SKILLS
@@ -148,11 +155,12 @@ func _ready() -> void:
 	
 	equip_weapon_tier("tier_d")
 	
-	# Trang bị khởi đầu bộ giáp Bậc D
+	# Trang bị khởi đầu bộ giáp Bậc D & Khiên Gỗ Bậc D
 	equip_armor_piece(ArmorSystem.create_armor_item("helmet", "tier_d"))
 	equip_armor_piece(ArmorSystem.create_armor_item("chest", "tier_d"))
 	equip_armor_piece(ArmorSystem.create_armor_item("arms", "tier_d"))
 	equip_armor_piece(ArmorSystem.create_armor_item("legs", "tier_d"))
+	equip_shield(ShieldSystem.create_shield_item("tier_d"))
 	
 	_change_state(State.IDLE)
 	
@@ -654,7 +662,68 @@ func _on_hurtbox_hit_received(incoming_hitbox: Hitbox) -> void:
 			_on_parry_success(incoming_hitbox.owner)
 		return
 
+	# Kiểm tra Chặn Đòn từ Khiên Hộ Thân (Shield Block Chance)
+	if _try_shield_block(incoming_hitbox):
+		return
+
 	_take_damage(incoming_hitbox.damage)
+
+func _try_shield_block(incoming_hitbox: Hitbox) -> bool:
+	if equipped_shield.is_empty():
+		return false
+		
+	var effective_block = block_chance
+	# Option Thần Hộ Mệnh SSR: Nếu HP < 25% thì chặn 100%
+	for opt in equipped_shield.get("options", []):
+		if opt.get("immortal_threshold", 0.0) > 0.0 and (current_hp / max_hp) <= opt["immortal_threshold"]:
+			effective_block = 1.0
+			break
+
+	if randf() < effective_block:
+		# Kích hoạt Chặn Đòn Thành Công (BLOCK!)
+		_on_shield_block_success(incoming_hitbox)
+		return true
+		
+	return false
+
+func _on_shield_block_success(incoming_hitbox: Hitbox) -> void:
+	# 1. Spawn hiệu ứng vòm khiên phát quang (ShieldBlockVFX)
+	if get_parent():
+		var block_vfx = ShieldBlockVFX.new()
+		get_parent().add_child(block_vfx)
+		var block_pos = global_position + Vector2(facing_direction * 12.0, -14.0)
+		var tier = equipped_shield.get("tier", "tier_d")
+		var vfx_color = Color(0.1, 0.8, 1.0, 1.0) # Cobalt Blue
+		match tier:
+			"tier_sr": vfx_color = Color(1.0, 0.85, 0.2, 1.0) # Vàng kim
+			"tier_ssr": vfx_color = Color(1.0, 0.25, 0.8, 1.0) # Hồng tím Thần Thánh
+		block_vfx.setup(block_pos, facing_direction, vfx_color)
+		
+		# Hiện chữ "BLOCK!" màu xanh lam
+		var dmg_num = DamageNumber.new()
+		dmg_num.global_position = block_pos + Vector2(0, -12)
+		get_parent().add_child(dmg_num)
+		dmg_num.setup(0.0, true, Color(0.2, 0.9, 1.0, 1.0))
+		var lbl = dmg_num.get_child(0)
+		if lbl is Label:
+			lbl.text = "BLOCK!"
+
+	# 2. Khựng nhẹ và rung chấn phòng thủ
+	HitStopManager.freeze(get_tree(), 0.04, 0.04)
+	var cam: Camera2D = get_node_or_null("Camera2D")
+	if cam:
+		VFXManager.screen_shake(cam, 2.5, 0.08)
+
+	# 3. Kích hoạt hiệu ứng từ các dòng Option của Khiên
+	var opts = equipped_shield.get("options", [])
+	for opt in opts:
+		if opt.get("block_heal_armor", 0.0) > 0.0:
+			current_armor = min(max_armor, current_armor + max_armor * opt["block_heal_armor"])
+			emit_signal("armor_changed", current_armor, max_armor)
+		if opt.get("block_flow", 0) > 0:
+			add_flow(opt["block_flow"])
+		if opt.get("block_stun", false) and incoming_hitbox.owner and incoming_hitbox.owner.has_method("apply_knockback"):
+			incoming_hitbox.owner.apply_knockback(Vector2(-facing_direction, 0.0), 160.0)
 
 func _on_parry_success(enemy_node: Node) -> void:
 	hit_stop_timer = 0.1
@@ -918,6 +987,10 @@ func recalculate_armor() -> void:
 			armor_pct_bonus += opt.get("armor_pct", 0.0)
 			flat_bonus += opt.get("flat_armor", 0.0)
 			
+	# Cộng thêm giáp từ Khiên Hộ Thân
+	if not equipped_shield.is_empty():
+		total_armor += equipped_shield.get("bonus_armor", 0.0)
+
 	var prev_max = max_armor
 	max_armor = round((total_armor + flat_bonus) * (1.0 + armor_pct_bonus))
 	
@@ -939,3 +1012,42 @@ func refill_armor_after_round() -> void:
 		var tween = create_tween()
 		tween.tween_property(sprite, "modulate", Color(0.4, 0.9, 1.8, 1.0), 0.2)
 		tween.tween_property(sprite, "modulate", Color.WHITE, 0.25)
+
+# ------------------------------------------------------------------------------
+# 12. HỆ THỐNG KHIÊN HỘ THÂN (SHIELD SYSTEM & BLOCK LOGIC)
+# ------------------------------------------------------------------------------
+func equip_shield(shield_dict: Dictionary) -> void:
+	equipped_shield = shield_dict
+	recalculate_shield_stats()
+	emit_signal("shield_equipped", equipped_shield)
+
+func recalculate_shield_stats() -> void:
+	var shield_bonus_hp = 0.0
+	var shield_bonus_armor = 0.0
+	var shield_base_block = 0.0
+	var shield_dmg_reduc = 0.0
+	var bonus_block_rate = 0.0
+	var hp_pct_bonus = 0.0
+
+	if not equipped_shield.is_empty():
+		shield_bonus_hp = equipped_shield.get("bonus_hp", 0.0)
+		shield_bonus_armor = equipped_shield.get("bonus_armor", 0.0)
+		shield_base_block = equipped_shield.get("block_chance", 0.0)
+		shield_dmg_reduc = equipped_shield.get("damage_reduction", 0.0)
+		
+		for opt in equipped_shield.get("options", []):
+			bonus_block_rate += opt.get("bonus_block", 0.0)
+			hp_pct_bonus += opt.get("hp_pct", 0.0)
+
+	block_chance = clampf(shield_base_block + bonus_block_rate, 0.0, 0.85)
+	shield_damage_reduction = shield_dmg_reduc
+
+	# Cập nhật Máu Tối Đa (Max HP) được cộng thêm từ Khiên
+	var prev_max_hp = max_hp
+	max_hp = round((base_max_hp + shield_bonus_hp) * (1.0 + hp_pct_bonus))
+	if prev_max_hp != max_hp:
+		current_hp = clampf(current_hp + (max_hp - prev_max_hp), 1.0, max_hp)
+		emit_signal("hp_changed", current_hp, max_hp)
+
+	# Tái tính toán Lớp Giáp tổng
+	recalculate_armor()

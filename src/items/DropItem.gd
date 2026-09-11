@@ -36,7 +36,14 @@ const TEXTURES = {
 	"armor_helmet": preload("res://assets/sprites/armor/armor_helmet.png"),
 	"armor_chest": preload("res://assets/sprites/armor/armor_chest.png"),
 	"armor_arms": preload("res://assets/sprites/armor/armor_arms.png"),
-	"armor_legs": preload("res://assets/sprites/armor/armor_legs.png")
+	"armor_legs": preload("res://assets/sprites/armor/armor_legs.png"),
+	"shield_tier_d": preload("res://assets/sprites/items/shield/shield_tier_d.png"),
+	"shield_tier_c": preload("res://assets/sprites/items/shield/shield_tier_c.png"),
+	"shield_tier_b": preload("res://assets/sprites/items/shield/shield_tier_b.png"),
+	"shield_tier_a": preload("res://assets/sprites/items/shield/shield_tier_a.png"),
+	"shield_tier_r": preload("res://assets/sprites/items/shield/shield_tier_r.png"),
+	"shield_tier_sr": preload("res://assets/sprites/items/shield/shield_tier_sr.png"),
+	"shield_tier_ssr": preload("res://assets/sprites/items/shield/shield_tier_ssr.png")
 }
 
 const TIER_GLOW_COLORS = {
@@ -149,6 +156,14 @@ func _apply_pickup(player: Player) -> void:
 					player.equip_weapon_dict(item_data)
 				elif player.has_method("equip_weapon_tier"):
 					player.equip_weapon_tier(item_type)
+			elif item_type.begins_with("shield_"):
+				# Format: "shield_<tier>" (vd: "shield_tier_b")
+				var tier = item_type.replace("shield_", "")
+				var shield_item = ShieldSystem.create_shield_item(tier)
+				if player.has_method("add_to_inventory"):
+					player.add_to_inventory(shield_item)
+				if player.has_method("equip_shield"):
+					player.equip_shield(shield_item)
 			elif item_type.begins_with("armor_"):
 				# Format: "armor_<part>_<tier>" (vd: "armor_helmet_tier_b")
 				var tokens = item_type.replace("armor_", "").split("_")
