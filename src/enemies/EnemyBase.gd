@@ -360,46 +360,15 @@ func _spawn_loot_drops() -> void:
 			_drop_item(item_key)
 
 func _roll_equipment_tier() -> String:
-	if is_boss:
-		# Boss 1.10 rơi đồ từ B đến SSR
-		var r = randf()
-		if r < 0.20:
-			return "tier_ssr"
-		elif r < 0.55:
-			return "tier_sr"
-		elif r < 0.85:
-			return "tier_r"
-		else:
-			return "tier_a"
-	elif is_elite:
-		# Elite Mid-boss rơi C, B, A hoặc R
-		var r = randf()
-		if stage_number >= 8:
-			return "tier_r" if r < 0.25 else ("tier_a" if r < 0.65 else "tier_b")
-		else:
-			return "tier_a" if r < 0.25 else ("tier_b" if r < 0.70 else "tier_c")
+	# Yêu cầu World 1 (Ải 1.1 -> 1.10): Tỷ lệ rơi cao nhất là Tier B:
+	# D: 60%, C: 30%, B: 10%
+	var r = randf()
+	if r < 0.10:
+		return "tier_b"
+	elif r < 0.40:
+		return "tier_c"
 	else:
-		# Quái thường: Phẩm cấp tịnh tiến theo Stage
-		var r = randf()
-		if stage_number <= 3:
-			# Map 1.1 - 1.3: 75% Tier D, 25% Tier C
-			return "tier_c" if r < 0.25 else "tier_d"
-		elif stage_number <= 7:
-			# Map 1.4 - 1.7: 45% Tier D, 45% Tier C, 10% Tier B
-			if r < 0.10:
-				return "tier_b"
-			elif r < 0.55:
-				return "tier_c"
-			else:
-				return "tier_d"
-		else:
-			# Map 1.8+: 35% Tier C, 45% Tier B, 20% Tier A
-			if r < 0.20:
-				return "tier_a"
-			elif r < 0.65:
-				return "tier_b"
-			else:
-				return "tier_c"
+		return "tier_d"
 
 func _pick_smart_equipment_item(tier: String) -> String:
 	# Kiểm tra túi đồ của người chơi để kích hoạt Smart Fill
