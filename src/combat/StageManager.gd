@@ -2,17 +2,13 @@ class_name StageManager
 extends Node2D
 
 ## StageManager quản lý Vòng lặp Vượt ải (Loop Pacing & Stage Progression) theo detail.md
-## Cấu trúc: 
-## X.1 -> X.4: Quái thường khởi động (Rusty Guard, Chain Hound, Archer)
-## X.5: Quái Tinh Anh (Thủ Lĩnh Đao Phủ Quỷ - Elite Demon Executioner)
-## X.6 -> X.8: Đẩy cao độ khó (Mật độ quái dày, bắn tỉa & giáp nặng)
-## X.9: Trạm Nghỉ An Toàn (Safe Haven - Hồi máu, Rèn đồ, Bàn Thợ Rèn & Đài Tế)
-## X.10: Sàn Đấu Đại Trùm (Thống Lĩnh Thiết Vệ - Boss Ironclad Commander)
+## Hỗ trợ:
+## - World 1: Cổ Thành Hoang Tàn (The Forsaken Bastion) - Boss: Thống Lĩnh Thiết Vệ
+## - World 2: Hầm Ngục Huyết Rễ (The Crimson Catacombs) - Quái Tinh Anh: Cổ Thụ Biến Dị, Boss: Mẫu Thể Ký Sinh
 ##
 ## Phân Nhánh Phòng (Portal Choice - detail.md IV.2):
-## Sau khi dọn sạch quái ở mỗi ải thông thường, xuất hiện 2 Cánh Cổng:
-## - Cổng Đao Kiếm (Combat Portal): Mật độ quái dày hơn, có tinh anh nhỏ, tỷ lệ rơi phôi trang bị cao.
-## - Cổng Sinh Mệnh (Sustain Portal): Quái thưa hơn, bảo đảm rơi bình vỡ chứa Hạt Sinh Mệnh & Bình Máu Lớn.
+## - Cổng Đao Kiếm (Combat Portal)
+## - Cổng Sinh Mệnh (Sustain Portal)
 
 signal stage_changed(stage_str: String, stage_name: String)
 signal stage_cleared(stage_str: String)
@@ -36,19 +32,36 @@ var current_branch: RoomBranch = RoomBranch.STANDARD
 @onready var banner_label: Label = get_node_or_null("../UI_Layer/StageBanner/BannerLabel")
 @onready var banner_panel: Control = get_node_or_null("../UI_Layer/StageBanner")
 
+# Cổng dịch chuyển
 const PORTAL_SCENE = preload("res://scenes/Portal.tscn")
 const PortalScript = preload("res://src/combat/Portal.gd")
+
+# Quái World 1
 const ENEMY_GUARD = preload("res://scenes/enemies/EnemyRustyGuard.tscn")
 const ENEMY_HOUND = preload("res://scenes/enemies/EnemyChainHound.tscn")
 const ENEMY_ARCHER = preload("res://scenes/enemies/EnemyArcher.tscn")
-const ENEMY_ELITE = preload("res://scenes/enemies/EnemyEliteExecutioner.tscn")
-const ENEMY_BOSS = preload("res://scenes/enemies/EnemyBossCommander.tscn")
+const ENEMY_ELITE_W1 = preload("res://scenes/enemies/EnemyEliteExecutioner.tscn")
+const ENEMY_BOSS_W1 = preload("res://scenes/enemies/EnemyBossCommander.tscn")
+
+# Quái & Môi Trường World 2
+const ENEMY_MUSHROOM = preload("res://scenes/enemies/EnemyToxicMushroom.tscn")
+const ENEMY_SPIDER = preload("res://scenes/enemies/EnemyCrimsonSpider.tscn")
+const ENEMY_ELITE_TREE = preload("res://scenes/enemies/EnemyEliteTree.tscn")
+const ENEMY_BOSS_BROODMOTHER = preload("res://scenes/enemies/EnemyBossBroodmother.tscn")
+const BOUNCY_MUSHROOM_SCENE = preload("res://scenes/environment/BouncyMushroom.tscn")
+const TOXIC_ACID_SCENE = preload("res://scenes/environment/ToxicAcidPool.tscn")
+
+# Texture Background World 1 & 2
+const BG_WORLD_1 = preload("res://assets/sprites/environment/world1_bastion_bg.png")
+const BG_WORLD_2 = preload("res://assets/sprites/environment/world2_catacombs_bg.png")
+
 const SAFE_ALTAR = preload("res://scenes/SafeHavenAltar.tscn")
 const DROP_ITEM_SCENE = preload("res://scenes/DropItem.tscn")
 
 var active_enemies: Array[EnemyBase] = []
 var active_altar: Node2D = null
 var active_portals: Array[Node2D] = []
+var active_hazards: Array[Node2D] = []
 var stage_in_progress: bool = false
 var enemies_to_spawn: int = 0
 
@@ -65,21 +78,32 @@ func start_stage(world_idx: int, stage_idx: int, branch: RoomBranch = RoomBranch
 	current_branch = branch
 	stage_in_progress = true
 	
-	# Đặt lại vị trí người chơi về điểm xuất phát bên trái
+	_update_environment_theme()
 	_reposition_player()
 	
 	_clear_portals()
+	_clear_hazards()
+
 	if portal_node and is_instance_valid(portal_node):
 		portal_node.visible = false
 		portal_node.set_deferred("monitoring", false)
 		
 	var stage_str = "%d.%d" % [current_world, current_stage]
-	var title = _get_stage_title(current_stage, current_branch)
+	var title = _get_stage_title(current_world, current_stage, current_branch)
 	
 	_show_banner(stage_str + ": " + title)
 	stage_changed.emit(stage_str, title)
 	
-	_spawn_stage_wave(current_stage, current_branch)
+	_spawn_stage_wave(current_world, current_stage, current_branch)
+
+func _update_environment_theme() -> void:
+	# Cập nhật hình nền ParallaxBackground tùy theo World
+	var par_bg = get_node_or_null("../ParallaxBackground/ParallaxLayer")
+	if par_bg:
+		var target_tex = BG_WORLD_2 if current_world == 2 else BG_WORLD_1
+		for child in par_bg.get_children():
+			if child is Sprite2D:
+				child.texture = target_tex
 
 func _reposition_player() -> void:
 	if not entities_node:
@@ -97,13 +121,28 @@ func _reposition_player() -> void:
 		if player.has_method("refill_armor_after_round"):
 			player.refill_armor_after_round()
 
-func _get_stage_title(stage: int, branch: RoomBranch = RoomBranch.STANDARD) -> String:
+func _get_stage_title(world: int, stage: int, branch: RoomBranch = RoomBranch.STANDARD) -> String:
 	var branch_suffix = ""
 	if branch == RoomBranch.COMBAT:
 		branch_suffix = " [⚔ Đao Kiếm]"
 	elif branch == RoomBranch.SUSTAIN:
 		branch_suffix = " [❤ Sinh Mệnh]"
 
+	if world == 2:
+		match stage:
+			1: return "Cống Ngầm Huyết Rễ" + branch_suffix
+			2: return "Mê Cung Bào Tử" + branch_suffix
+			3: return "Vực Nấm Gai Độc" + branch_suffix
+			4: return "Hang Ổ Ký Sinh" + branch_suffix
+			5: return "QUÁI TINH ANH - Cổ Thụ Biến Dị"
+			6: return "Địa Ngục Rễ Cây" + branch_suffix
+			7: return "Vũng Axit Ăn Mòn" + branch_suffix
+			8: return "Tử Địa Mạng Nhện" + branch_suffix
+			9: return "TRẠM NGHỈ AN TOÀN (Thầy Lang Điên & Lão Thợ Rèn)"
+			10: return "ĐẠI TRÙM - Mẫu Thể Ký Sinh"
+			_: return "Hầm Ngục Huyết Rễ" + branch_suffix
+
+	# World 1
 	match stage:
 		1: return "Cổ Thành Khởi Đầu" + branch_suffix
 		2: return "Tiền Tuyến Bị Phá Hủy" + branch_suffix
@@ -128,7 +167,13 @@ func _show_banner(text: String) -> void:
 		tween.tween_property(banner_panel, "modulate:a", 0.0, 0.4)
 		tween.tween_callback(func(): banner_panel.visible = false)
 
-func _spawn_stage_wave(stage: int, branch: RoomBranch) -> void:
+func _clear_hazards() -> void:
+	for h in active_hazards:
+		if is_instance_valid(h):
+			h.queue_free()
+	active_hazards.clear()
+
+func _spawn_stage_wave(world: int, stage: int, branch: RoomBranch) -> void:
 	# Clear previous enemies
 	for e in active_enemies:
 		if is_instance_valid(e):
@@ -149,6 +194,147 @@ func _spawn_stage_wave(stage: int, branch: RoomBranch) -> void:
 		_on_wave_cleared()
 		return
 
+	var spawn_list = []
+	if world == 2:
+		spawn_list = _get_world2_spawns(stage, branch)
+		_spawn_world2_hazards(stage)
+	else:
+		spawn_list = _get_world1_spawns(stage, branch)
+
+	for item in spawn_list:
+		var scn: PackedScene = item["scene"]
+		var pos: Vector2 = item["pos"]
+		var enemy: EnemyBase = scn.instantiate()
+		enemy.global_position = pos
+		enemy.stage_number = current_stage
+		enemy.is_combat_room = (branch == RoomBranch.COMBAT)
+		enemy.died.connect(_on_enemy_died)
+		
+		# Kết nối thanh máu Boss nếu là boss
+		if enemy is EnemyBossCommander or enemy is EnemyBossBroodmother:
+			var ui = get_node_or_null("../UI_Layer")
+			if ui and ui.has_method("bind_boss"):
+				ui.bind_boss(enemy)
+				
+		entities_node.add_child(enemy)
+		active_enemies.append(enemy)
+
+	# Nếu là phòng Sustain (Sinh Mệnh): Chắc chắn sinh ra bình chứa Hạt Sinh Mệnh & Bình Máu Lớn
+	if branch == RoomBranch.SUSTAIN and DROP_ITEM_SCENE and entities_node:
+		call_deferred("_spawn_sustain_room_caches")
+
+func _spawn_world2_hazards(stage: int) -> void:
+	if not entities_node:
+		return
+		
+	# Spawn búp nấm nảy (Bouncy Mushroom) để người chơi leo bục né bẫy
+	if stage in [2, 3, 4, 6, 7]:
+		var shroom = BOUNCY_MUSHROOM_SCENE.instantiate()
+		shroom.position = Vector2(720, 192)
+		entities_node.add_child(shroom)
+		active_hazards.append(shroom)
+
+	# Spawn vũng Axit ăn mòn (Toxic Acid Pool) ở các ải nguy hiểm
+	if stage in [3, 7, 8]:
+		var acid = TOXIC_ACID_SCENE.instantiate()
+		acid.position = Vector2(520, 192)
+		entities_node.add_child(acid)
+		active_hazards.append(acid)
+
+func _get_world2_spawns(stage: int, branch: RoomBranch) -> Array:
+	var spawn_list = []
+	match stage:
+		1:
+			spawn_list = [
+				{"scene": ENEMY_MUSHROOM, "pos": Vector2(420, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(680, 192)}
+			]
+		2:
+			if branch == RoomBranch.COMBAT:
+				spawn_list = [
+					{"scene": ENEMY_MUSHROOM, "pos": Vector2(380, 192)},
+					{"scene": ENEMY_MUSHROOM, "pos": Vector2(580, 192)},
+					{"scene": ENEMY_SPIDER, "pos": Vector2(750, 192)},
+					{"scene": ENEMY_SPIDER, "pos": Vector2(920, 192)},
+					{"scene": ENEMY_ARCHER, "pos": Vector2(850, 108)}
+				]
+			elif branch == RoomBranch.SUSTAIN:
+				spawn_list = [
+					{"scene": ENEMY_MUSHROOM, "pos": Vector2(450, 192)},
+					{"scene": ENEMY_SPIDER, "pos": Vector2(750, 192)}
+				]
+			else:
+				spawn_list = [
+					{"scene": ENEMY_MUSHROOM, "pos": Vector2(400, 192)},
+					{"scene": ENEMY_SPIDER, "pos": Vector2(650, 192)},
+					{"scene": ENEMY_ARCHER, "pos": Vector2(850, 108)}
+				]
+		3:
+			if branch == RoomBranch.COMBAT:
+				spawn_list = [
+					{"scene": ENEMY_SPIDER, "pos": Vector2(380, 192)},
+					{"scene": ENEMY_SPIDER, "pos": Vector2(560, 192)},
+					{"scene": ENEMY_MUSHROOM, "pos": Vector2(740, 192)},
+					{"scene": ENEMY_MUSHROOM, "pos": Vector2(920, 192)},
+					{"scene": ENEMY_ARCHER, "pos": Vector2(850, 108)},
+					{"scene": ENEMY_ARCHER, "pos": Vector2(1100, 108)}
+				]
+			elif branch == RoomBranch.SUSTAIN:
+				spawn_list = [
+					{"scene": ENEMY_SPIDER, "pos": Vector2(480, 192)},
+					{"scene": ENEMY_MUSHROOM, "pos": Vector2(800, 192)}
+				]
+			else:
+				spawn_list = [
+					{"scene": ENEMY_SPIDER, "pos": Vector2(420, 192)},
+					{"scene": ENEMY_MUSHROOM, "pos": Vector2(640, 192)},
+					{"scene": ENEMY_SPIDER, "pos": Vector2(860, 192)}
+				]
+		4:
+			spawn_list = [
+				{"scene": ENEMY_MUSHROOM, "pos": Vector2(400, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(600, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(800, 192)},
+				{"scene": ENEMY_ARCHER, "pos": Vector2(950, 108)}
+			]
+		5:
+			# Quái Tinh Anh 2.5: Cổ Thụ Biến Dị
+			spawn_list = [
+				{"scene": ENEMY_ELITE_TREE, "pos": Vector2(780, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(450, 192)},
+				{"scene": ENEMY_MUSHROOM, "pos": Vector2(980, 192)}
+			]
+		6:
+			spawn_list = [
+				{"scene": ENEMY_MUSHROOM, "pos": Vector2(420, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(640, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(850, 192)},
+				{"scene": ENEMY_ARCHER, "pos": Vector2(1050, 108)}
+			]
+		7:
+			spawn_list = [
+				{"scene": ENEMY_SPIDER, "pos": Vector2(450, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(680, 192)},
+				{"scene": ENEMY_MUSHROOM, "pos": Vector2(880, 192)},
+				{"scene": ENEMY_ARCHER, "pos": Vector2(1100, 108)}
+			]
+		8:
+			# Đẩy cao độ khó trước boss
+			spawn_list = [
+				{"scene": ENEMY_ELITE_TREE, "pos": Vector2(720, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(500, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(920, 192)},
+				{"scene": ENEMY_ARCHER, "pos": Vector2(1150, 108)}
+			]
+		10:
+			# Đại Trùm Cuối World 2 (2.10): Mẫu Thể Ký Sinh
+			spawn_list = [
+				{"scene": ENEMY_BOSS_BROODMOTHER, "pos": Vector2(880, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(1150, 192)}
+			]
+	return spawn_list
+
+func _get_world1_spawns(stage: int, branch: RoomBranch) -> Array:
 	var spawn_list = []
 	match stage:
 		1:
@@ -224,7 +410,7 @@ func _spawn_stage_wave(stage: int, branch: RoomBranch) -> void:
 		5:
 			# Elite Mid-boss (1.5)
 			spawn_list = [
-				{"scene": ENEMY_ELITE, "pos": Vector2(750, 192)},
+				{"scene": ENEMY_ELITE_W1, "pos": Vector2(750, 192)},
 				{"scene": ENEMY_ARCHER, "pos": Vector2(950, 108)},
 				{"scene": ENEMY_GUARD, "pos": Vector2(550, 192)}
 			]
@@ -277,7 +463,7 @@ func _spawn_stage_wave(stage: int, branch: RoomBranch) -> void:
 		8:
 			if branch == RoomBranch.COMBAT:
 				spawn_list = [
-					{"scene": ENEMY_ELITE, "pos": Vector2(700, 192)},
+					{"scene": ENEMY_ELITE_W1, "pos": Vector2(700, 192)},
 					{"scene": ENEMY_HOUND, "pos": Vector2(450, 192)},
 					{"scene": ENEMY_GUARD, "pos": Vector2(550, 192)},
 					{"scene": ENEMY_ARCHER, "pos": Vector2(950, 108)},
@@ -291,7 +477,7 @@ func _spawn_stage_wave(stage: int, branch: RoomBranch) -> void:
 				]
 			else:
 				spawn_list = [
-					{"scene": ENEMY_ELITE, "pos": Vector2(700, 192)},
+					{"scene": ENEMY_ELITE_W1, "pos": Vector2(700, 192)},
 					{"scene": ENEMY_HOUND, "pos": Vector2(500, 192)},
 					{"scene": ENEMY_ARCHER, "pos": Vector2(950, 108)},
 					{"scene": ENEMY_ARCHER, "pos": Vector2(1150, 108)}
@@ -299,31 +485,10 @@ func _spawn_stage_wave(stage: int, branch: RoomBranch) -> void:
 		10:
 			# Đại Trùm Cuối World 1 (1.10)
 			spawn_list = [
-				{"scene": ENEMY_BOSS, "pos": Vector2(900, 192)},
+				{"scene": ENEMY_BOSS_W1, "pos": Vector2(900, 192)},
 				{"scene": ENEMY_ARCHER, "pos": Vector2(1200, 108)}
 			]
-
-	for item in spawn_list:
-		var scn: PackedScene = item["scene"]
-		var pos: Vector2 = item["pos"]
-		var enemy: EnemyBase = scn.instantiate()
-		enemy.global_position = pos
-		enemy.stage_number = current_stage
-		enemy.is_combat_room = (branch == RoomBranch.COMBAT)
-		enemy.died.connect(_on_enemy_died)
-		
-		# Kết nối thanh máu Boss nếu là boss
-		if enemy is EnemyBossCommander:
-			var ui = get_node_or_null("../UI_Layer")
-			if ui and ui.has_method("bind_boss"):
-				ui.bind_boss(enemy)
-				
-		entities_node.add_child(enemy)
-		active_enemies.append(enemy)
-
-	# Nếu là phòng Sustain (Sinh Mệnh): Chắc chắn sinh ra bình chứa Hạt Sinh Mệnh & Bình Máu Lớn
-	if branch == RoomBranch.SUSTAIN and DROP_ITEM_SCENE and entities_node:
-		call_deferred("_spawn_sustain_room_caches")
+	return spawn_list
 
 func _spawn_sustain_room_caches() -> void:
 	# Sinh bình chứa hồi phục tại các vị trí an toàn trên sàn/bục
@@ -369,7 +534,7 @@ func _open_portals() -> void:
 	
 	var parent_node = world_node if world_node else self
 	
-	# Các ải đặc biệt (1.4 trước quái tinh anh 1.5, 1.8 trước trạm nghỉ 1.9, 1.9 trước Boss 1.10)
+	# Các ải đặc biệt (X.4 trước quái tinh anh X.5, X.8 trước trạm nghỉ X.9, X.9 trước Boss X.10, và Boss X.10 sang World sau)
 	# chỉ mở 1 Cổng Tiến Bước duy nhất
 	if current_stage in [4, 8, 9, 10]:
 		var p = PORTAL_SCENE.instantiate()
@@ -381,7 +546,7 @@ func _open_portals() -> void:
 		active_portals.append(p)
 		return
 
-	# Các ải thông thường (1.1, 1.2, 1.3, 1.6, 1.7):
+	# Các ải thông thường (X.1, X.2, X.3, X.6, X.7):
 	# Xuất hiện 2 cánh cổng: Cổng Đao Kiếm & Cổng Sinh Mệnh
 	var p_combat = PORTAL_SCENE.instantiate()
 	parent_node.add_child(p_combat)
@@ -412,8 +577,13 @@ func next_stage(branch: RoomBranch = RoomBranch.STANDARD) -> void:
 	if current_stage < 10:
 		start_stage(current_world, current_stage + 1, branch)
 	else:
-		# Kết thúc vòng lặp World 1, lặp lại với độ khó tăng (New Game+ / World tiếp theo)
-		_show_banner("CHÚC MỪNG BẠN ĐÃ ĐÁNH BẠI ĐẠI TRÙM THẾ GIỚI 1!")
-		all_stages_completed.emit()
-		await get_tree().create_timer(3.0).timeout
-		start_stage(1, 1, RoomBranch.STANDARD)
+		# Đánh bại Boss 10 của World hiện tại -> Chuyển sang World tiếp theo!
+		if current_world == 1:
+			_show_banner("VƯỢT THÀNH CÔNG THẾ GIỚI 1! TIẾN VÀO HẦM NGỤC HUYẾT RỄ (WORLD 2)!")
+			await get_tree().create_timer(3.0).timeout
+			start_stage(2, 1, RoomBranch.STANDARD)
+		elif current_world == 2:
+			_show_banner("CHÚC MỪNG BẠN ĐÃ TIÊU DIỆT MẪU THỂ KÝ SINH!")
+			all_stages_completed.emit()
+			await get_tree().create_timer(3.0).timeout
+			start_stage(1, 1, RoomBranch.STANDARD) # Loop lại New Game+

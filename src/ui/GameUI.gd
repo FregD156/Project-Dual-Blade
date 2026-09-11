@@ -95,13 +95,15 @@ func connect_player(player: Player) -> void:
 				inv.toggle_inventory()
 		)
 
-func bind_boss(boss: EnemyBossCommander) -> void:
+func bind_boss(boss: EnemyBase) -> void:
 	if not boss:
 		return
 	if boss_bar_container:
 		boss_bar_container.visible = true
-	boss.boss_hp_updated.connect(_on_boss_hp_updated)
-	boss.boss_defeated.connect(_on_boss_defeated)
+	if boss.has_signal("boss_hp_updated"):
+		boss.boss_hp_updated.connect(_on_boss_hp_updated)
+	if boss.has_signal("boss_defeated"):
+		boss.boss_defeated.connect(_on_boss_defeated)
 	_on_boss_hp_updated(boss.current_hp, boss.max_hp, boss.enemy_name)
 
 func _on_boss_hp_updated(current: float, maximum: float, boss_name: String) -> void:
