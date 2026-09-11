@@ -26,6 +26,7 @@ extends Control
 
 @onready var count_flasks_lbl: Label = $CenterContainer/Panel/Margin/VBox/Footer/FlaskCountLabel
 @onready var count_crystals_lbl: Label = $CenterContainer/Panel/Margin/VBox/Footer/CrystalCountLabel
+@onready var merge_btn: Button = get_node_or_null("CenterContainer/Panel/Margin/VBox/Footer/MergeBtn")
 @onready var close_btn: Button = $CenterContainer/Panel/Margin/VBox/Header/CloseBtn
 
 var player_ref: Player = null
@@ -72,6 +73,30 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	if close_btn:
 		close_btn.pressed.connect(toggle_inventory)
+	if merge_btn:
+		merge_btn.pressed.connect(_on_merge_pressed)
+
+func _on_merge_pressed() -> void:
+	if not player_ref:
+		return
+	if player_ref.has_method("check_and_merge_inventory"):
+		var merged = player_ref.check_and_merge_inventory()
+		refresh_ui()
+		# Nút nhấp nháy phản hồi
+		if merge_btn:
+			var tw = create_tween()
+			if merged.size() > 0:
+				merge_btn.text = "THÀNH CÔNG!"
+				tw.tween_property(merge_btn, "modulate", Color(0.2, 1.0, 0.4), 0.15)
+				tw.tween_interval(0.6)
+				tw.tween_property(merge_btn, "modulate", Color.WHITE, 0.2)
+				tw.tween_callback(func(): if merge_btn: merge_btn.text = "GHÉP (5x)")
+			else:
+				merge_btn.text = "KHÔNG ĐỦ 5"
+				tw.tween_property(merge_btn, "modulate", Color(1.0, 0.4, 0.4), 0.15)
+				tw.tween_interval(0.6)
+				tw.tween_property(merge_btn, "modulate", Color.WHITE, 0.2)
+				tw.tween_callback(func(): if merge_btn: merge_btn.text = "GHÉP (5x)")
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:

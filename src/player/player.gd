@@ -36,6 +36,7 @@ signal inventory_changed(items: Array[Dictionary])
 signal armor_changed(current_armor: float, max_armor: float)
 signal armor_equipped(equipped_armor: Dictionary)
 signal shield_equipped(shield_data: Dictionary)
+signal items_merged(merged_items: Array[Dictionary])
 signal player_died()
 
 # ------------------------------------------------------------------------------
@@ -965,7 +966,50 @@ func _play_equip_vfx(tier: String) -> void:
 
 func add_to_inventory(item_dict: Dictionary) -> void:
 	inventory.append(item_dict)
+	check_and_merge_inventory()
 	emit_signal("inventory_changed", inventory)
+
+func check_and_merge_inventory() -> Array[Dictionary]:
+	var merged_items = MergeSystem.perform_merge(inventory)
+	if merged_items.size() > 0:
+		emit_signal("items_merged", merged_items)
+		emit_signal("inventory_changed", inventory)
+		_play_merge_notification_vfx(merged_items)
+	return merged_items
+
+func _play_merge_notification_vfx(merged_items: Array[Dictionary]) -> void:
+	for item in merged_items:
+		var tier = item.get("tier", "tier_c")
+		var item_name = item.get("name", "Trang Bị")
+		var tier_str = tier.replace("tier_", "").to_upper()
+		
+		# Hiển thị thông báo Floating Text rực rỡ trên đầu nhân vật
+		if get_parent():
+			var dmg_num = DamageNumber.new()
+			dmg_num.global_position = global_position + Vector2(0, -32 - randf_range(0, 15))
+			var tier_colors = {
+				"tier_c": Color(1.0, 1.0, 1.0),
+				"tier_b": Color(0.2, 1.0, 0.3),
+				"tier_a": Color(0.2, 0.6, 1.0),
+				"tier_r": Color(0.8, 0.3, 1.0),
+				"tier_sr": Color(1.0, 0.85, 0.2),
+				"tier_ssr": Color(1.0, 0.3, 0.8)
+			}
+			var col = tier_colors.get(tier, Color(1.0, 0.9, 0.3))
+			dmg_num.setup(0, false, col)
+			# Gán nhãn text hiển thị thông báo ghép thành công
+			for child in dmg_num.get_children():
+				if child is Label:
+					child.text = "GHÉP THÀNH CÔNG: %s!" % item_name
+					child.custom_minimum_size = Vector2(160, 20)
+					child.position = Vector2(-80, -10)
+			get_parent().call_deferred("add_child", dmg_num)
+			
+		# Hiệu ứng ánh hào quang loé sáng trên người Player
+		if sprite:
+			var tw = create_tween()
+			tw.tween_property(sprite, "modulate", Color(2.0, 2.0, 0.5, 1.0), 0.12)
+			tw.tween_property(sprite, "modulate", Color.WHITE, 0.2)
 
 func salvage_weapon(index: int) -> bool:
 	if index < 0 or index >= inventory.size():
