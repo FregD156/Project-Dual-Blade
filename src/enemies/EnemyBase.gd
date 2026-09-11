@@ -19,6 +19,7 @@ enum State { IDLE, PATROL, CHASE, WINDUP, ATTACK, HURT, DEAD }
 @export var is_elite: bool = false
 @export var is_boss: bool = false
 @export var stage_number: int = 1
+@export var is_combat_room: bool = false
 
 @export_group("Stats")
 @export var max_hp: float = 80.0
@@ -339,12 +340,18 @@ func _spawn_loot_drops() -> void:
 	#    - Quái thường: 45% rơi đồ (1 món)
 	#    - Elite: 100% rơi (2 món)
 	#    - Boss: 100% rơi (3 - 4 món)
+	# Trong Cổng Đao Kiếm (Combat Portal): Quái rớt nhiều phôi trang bị và quặng hơn (detail.md IV.2)
 	var equip_chance = 0.45 if not is_elite else 1.0
 	var drop_count = 1
+	if is_combat_room:
+		equip_chance = 0.70 if not is_elite else 1.0
+		if randf() < 0.35 and not is_elite:
+			drop_count = 2
+
 	if is_boss:
 		drop_count = randi_range(3, 4)
 	elif is_elite:
-		drop_count = 2
+		drop_count = 3 if is_combat_room else 2
 
 	if randf() < equip_chance:
 		for i in range(drop_count):
