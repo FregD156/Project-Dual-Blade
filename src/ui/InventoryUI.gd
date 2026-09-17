@@ -139,19 +139,19 @@ func connect_player(player: Player) -> void:
 	player_ref = player
 	if not player_ref:
 		return
-	if player_ref.has_signal("inventory_changed"):
+	if player_ref.has_signal("inventory_changed") and not player_ref.inventory_changed.is_connected(_on_inventory_changed):
 		player_ref.inventory_changed.connect(_on_inventory_changed)
-	if player_ref.has_signal("weapon_equipped"):
+	if player_ref.has_signal("weapon_equipped") and not player_ref.weapon_equipped.is_connected(_on_weapon_equipped):
 		player_ref.weapon_equipped.connect(_on_weapon_equipped)
-	if player_ref.has_signal("flasks_changed"):
+	if player_ref.has_signal("flasks_changed") and not player_ref.flasks_changed.is_connected(_on_flasks_changed):
 		player_ref.flasks_changed.connect(_on_flasks_changed)
-	if player_ref.has_signal("crystals_changed"):
+	if player_ref.has_signal("crystals_changed") and not player_ref.crystals_changed.is_connected(_on_crystals_changed):
 		player_ref.crystals_changed.connect(_on_crystals_changed)
-	if player_ref.has_signal("armor_changed"):
+	if player_ref.has_signal("armor_changed") and not player_ref.armor_changed.is_connected(_on_armor_changed):
 		player_ref.armor_changed.connect(_on_armor_changed)
-	if player_ref.has_signal("armor_equipped"):
+	if player_ref.has_signal("armor_equipped") and not player_ref.armor_equipped.is_connected(_on_armor_equipped):
 		player_ref.armor_equipped.connect(_on_armor_equipped)
-	if player_ref.has_signal("shield_equipped"):
+	if player_ref.has_signal("shield_equipped") and not player_ref.shield_equipped.is_connected(_on_shield_equipped):
 		player_ref.shield_equipped.connect(_on_shield_equipped)
 	refresh_ui()
 
