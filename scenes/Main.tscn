@@ -379,6 +379,18 @@ custom_minimum_size = Vector2(110, 18)
 layout_mode = 2
 mouse_filter = 2
 
+[node name="GothicFrame" type="TextureRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel"]
+z_index = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("13_flow_frame")
+expand_mode = 1
+
 [node name="Border" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel"]
 layout_mode = 1
 anchors_preset = 15
@@ -476,17 +488,6 @@ theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 7
 text = ""
 vertical_alignment = 1
-
-[node name="GothicFrame" type="TextureRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("13_flow_frame")
-expand_mode = 1
 
 [node name="WeaponPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
 custom_minimum_size = Vector2(100, 18)
