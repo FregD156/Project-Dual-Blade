@@ -328,13 +328,13 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 			var cell = flow_cells[i]
 			if i < stacks:
 				cell.color = Color(0.0, 0.95, 1.0, 1.0) # Cyan ngọc bích
-				# Hiệu ứng nạp khí: Ô mới kích hoạt nở to bừng sáng (Pop & Bloom)
+				# Hiệu ứng nạp khí: Ô mới kích hoạt bừng sáng và nở nhẹ tự nhiên
 				if gained_flow and i == stacks - 1:
 					var tw_pop = create_tween()
-					tw_pop.tween_property(cell, "scale", Vector2(1.5, 1.5), 0.06)
-					tw_pop.tween_property(cell, "modulate", Color(3.0, 3.0, 3.5, 1.0), 0.06)
-					tw_pop.tween_property(cell, "scale", Vector2.ONE, 0.12)
-					tw_pop.tween_property(cell, "modulate", Color.WHITE, 0.12)
+					tw_pop.tween_property(cell, "scale", Vector2(1.15, 1.15), 0.08)
+					tw_pop.tween_property(cell, "modulate", Color(2.5, 2.5, 3.0, 1.0), 0.08)
+					tw_pop.tween_property(cell, "scale", Vector2.ONE, 0.14)
+					tw_pop.tween_property(cell, "modulate", Color.WHITE, 0.14)
 			else:
 				cell.color = Color(0.08, 0.12, 0.18, 0.45)
 
