@@ -53,8 +53,8 @@ extends CanvasLayer
 @onready var boss_hp_fill: ColorRect = get_node_or_null("BossBarContainer/VBox/BarBorder/Background/Fill")
 @onready var boss_hp_catchup: ColorRect = get_node_or_null("BossBarContainer/VBox/BarBorder/Background/Catchup")
 
-const HP_BAR_MAX_WIDTH: float = 116.0
-const ARMOR_BAR_MAX_WIDTH: float = 116.0
+const HP_BAR_MAX_WIDTH: float = 94.0
+const ARMOR_BAR_MAX_WIDTH: float = 94.0
 const BOSS_BAR_MAX_WIDTH: float = 236.0
 
 var catchup_tween: Tween = null
@@ -328,13 +328,13 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 			var cell = flow_cells[i]
 			if i < stacks:
 				cell.color = Color(0.0, 0.95, 1.0, 1.0) # Cyan ngọc bích
-				# Hiệu ứng nạp khí: Ô mới kích hoạt nở to bừng sáng (Pop & Bloom)
+				# Hiệu ứng nạp khí: Ô mới kích hoạt bừng sáng và nở nhẹ tự nhiên
 				if gained_flow and i == stacks - 1:
 					var tw_pop = create_tween()
-					tw_pop.tween_property(cell, "scale", Vector2(1.5, 1.5), 0.06)
-					tw_pop.tween_property(cell, "modulate", Color(3.0, 3.0, 3.5, 1.0), 0.06)
-					tw_pop.tween_property(cell, "scale", Vector2.ONE, 0.12)
-					tw_pop.tween_property(cell, "modulate", Color.WHITE, 0.12)
+					tw_pop.tween_property(cell, "scale", Vector2(1.12, 1.12), 0.08)
+					tw_pop.tween_property(cell, "modulate", Color(2.5, 2.5, 3.0, 1.0), 0.08)
+					tw_pop.tween_property(cell, "scale", Vector2.ONE, 0.14)
+					tw_pop.tween_property(cell, "modulate", Color.WHITE, 0.14)
 			else:
 				cell.color = Color(0.08, 0.12, 0.18, 0.45)
 
@@ -345,9 +345,6 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 		tw_ff.tween_property(flow_frame, "modulate", Color.WHITE, 0.18)
 
 	if is_full:
-		if flow_title:
-			flow_title.text = "⚡ XUẤT QUỶ!"
-			flow_title.modulate = Color(1.0, 0.9, 0.2)
 		if not pulse_tween or not pulse_tween.is_valid():
 			pulse_tween = create_tween().set_loops()
 			# Hiệu ứng cầu vồng ma thuật xung nhịp toàn bộ 5 ô ngọc và khung Flow
@@ -366,6 +363,3 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 			cell.modulate = Color(1.0, 1.0, 1.0, 1.0)
 		if flow_frame:
 			flow_frame.modulate = Color.WHITE
-		if flow_title:
-			flow_title.text = "FLOW"
-			flow_title.modulate = Color(0.0, 0.9, 1.0, 1.0)
