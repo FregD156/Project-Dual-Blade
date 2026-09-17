@@ -433,45 +433,47 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 41.0
-offset_top = 3.0
-offset_right = -3.0
-offset_bottom = -3.0
+offset_left = 5.0
+offset_top = 2.0
+offset_right = -5.0
+offset_bottom = -2.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 2
+theme_override_constants/separation = 4
+alignment = 1
 
 [node name="Cell1" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(11, 18)
+custom_minimum_size = Vector2(16, 22)
 layout_mode = 2
-pivot_offset = Vector2(5.5, 9)
+pivot_offset = Vector2(8, 11)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell2" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(11, 18)
+custom_minimum_size = Vector2(16, 22)
 layout_mode = 2
-pivot_offset = Vector2(5.5, 9)
+pivot_offset = Vector2(8, 11)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell3" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(11, 18)
+custom_minimum_size = Vector2(16, 22)
 layout_mode = 2
-pivot_offset = Vector2(5.5, 9)
+pivot_offset = Vector2(8, 11)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell4" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(11, 18)
+custom_minimum_size = Vector2(16, 22)
 layout_mode = 2
-pivot_offset = Vector2(5.5, 9)
+pivot_offset = Vector2(8, 11)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell5" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(11, 18)
+custom_minimum_size = Vector2(16, 22)
 layout_mode = 2
-pivot_offset = Vector2(5.5, 9)
+pivot_offset = Vector2(8, 11)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="FlowTitle" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border"]
+visible = false
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
@@ -483,7 +485,7 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 7
-text = "FLOW"
+text = ""
 vertical_alignment = 1
 
 [node name="WeaponPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
