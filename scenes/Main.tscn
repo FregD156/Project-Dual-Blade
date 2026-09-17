@@ -247,12 +247,16 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 3.0
+offset_right = -4.0
+offset_bottom = -3.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 1
 
 [node name="HPBar" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox"]
-custom_minimum_size = Vector2(116, 10)
+custom_minimum_size = Vector2(112, 11)
 layout_mode = 2
 mouse_filter = 2
 
@@ -267,21 +271,21 @@ color = Color(0.18, 0.04, 0.06, 1)
 
 [node name="CatchupFill" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background"]
 layout_mode = 0
-offset_right = 116.0
-offset_bottom = 10.0
+offset_right = 112.0
+offset_bottom = 11.0
 color = Color(0.95, 0.8, 0.2, 1)
 
 [node name="Fill" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background"]
 layout_mode = 0
-offset_right = 116.0
-offset_bottom = 10.0
+offset_right = 112.0
+offset_bottom = 11.0
 color = Color(0.88, 0.18, 0.25, 1)
 
 [node name="Shimmer" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 0
 offset_right = 16.0
-offset_bottom = 10.0
+offset_bottom = 11.0
 color = Color(1, 1, 1, 0.6)
 
 [node name="HPText" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar"]
@@ -300,7 +304,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ArmorBar" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox"]
-custom_minimum_size = Vector2(116, 7)
+custom_minimum_size = Vector2(112, 10)
 layout_mode = 2
 mouse_filter = 2
 
@@ -315,21 +319,21 @@ color = Color(0.04, 0.08, 0.14, 1)
 
 [node name="CatchupFill" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background"]
 layout_mode = 0
-offset_right = 116.0
-offset_bottom = 7.0
+offset_right = 112.0
+offset_bottom = 10.0
 color = Color(0.75, 0.95, 1, 0.6)
 
 [node name="Fill" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background"]
 layout_mode = 0
-offset_right = 116.0
-offset_bottom = 7.0
+offset_right = 112.0
+offset_bottom = 10.0
 color = Color(0.15, 0.75, 0.95, 1)
 
 [node name="Shimmer" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 0
 offset_right = 12.0
-offset_bottom = 7.0
+offset_bottom = 10.0
 color = Color(1, 1, 1, 0.6)
 
 [node name="ArmorText" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar"]
@@ -353,10 +357,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -3.0
-offset_top = -2.0
-offset_right = 3.0
-offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -422,49 +422,49 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 40.0
+offset_left = 41.0
 offset_top = 3.0
-offset_right = -4.0
+offset_right = -3.0
 offset_bottom = -3.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 2
 
 [node name="Cell1" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(9, 8)
+custom_minimum_size = Vector2(11, 18)
 layout_mode = 2
-pivot_offset = Vector2(4.5, 4)
+pivot_offset = Vector2(5.5, 9)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell2" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(9, 8)
+custom_minimum_size = Vector2(11, 18)
 layout_mode = 2
-pivot_offset = Vector2(4.5, 4)
+pivot_offset = Vector2(5.5, 9)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell3" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(9, 8)
+custom_minimum_size = Vector2(11, 18)
 layout_mode = 2
-pivot_offset = Vector2(4.5, 4)
+pivot_offset = Vector2(5.5, 9)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell4" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(9, 8)
+custom_minimum_size = Vector2(11, 18)
 layout_mode = 2
-pivot_offset = Vector2(4.5, 4)
+pivot_offset = Vector2(5.5, 9)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="Cell5" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border/Background/FlowContainer"]
-custom_minimum_size = Vector2(9, 8)
+custom_minimum_size = Vector2(11, 18)
 layout_mode = 2
-pivot_offset = Vector2(4.5, 4)
+pivot_offset = Vector2(5.5, 9)
 color = Color(0.12, 0.18, 0.25, 0.5)
 
 [node name="FlowTitle" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlowPanel/Border"]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_left = 4.0
+offset_left = 5.0
 offset_right = 38.0
 grow_vertical = 2
 theme_override_colors/font_color = Color(0, 0.9, 1, 1)
@@ -480,10 +480,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -3.0
-offset_top = -2.0
-offset_right = 3.0
-offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
