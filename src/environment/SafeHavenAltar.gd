@@ -7,10 +7,13 @@ extends Area2D
 
 signal player_rested()
 
+@export var world_index: int = 1
 @onready var prompt_label: Label = $PromptLabel
 
 var player_in_range: Player = null
 var has_used: bool = false
+var current_dialogue_idx: int = 0
+var haven_dialogues: Array[Dictionary] = []
 
 func _ready() -> void:
 	collision_layer = 0
@@ -19,6 +22,7 @@ func _ready() -> void:
 	body_exited.connect(_on_body_exited)
 	area_entered.connect(_on_area_entered)
 	area_exited.connect(_on_area_exited)
+	haven_dialogues = DialogueManager.get_dialogue_for_haven(world_index)
 	if prompt_label:
 		prompt_label.visible = false
 
@@ -46,7 +50,7 @@ func _show_player_prompt(player: Player) -> void:
 	player_in_range = player
 	if prompt_label:
 		prompt_label.visible = true
-		prompt_label.text = "[E hoặc Chém]: ĐÀI TẾ HỒI PHỤC HOÀN TOÀN"
+		prompt_label.text = "[E/Chém]: ĐÀI TẾ HỒI PHỤC  |  [M]: DỊCH CHUYỂN NHANH"
 		prompt_label.modulate = Color(0.2, 1.0, 0.6)
 
 func _hide_player_prompt() -> void:
@@ -77,7 +81,12 @@ func rest_at_altar() -> void:
 		tween.tween_property(player_in_range.sprite, "modulate", Color.WHITE, 0.3)
 		
 	if prompt_label:
-		prompt_label.text = "✦ ĐÃ PHỤC HỒI ĐẦY 100% HP & 3 BÌNH MÁU! ✦"
+		if haven_dialogues.size() > 0:
+			var d = haven_dialogues[current_dialogue_idx % haven_dialogues.size()]
+			prompt_label.text = "[%s]: \"%s\"" % [d["speaker"], d["text"]]
+			current_dialogue_idx += 1
+		else:
+			prompt_label.text = "✦ ĐÃ PHỤC HỒI ĐẦY 100% HP & 3 BÌNH MÁU! ✦"
 		prompt_label.modulate = Color(0.3, 1.0, 0.5)
 		
 	player_rested.emit()

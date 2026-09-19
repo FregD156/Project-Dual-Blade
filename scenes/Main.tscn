@@ -15,6 +15,8 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/flow_hud_frame.png" id="13_flow_frame"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/ruby_gem.png" id="14_ruby_gem"]
 
+[ext_resource type="PackedScene" path="res://scenes/FastTravelMapUI.tscn" id="15_map_ui"]
+
 [sub_resource type="GDScript" id="GDScript_main"]
 script/source = "extends Node2D
 
@@ -24,6 +26,7 @@ script/source = "extends Node2D
 @onready var stage_mgr: StageManager = $StageManager
 @onready var inv_ui: InventoryUI = $UI_Layer/InventoryUI
 @onready var game_over_ui: GameOverUI = $UI_Layer/GameOverUI
+@onready var map_ui: FastTravelMapUI = $UI_Layer/FastTravelMapUI
 
 func _ready() -> void:
 	if ui and player:
@@ -34,6 +37,12 @@ func _ready() -> void:
 		game_over_ui.connect_player(player)
 	if debug_layer and player:
 		debug_layer.connect_player(player)
+	if map_ui and stage_mgr:
+		map_ui.checkpoint_selected.connect(_on_fast_travel_selected)
+
+func _on_fast_travel_selected(world: int, stage: int) -> void:
+	if stage_mgr:
+		stage_mgr.start_stage(world, stage, StageManager.RoomBranch.STANDARD)
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
@@ -576,7 +585,18 @@ theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 6
 text = "[B] Túi Đồ"
 
+[node name="MapBtn" type="Button" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(46, 18)
+layout_mode = 2
+focus_mode = 0
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 6
+text = "[M] Bản Đồ"
+
 [node name="InventoryUI" parent="UI_Layer" instance=ExtResource("10_inv")]
+visible = false
+
+[node name="FastTravelMapUI" parent="UI_Layer" instance=ExtResource("15_map_ui")]
 visible = false
 
 [node name="GameOverUI" parent="UI_Layer" instance=ExtResource("11_game_over")]

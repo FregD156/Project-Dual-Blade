@@ -51,9 +51,11 @@ const ENEMY_BOSS_BROODMOTHER = preload("res://scenes/enemies/EnemyBossBroodmothe
 const BOUNCY_MUSHROOM_SCENE = preload("res://scenes/environment/BouncyMushroom.tscn")
 const TOXIC_ACID_SCENE = preload("res://scenes/environment/ToxicAcidPool.tscn")
 
-# Texture Background World 1 & 2
+# Texture Background World 1 -> 4
 const BG_WORLD_1 = preload("res://assets/sprites/environment/world1_bastion_bg.png")
 const BG_WORLD_2 = preload("res://assets/sprites/environment/world2_catacombs_bg.png")
+const BG_WORLD_3 = preload("res://assets/sprites/environment/world3_clockwork_bg.png")
+const BG_WORLD_4 = preload("res://assets/sprites/environment/world4_void_bg.png")
 
 const SAFE_ALTAR = preload("res://scenes/SafeHavenAltar.tscn")
 const DROP_ITEM_SCENE = preload("res://scenes/DropItem.tscn")
@@ -63,16 +65,21 @@ var active_altar: Node2D = null
 var active_portals: Array[Node2D] = []
 var active_hazards: Array[Node2D] = []
 var stage_in_progress: bool = false
-var enemies_to_spawn: int = 0
+var is_initialized: bool = false
 
 func _ready() -> void:
 	if portal_node and is_instance_valid(portal_node):
 		portal_node.visible = false
 		portal_node.set_deferred("monitoring", false)
 	
-	call_deferred("start_stage", current_world, current_stage, RoomBranch.STANDARD)
+	call_deferred("_initial_stage_start")
+
+func _initial_stage_start() -> void:
+	if not is_initialized:
+		start_stage(current_world, current_stage, RoomBranch.STANDARD)
 
 func start_stage(world_idx: int, stage_idx: int, branch: RoomBranch = RoomBranch.STANDARD) -> void:
+	is_initialized = true
 	current_world = world_idx
 	current_stage = stage_idx
 	current_branch = branch
@@ -83,6 +90,15 @@ func start_stage(world_idx: int, stage_idx: int, branch: RoomBranch = RoomBranch
 	
 	_clear_portals()
 	_clear_hazards()
+	_clear_ground_entities()
+
+	# Ẩn và reset thanh máu Boss nếu không phải là ải Boss (Stage 10)
+	if current_stage != 10:
+		var ui = get_node_or_null("../UI_Layer")
+		if ui:
+			var boss_bar = ui.get_node_or_null("BossBarContainer")
+			if boss_bar:
+				boss_bar.visible = false
 
 	if portal_node and is_instance_valid(portal_node):
 		portal_node.visible = false
@@ -90,6 +106,10 @@ func start_stage(world_idx: int, stage_idx: int, branch: RoomBranch = RoomBranch
 		
 	var stage_str = "%d.%d" % [current_world, current_stage]
 	var title = _get_stage_title(current_world, current_stage, current_branch)
+	
+	# Đăng ký Checkpoint tự động khi tới các mốc 1, 5, 9, 10 theo detail.md VI
+	if current_stage in [1, 5, 9, 10]:
+		CheckpointManager.get_instance().activate_checkpoint(current_world, current_stage)
 	
 	_show_banner(stage_str + ": " + title)
 	stage_changed.emit(stage_str, title)
@@ -100,7 +120,14 @@ func _update_environment_theme() -> void:
 	# Cập nhật hình nền ParallaxBackground tùy theo World
 	var par_bg = get_node_or_null("../ParallaxBackground/ParallaxLayer")
 	if par_bg:
-		var target_tex = BG_WORLD_2 if current_world == 2 else BG_WORLD_1
+		var target_tex = BG_WORLD_1
+		match current_world:
+			1: target_tex = BG_WORLD_1
+			2: target_tex = BG_WORLD_2
+			3: target_tex = BG_WORLD_3
+			4: target_tex = BG_WORLD_4
+			_: target_tex = BG_WORLD_1
+			
 		for child in par_bg.get_children():
 			if child is Sprite2D:
 				child.texture = target_tex
@@ -118,8 +145,24 @@ func _reposition_player() -> void:
 	if player and is_instance_valid(player):
 		player.global_position = Vector2(100, 192)
 		player.velocity = Vector2.ZERO
+		if player.has_node("Camera2D"):
+			player.get_node("Camera2D").reset_smoothing()
 		if player.has_method("refill_armor_after_round"):
 			player.refill_armor_after_round()
+
+func _clear_ground_entities() -> void:
+	# Dọn dẹp quái còn sót, vật phẩm rơi, bóng ma echo shard cũ
+	for e in active_enemies:
+		if is_instance_valid(e):
+			e.queue_free()
+	active_enemies.clear()
+	
+	if entities_node:
+		for child in entities_node.get_children():
+			if child is Player:
+				continue
+			if child.is_in_group("enemy") or child.is_in_group("drop_item") or child.is_in_group("hazard"):
+				child.queue_free()
 
 func _get_stage_title(world: int, stage: int, branch: RoomBranch = RoomBranch.STANDARD) -> String:
 	var branch_suffix = ""
@@ -127,6 +170,34 @@ func _get_stage_title(world: int, stage: int, branch: RoomBranch = RoomBranch.ST
 		branch_suffix = " [⚔ Đao Kiếm]"
 	elif branch == RoomBranch.SUSTAIN:
 		branch_suffix = " [❤ Sinh Mệnh]"
+
+	if world == 4:
+		match stage:
+			1: return "Ải Ảo Ảnh Hư Vô" + branch_suffix
+			2: return "Mảnh Vỡ Không Gian" + branch_suffix
+			3: return "Vết Rách Trọng Lực" + branch_suffix
+			4: return "Bậc Thềm Tan Biến" + branch_suffix
+			5: return "QUÁI TINH ANH - Chiến Binh Ảo Ảnh"
+			6: return "Tử Địa Hư Không" + branch_suffix
+			7: return "Vực Sâu Tinh Thể" + branch_suffix
+			8: return "Cung Điện Vỡ Nát" + branch_suffix
+			9: return "TRẠM NGHỈ (Gương Phản Chiếu & Lão Thợ Rèn)"
+			10: return "ĐẠI TRÙM CUỐI - Kẻ Thao Túng Hư Không"
+			_: return "Đền Thờ Hư Vô" + branch_suffix
+
+	if world == 3:
+		match stage:
+			1: return "Lối Vào Tháp Bánh Răng" + branch_suffix
+			2: return "Khoang Hơi Nước Áp Suất" + branch_suffix
+			3: return "Sàn Đấu Bánh Răng Xoay" + branch_suffix
+			4: return "Hành Lang Piston Giập" + branch_suffix
+			5: return "QUÁI TINH ANH - Cỗ Máy Hộ Vệ Lõi"
+			6: return "Tử Địa Laser Quét" + branch_suffix
+			7: return "Lò Phế Liệu Cơ Giới" + branch_suffix
+			8: return "Bệ Phóng Hơi Nước" + branch_suffix
+			9: return "TRẠM NGHỈ (Kỹ Sư Sao Chép & Lão Thợ Rèn)"
+			10: return "ĐẠI TRÙM - Kẻ Hành Quyết Cơ Giới"
+			_: return "Tháp Đồng Hồ Cơ Giới" + branch_suffix
 
 	if world == 2:
 		match stage:
@@ -189,6 +260,8 @@ func _spawn_stage_wave(world: int, stage: int, branch: RoomBranch) -> void:
 		# Safe Haven: Không có quái, dựng Đài Tế Hồi Phục & Bàn Thợ Rèn
 		if SAFE_ALTAR and entities_node:
 			active_altar = SAFE_ALTAR.instantiate()
+			if "world_index" in active_altar:
+				active_altar.world_index = current_world
 			active_altar.global_position = Vector2(500, 192)
 			entities_node.add_child(active_altar)
 		_on_wave_cleared()
@@ -198,6 +271,10 @@ func _spawn_stage_wave(world: int, stage: int, branch: RoomBranch) -> void:
 	if world == 2:
 		spawn_list = _get_world2_spawns(stage, branch)
 		_spawn_world2_hazards(stage)
+	elif world == 3:
+		spawn_list = _get_world3_spawns(stage, branch)
+	elif world == 4:
+		spawn_list = _get_world4_spawns(stage, branch)
 	else:
 		spawn_list = _get_world1_spawns(stage, branch)
 
@@ -331,6 +408,60 @@ func _get_world2_spawns(stage: int, branch: RoomBranch) -> Array:
 			spawn_list = [
 				{"scene": ENEMY_BOSS_BROODMOTHER, "pos": Vector2(880, 192)},
 				{"scene": ENEMY_SPIDER, "pos": Vector2(1150, 192)}
+			]
+	return spawn_list
+
+func _get_world3_spawns(stage: int, branch: RoomBranch) -> Array:
+	var spawn_list = []
+	match stage:
+		1, 2, 3, 4:
+			spawn_list = [
+				{"scene": ENEMY_GUARD, "pos": Vector2(400, 192)},
+				{"scene": ENEMY_ARCHER, "pos": Vector2(750, 108)},
+				{"scene": ENEMY_HOUND, "pos": Vector2(900, 192)}
+			]
+		5:
+			spawn_list = [
+				{"scene": ENEMY_ELITE_W1, "pos": Vector2(750, 192)},
+				{"scene": ENEMY_ARCHER, "pos": Vector2(950, 108)}
+			]
+		6, 7, 8:
+			spawn_list = [
+				{"scene": ENEMY_GUARD, "pos": Vector2(450, 192)},
+				{"scene": ENEMY_HOUND, "pos": Vector2(650, 192)},
+				{"scene": ENEMY_ARCHER, "pos": Vector2(850, 108)},
+				{"scene": ENEMY_ARCHER, "pos": Vector2(1100, 108)}
+			]
+		10:
+			spawn_list = [
+				{"scene": ENEMY_BOSS_W1, "pos": Vector2(900, 192)}
+			]
+	return spawn_list
+
+func _get_world4_spawns(stage: int, branch: RoomBranch) -> Array:
+	var spawn_list = []
+	match stage:
+		1, 2, 3, 4:
+			spawn_list = [
+				{"scene": ENEMY_SPIDER, "pos": Vector2(420, 192)},
+				{"scene": ENEMY_MUSHROOM, "pos": Vector2(680, 192)},
+				{"scene": ENEMY_ARCHER, "pos": Vector2(880, 108)}
+			]
+		5:
+			spawn_list = [
+				{"scene": ENEMY_ELITE_TREE, "pos": Vector2(750, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(950, 192)}
+			]
+		6, 7, 8:
+			spawn_list = [
+				{"scene": ENEMY_SPIDER, "pos": Vector2(450, 192)},
+				{"scene": ENEMY_MUSHROOM, "pos": Vector2(680, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(880, 192)},
+				{"scene": ENEMY_ARCHER, "pos": Vector2(1100, 108)}
+			]
+		10:
+			spawn_list = [
+				{"scene": ENEMY_BOSS_BROODMOTHER, "pos": Vector2(900, 192)}
 			]
 	return spawn_list
 
@@ -583,7 +714,15 @@ func next_stage(branch: RoomBranch = RoomBranch.STANDARD) -> void:
 			await get_tree().create_timer(3.0).timeout
 			start_stage(2, 1, RoomBranch.STANDARD)
 		elif current_world == 2:
-			_show_banner("CHÚC MỪNG BẠN ĐÃ TIÊU DIỆT MẪU THỂ KÝ SINH!")
+			_show_banner("VƯỢT THÀNH CÔNG THẾ GIỚI 2! TIẾN VÀO THÁP ĐỒNG HỒ CƠ GIỚI (WORLD 3)!")
+			await get_tree().create_timer(3.0).timeout
+			start_stage(3, 1, RoomBranch.STANDARD)
+		elif current_world == 3:
+			_show_banner("VƯỢT THÀNH CÔNG THẾ GIỚI 3! TIẾN VÀO ĐỀN THỜ HƯ VÔ (WORLD 4)!")
+			await get_tree().create_timer(3.0).timeout
+			start_stage(4, 1, RoomBranch.STANDARD)
+		elif current_world == 4:
+			_show_banner("CHÚC MỪNG BẠN ĐÃ TIÊU DIỆT KẺ THAO TÚNG HƯ KHÔNG — HOÀN THÀNH GAME!")
 			all_stages_completed.emit()
 			await get_tree().create_timer(3.0).timeout
 			start_stage(1, 1, RoomBranch.STANDARD) # Loop lại New Game+
