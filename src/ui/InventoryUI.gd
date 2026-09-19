@@ -9,29 +9,33 @@ extends Control
 ## - Lưới ô trang bị (Grid) chứa vũ khí & các mảnh giáp nhặt được
 ## - Bấm chuột TRÁI để Trang bị | Bấm chuột PHẢI để Phân rã (Salvage) lấy Tinh thể
 
-@onready var panel_container: PanelContainer = $CenterContainer/Panel
-@onready var grid_container: GridContainer = $CenterContainer/Panel/Margin/VBox/Scroll/GridContainer
-@onready var equipped_icon: TextureRect = $CenterContainer/Panel/Margin/VBox/EquippedSection/EquippedIcon
-@onready var equipped_tier_lbl: Label = $CenterContainer/Panel/Margin/VBox/EquippedSection/VBoxStats/TierLabel
-@onready var equipped_atk_lbl: Label = $CenterContainer/Panel/Margin/VBox/EquippedSection/VBoxStats/AtkLabel
-@onready var equipped_crit_lbl: Label = $CenterContainer/Panel/Margin/VBox/EquippedSection/VBoxStats/CritLabel
-@onready var options_lbl: Label = get_node_or_null("CenterContainer/Panel/Margin/VBox/OptionsLabel")
+@onready var panel_container: Control = $CenterContainer/MainHBox
+@onready var grid_container: GridContainer = $CenterContainer/MainHBox/RightFrame/GridContainer
+@onready var equipped_icon: TextureRect = $CenterContainer/MainHBox/LeftPanel/Margin/VBox/EquippedSection/EquippedIcon
+@onready var equipped_tier_lbl: Label = $CenterContainer/MainHBox/LeftPanel/Margin/VBox/EquippedSection/VBoxStats/TierLabel
+@onready var equipped_atk_lbl: Label = $CenterContainer/MainHBox/LeftPanel/Margin/VBox/EquippedSection/VBoxStats/AtkLabel
+@onready var equipped_crit_lbl: Label = $CenterContainer/MainHBox/LeftPanel/Margin/VBox/EquippedSection/VBoxStats/CritLabel
+@onready var options_lbl: Label = get_node_or_null("CenterContainer/MainHBox/LeftPanel/Margin/VBox/OptionsLabel")
 
 # Armor section labels & icons
-@onready var armor_total_lbl: Label = get_node_or_null("CenterContainer/Panel/Margin/VBox/ArmorSection/ArmorTotalLabel")
-@onready var helmet_btn: TextureRect = get_node_or_null("CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/HelmetSlot/Icon")
-@onready var chest_btn: TextureRect = get_node_or_null("CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/ChestSlot/Icon")
-@onready var arms_btn: TextureRect = get_node_or_null("CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/ArmsSlot/Icon")
-@onready var legs_btn: TextureRect = get_node_or_null("CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/LegsSlot/Icon")
-@onready var shield_btn: TextureRect = get_node_or_null("CenterContainer/Panel/Margin/VBox/ArmorSection/HBox/ShieldSlot/Icon")
+@onready var armor_total_lbl: Label = get_node_or_null("CenterContainer/MainHBox/LeftPanel/Margin/VBox/ArmorSection/ArmorTotalLabel")
+@onready var helmet_btn: TextureRect = get_node_or_null("CenterContainer/MainHBox/LeftPanel/Margin/VBox/ArmorSection/HBox/HelmetSlot/Icon")
+@onready var chest_btn: TextureRect = get_node_or_null("CenterContainer/MainHBox/LeftPanel/Margin/VBox/ArmorSection/HBox/ChestSlot/Icon")
+@onready var arms_btn: TextureRect = get_node_or_null("CenterContainer/MainHBox/LeftPanel/Margin/VBox/ArmorSection/HBox/ArmsSlot/Icon")
+@onready var legs_btn: TextureRect = get_node_or_null("CenterContainer/MainHBox/LeftPanel/Margin/VBox/ArmorSection/HBox/LegsSlot/Icon")
+@onready var shield_btn: TextureRect = get_node_or_null("CenterContainer/MainHBox/LeftPanel/Margin/VBox/ArmorSection/HBox/ShieldSlot/Icon")
 
-@onready var count_flasks_lbl: Label = $CenterContainer/Panel/Margin/VBox/Footer/FlaskCountLabel
-@onready var count_crystals_lbl: Label = $CenterContainer/Panel/Margin/VBox/Footer/CrystalCountLabel
-@onready var merge_btn: Button = get_node_or_null("CenterContainer/Panel/Margin/VBox/Footer/MergeBtn")
-@onready var close_btn: Button = $CenterContainer/Panel/Margin/VBox/Header/CloseBtn
+@onready var count_flasks_lbl: Label = $CenterContainer/MainHBox/LeftPanel/Margin/VBox/Footer/FlaskCountLabel
+@onready var count_crystals_lbl: Label = $CenterContainer/MainHBox/LeftPanel/Margin/VBox/Footer/CrystalCountLabel
+@onready var merge_btn: Button = get_node_or_null("CenterContainer/MainHBox/LeftPanel/Margin/VBox/ActionButtons/MergeBtn")
+@onready var auto_equip_btn: Button = get_node_or_null("CenterContainer/MainHBox/LeftPanel/Margin/VBox/ActionButtons/AutoEquipBtn")
+@onready var merge_hint_banner: PanelContainer = get_node_or_null("CenterContainer/MainHBox/LeftPanel/Margin/VBox/MergeHintBanner")
+@onready var hint_label: Label = get_node_or_null("CenterContainer/MainHBox/LeftPanel/Margin/VBox/MergeHintBanner/HintLabel")
+@onready var close_btn: Button = $CenterContainer/MainHBox/RightFrame/CloseBtn
 
 var player_ref: Player = null
 var open_tween: Tween = null
+var merge_glow_tween: Tween = null
 const ITEM_SLOT_TEXTURE = preload("res://assets/sprites/ui/item_slot_frame.png")
 
 const WEAPON_TEXTURES = {
@@ -78,6 +82,22 @@ func _ready() -> void:
 		close_btn.pressed.connect(toggle_inventory)
 	if merge_btn:
 		merge_btn.pressed.connect(_on_merge_pressed)
+	if auto_equip_btn:
+		auto_equip_btn.pressed.connect(_on_auto_equip_pressed)
+
+func _on_auto_equip_pressed() -> void:
+	if not player_ref:
+		return
+	if player_ref.has_method("auto_equip_all_highest_tiers"):
+		player_ref.auto_equip_all_highest_tiers()
+		refresh_ui()
+		if auto_equip_btn:
+			var tw = create_tween()
+			auto_equip_btn.text = "ĐÃ MẶC XONG!"
+			tw.tween_property(auto_equip_btn, "modulate", Color(0.3, 2.0, 0.7, 1.0), 0.12)
+			tw.tween_interval(0.6)
+			tw.tween_property(auto_equip_btn, "modulate", Color.WHITE, 0.2)
+			tw.tween_callback(func(): if auto_equip_btn: auto_equip_btn.text = "✦ MẶC TỐT NHẤT")
 
 func _on_merge_pressed() -> void:
 	if not player_ref:
@@ -93,13 +113,13 @@ func _on_merge_pressed() -> void:
 				tw.tween_property(merge_btn, "modulate", Color(0.2, 1.0, 0.4), 0.15)
 				tw.tween_interval(0.6)
 				tw.tween_property(merge_btn, "modulate", Color.WHITE, 0.2)
-				tw.tween_callback(func(): if merge_btn: merge_btn.text = "GHÉP (5x)")
+				tw.tween_callback(func(): if merge_btn: _update_merge_hint())
 			else:
 				merge_btn.text = "KHÔNG ĐỦ 5"
 				tw.tween_property(merge_btn, "modulate", Color(1.0, 0.4, 0.4), 0.15)
 				tw.tween_interval(0.6)
 				tw.tween_property(merge_btn, "modulate", Color.WHITE, 0.2)
-				tw.tween_callback(func(): if merge_btn: merge_btn.text = "GHÉP (5x)")
+				tw.tween_callback(func(): if merge_btn: _update_merge_hint())
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -267,6 +287,9 @@ func refresh_ui() -> void:
 	if count_crystals_lbl:
 		count_crystals_lbl.text = "Thạch: %d" % player_ref.upgrade_crystals
 
+	# Cập nhật Banner Gợi ý Hợp Thành & Nút Ghép 5x
+	_update_merge_hint()
+
 	# 3. Populate Grid Slots (Weapons, Armors, Shields in Inventory)
 	if not grid_container:
 		return
@@ -275,14 +298,22 @@ func refresh_ui() -> void:
 		child.queue_free()
 
 	var items = player_ref.inventory
-	var slot_count = max(12, ((items.size() + 3) / 4) * 4)
+	var slot_count = 36
+	
+	# Lấy danh sách các món thuộc nhóm đủ 5 để đánh dấu phát sáng
+	var ready_groups = MergeSystem.get_merge_ready_groups(items)
+	var ready_indices: Dictionary = {}
+	for grp in ready_groups:
+		for idx in grp.get("indices", []):
+			ready_indices[idx] = grp.get("name", "")
 
 	for i in range(slot_count):
 		var slot_panel = PanelContainer.new()
-		slot_panel.custom_minimum_size = Vector2(26, 26)
+		slot_panel.custom_minimum_size = Vector2(17, 17)
 		slot_panel.mouse_filter = Control.MOUSE_FILTER_PASS
+		slot_panel.pivot_offset = Vector2(8.5, 8.5)
 		
-		# Khung viền Gothic cho từng ô item
+		# Khung viền Gothic cho từng ô item (kích thước 17x17 khớp chính xác ô vẽ)
 		var frame_rect = TextureRect.new()
 		frame_rect.texture = ITEM_SLOT_TEXTURE
 		frame_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -291,7 +322,7 @@ func refresh_ui() -> void:
 		slot_panel.add_child(frame_rect)
 
 		var btn = Button.new()
-		btn.custom_minimum_size = Vector2(26, 26)
+		btn.custom_minimum_size = Vector2(17, 17)
 		btn.focus_mode = Control.FOCUS_NONE
 		btn.flat = true
 
@@ -301,6 +332,7 @@ func refresh_ui() -> void:
 			var tier = item_data.get("tier", "tier_d")
 			var item_name = item_data.get("name", "Trang Bị")
 			var item_idx = i
+			var can_merge_this = ready_indices.has(i)
 			
 			if item_type == "armor":
 				var part = item_data.get("part", "chest")
@@ -310,6 +342,8 @@ func refresh_ui() -> void:
 				var tooltip_lines = [item_name, "Giáp: +%d" % item_data.get("armor_value", 0)]
 				for opt in item_data.get("options", []):
 					tooltip_lines.append("+ " + opt.get("desc", ""))
+				if can_merge_this:
+					tooltip_lines.append("★ ĐÃ ĐỦ 5 MÓN: Có thể ghép lên bậc cao hơn!")
 				tooltip_lines.append("[Trái]: Mặc Giáp  |  [Phải]: Phân rã (+2 Thạch)")
 				btn.tooltip_text = "\n".join(tooltip_lines)
 			elif item_type == "shield":
@@ -326,6 +360,8 @@ func refresh_ui() -> void:
 				]
 				for opt in item_data.get("options", []):
 					tooltip_lines.append("+ " + opt.get("desc", ""))
+				if can_merge_this:
+					tooltip_lines.append("★ ĐÃ ĐỦ 5 MÓN: Có thể ghép lên bậc cao hơn!")
 				tooltip_lines.append("[Trái]: Cầm Khiên  |  [Phải]: Phân rã (+2 Thạch)")
 				btn.tooltip_text = "\n".join(tooltip_lines)
 			else:
@@ -335,19 +371,27 @@ func refresh_ui() -> void:
 					var tooltip_lines = [item_name]
 					for opt in item_data.get("options", []):
 						tooltip_lines.append("+ " + opt.get("desc", ""))
+					if can_merge_this:
+						tooltip_lines.append("★ ĐÃ ĐỦ 5 MÓN: Có thể ghép lên bậc cao hơn!")
 					tooltip_lines.append("[Trái]: Trang bị  |  [Phải]: Phân rã (+2 Thạch)")
 					btn.tooltip_text = "\n".join(tooltip_lines)
 			
 			var border_color = TIER_COLORS.get(tier, Color.WHITE)
+			if can_merge_this:
+				# Món đồ sẵn sàng ghép: viền phát sáng vàng rực rỡ
+				border_color = Color(1.8, 1.4, 0.2, 1.0)
 			frame_rect.modulate = border_color
 			
 			# Hiệu ứng phóng to nhẹ khi rê chuột vào (Hover Zoom Animation)
+			# Nâng z_index = 5 khi hover để hiệu ứng nổi lên trên, không bị các ô lân cận chèn
 			btn.mouse_entered.connect(func():
+				slot_panel.z_index = 5
 				var tw = create_tween()
-				tw.tween_property(slot_panel, "scale", Vector2(1.12, 1.12), 0.08)
+				tw.tween_property(slot_panel, "scale", Vector2(1.15, 1.15), 0.08)
 				tw.tween_property(frame_rect, "modulate", Color(1.5, 1.5, 1.5, 1.0), 0.08)
 			)
 			btn.mouse_exited.connect(func():
+				slot_panel.z_index = 0
 				var tw = create_tween()
 				tw.tween_property(slot_panel, "scale", Vector2.ONE, 0.08)
 				tw.tween_property(frame_rect, "modulate", border_color, 0.08)
@@ -363,9 +407,8 @@ func refresh_ui() -> void:
 			)
 		else:
 			btn.disabled = true
-			frame_rect.modulate = Color(0.25, 0.25, 0.25, 0.35)
+			frame_rect.modulate = Color(0.2, 0.2, 0.2, 0.3)
 
-		slot_panel.pivot_offset = Vector2(13, 13)
 		slot_panel.add_child(btn)
 		grid_container.add_child(slot_panel)
 
@@ -401,3 +444,42 @@ func _salvage_item(index: int) -> void:
 		tw.tween_property(count_crystals_lbl, "modulate", Color(2.2, 0.6, 2.5, 1.0), 0.08)
 		tw.tween_property(count_crystals_lbl, "modulate", Color.WHITE, 0.15)
 	refresh_ui()
+
+func _update_merge_hint() -> void:
+	if not player_ref:
+		return
+	var items = player_ref.inventory
+	var ready_groups = MergeSystem.get_merge_ready_groups(items)
+	
+	if ready_groups.size() > 0:
+		var group_names = []
+		for grp in ready_groups:
+			group_names.append("%s (%d/5)" % [grp.get("name", "Đồ"), grp.get("count", 5)])
+		var summary_text = "✦ CÓ THỂ GHÉP: " + ", ".join(group_names) + "!"
+		
+		if merge_hint_banner:
+			merge_hint_banner.visible = true
+		if hint_label:
+			hint_label.text = summary_text
+			
+		if merge_btn:
+			merge_btn.disabled = false
+			merge_btn.text = "GHÉP (%d)" % ready_groups.size()
+			merge_btn.tooltip_text = "Nhấp để ghép: %s lên phẩm chất cao hơn!" % ", ".join(group_names)
+			
+			# Hiệu ứng nhấp nháy phát sáng vàng kim cho nút Ghép
+			if merge_glow_tween:
+				merge_glow_tween.kill()
+			merge_glow_tween = create_tween().set_loops()
+			merge_glow_tween.tween_property(merge_btn, "modulate", Color(1.8, 1.6, 0.4, 1.0), 0.5)
+			merge_glow_tween.tween_property(merge_btn, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.5)
+	else:
+		if merge_hint_banner:
+			merge_hint_banner.visible = false
+		if merge_glow_tween:
+			merge_glow_tween.kill()
+			merge_glow_tween = null
+		if merge_btn:
+			merge_btn.modulate = Color(0.7, 0.7, 0.7, 0.9)
+			merge_btn.text = "GHÉP (5x)"
+			merge_btn.tooltip_text = "Thu thập đủ 5 món cùng loại, cùng bậc để hợp thành lên bậc cao hơn."
