@@ -1009,12 +1009,45 @@ func _play_equip_vfx(tier: String) -> void:
 
 func add_to_inventory(item_dict: Dictionary) -> void:
 	inventory.append(item_dict)
+	# Kiểm tra tự động trang bị nếu món đồ mới nhặt có bậc cao hơn món đang dùng
+	auto_equip_if_better(item_dict)
+	# Quét kiểm tra ghép nếu có nhóm đủ 5 món
 	check_and_merge_inventory()
 	emit_signal("inventory_changed", inventory)
+
+func auto_equip_if_better(item_dict: Dictionary) -> bool:
+	var itype = item_dict.get("type", "weapon")
+	var new_tier = item_dict.get("tier", "tier_d")
+	
+	if itype == "weapon":
+		if MergeSystem.is_higher_tier(new_tier, current_weapon_tier):
+			equip_weapon_dict(item_dict)
+			return true
+	elif itype == "armor":
+		var part = item_dict.get("part", "chest")
+		var cur_equipped = equipped_armor.get(part, {})
+		var cur_tier = cur_equipped.get("tier", "tier_d") if not cur_equipped.is_empty() else ""
+		if cur_equipped.is_empty() or MergeSystem.is_higher_tier(new_tier, cur_tier):
+			equip_armor_piece(item_dict)
+			return true
+	elif itype == "shield":
+		var cur_tier = equipped_shield.get("tier", "tier_d") if not equipped_shield.is_empty() else ""
+		if equipped_shield.is_empty() or MergeSystem.is_higher_tier(new_tier, cur_tier):
+			equip_shield(item_dict)
+			return true
+	return false
+
+func auto_equip_all_highest_tiers() -> void:
+	# Quét toàn bộ kho đồ và tự động trang bị món có phẩm cấp cao nhất cho từng loại
+	for item in inventory:
+		auto_equip_if_better(item)
 
 func check_and_merge_inventory() -> Array[Dictionary]:
 	var merged_items = MergeSystem.perform_merge(inventory)
 	if merged_items.size() > 0:
+		for new_item in merged_items:
+			# Sau khi ghép thành công món cấp cao hơn, ưu tiên tự động trang bị ngay
+			auto_equip_if_better(new_item)
 		emit_signal("items_merged", merged_items)
 		emit_signal("inventory_changed", inventory)
 		_play_merge_notification_vfx(merged_items)

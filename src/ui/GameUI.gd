@@ -46,6 +46,7 @@ extends CanvasLayer
 @onready var flask_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/FlaskPanel/FlaskLabel")
 @onready var crystal_label: Label = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/FlaskPanel/CrystalLabel")
 @onready var bag_btn: Button = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/BagBtn")
+@onready var map_btn: Button = get_node_or_null("TopContainer/MarginContainer/HBoxContainer/MapBtn")
 
 # Boss Bar Nodes
 @onready var boss_bar_container: Control = get_node_or_null("BossBarContainer")
@@ -136,6 +137,9 @@ func connect_player(player: Player) -> void:
 	if player.current_weapon_tier != "":
 		_on_weapon_equipped(player.current_weapon_tier, player.base_atk, player.crit_rate)
 		
+	player.inventory_changed.connect(_on_inventory_changed_for_hints)
+	_on_inventory_changed_for_hints(player.inventory)
+		
 	if bag_btn:
 		bag_btn.pressed.connect(func():
 			var inv = get_parent().get_node_or_null("UI_Layer/InventoryUI")
@@ -143,6 +147,15 @@ func connect_player(player: Player) -> void:
 				inv = get_tree().root.find_child("InventoryUI", true, false)
 			if inv and inv.has_method("toggle_inventory"):
 				inv.toggle_inventory()
+		)
+		
+	if map_btn:
+		map_btn.pressed.connect(func():
+			var map_ui = get_parent().get_node_or_null("UI_Layer/FastTravelMapUI")
+			if not map_ui:
+				map_ui = get_tree().root.find_child("FastTravelMapUI", true, false)
+			if map_ui and map_ui.has_method("toggle_map"):
+				map_ui.toggle_map()
 		)
 
 func bind_boss(boss: EnemyBase) -> void:
@@ -359,7 +372,24 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 	else:
 		if pulse_tween:
 			pulse_tween.kill()
-		for cell in flow_cells:
-			cell.modulate = Color(1.0, 1.0, 1.0, 1.0)
 		if flow_frame:
 			flow_frame.modulate = Color.WHITE
+
+var bag_btn_glow_tween: Tween = null
+
+func _on_inventory_changed_for_hints(inventory: Array[Dictionary]) -> void:
+	if not bag_btn:
+		return
+	var can_merge = MergeSystem.can_merge(inventory)
+	if can_merge:
+		bag_btn.text = "[B] Túi Đồ (!)"
+		if not bag_btn_glow_tween or not bag_btn_glow_tween.is_valid():
+			bag_btn_glow_tween = create_tween().set_loops()
+			bag_btn_glow_tween.tween_property(bag_btn, "modulate", Color(1.8, 1.6, 0.3, 1.0), 0.4)
+			bag_btn_glow_tween.tween_property(bag_btn, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.4)
+	else:
+		bag_btn.text = "[B] Túi Đồ"
+		if bag_btn_glow_tween:
+			bag_btn_glow_tween.kill()
+			bag_btn_glow_tween = null
+		bag_btn.modulate = Color.WHITE

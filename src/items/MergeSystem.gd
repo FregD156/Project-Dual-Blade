@@ -25,6 +25,15 @@ const TIER_ORDER: Array[String] = [
 	"tier_ssr"
 ]
 
+## Lấy thứ hạng số của tier (0 đến 6)
+static func get_tier_index(tier: String) -> int:
+	var idx = TIER_ORDER.find(tier)
+	return idx if idx != -1 else 0
+
+## So sánh tier mới có cao hơn tier cũ không
+static func is_higher_tier(new_tier: String, current_tier: String) -> bool:
+	return get_tier_index(new_tier) > get_tier_index(current_tier)
+
 ## Trả về bậc kế tiếp, hoặc rỗng nếu đã đạt SSR (kịch trần)
 static func get_next_tier(current_tier: String) -> String:
 	var idx = TIER_ORDER.find(current_tier)
@@ -44,6 +53,67 @@ static func get_merge_group_key(item: Dictionary) -> String:
 		return "shield_%s" % [tier]
 	else:
 		return "weapon_%s" % [tier]
+
+## Lấy tên hiển thị tiếng Việt thân thiện của nhóm ghép
+static func get_group_display_name(group_key: String) -> String:
+	var tokens = group_key.split("_")
+	if tokens.size() < 2:
+		return "Trang Bị"
+	var type_prefix = tokens[0]
+	var tier_letter = tokens[tokens.size() - 1].to_upper()
+	if type_prefix == "weapon":
+		return "Song Đao [Bậc %s]" % tier_letter
+	elif type_prefix == "shield":
+		return "Khiên Hộ Thân [Bậc %s]" % tier_letter
+	elif type_prefix == "armor":
+		var part = tokens[1]
+		var part_name = "Giáp"
+		match part:
+			"helmet": part_name = "Mũ"
+			"chest": part_name = "Áo Giáp"
+			"arms": part_name = "Hộ Thủ"
+			"legs": part_name = "Xà Cạp"
+		return "%s [Bậc %s]" % [part_name, tier_letter]
+	return "Trang Bị"
+
+## Kiểm tra xem trong kho có bất kỳ nhóm nào đủ 5 món để ghép không
+static func can_merge(inventory: Array[Dictionary]) -> bool:
+	var ready_groups = get_merge_ready_groups(inventory)
+	return ready_groups.size() > 0
+
+## Trả về danh sách chi tiết các nhóm đã gom đủ >= 5 món
+## Mỗi nhóm: {"key": String, "name": String, "count": int, "item_type": String, "part": String, "cur_tier": String, "next_tier": String, "indices": Array[int]}
+static func get_merge_ready_groups(inventory: Array[Dictionary]) -> Array[Dictionary]:
+	var groups: Dictionary = {}
+	for i in range(inventory.size()):
+		var item = inventory[i]
+		var tier = item.get("tier", "tier_d")
+		if tier == "tier_ssr":
+			continue
+		var key = get_merge_group_key(item)
+		if not groups.has(key):
+			groups[key] = []
+		groups[key].append(i)
+		
+	var ready: Array[Dictionary] = []
+	for key in groups.keys():
+		var indices: Array = groups[key]
+		if indices.size() >= 5:
+			var sample = inventory[indices[0]]
+			var itype = sample.get("type", "weapon")
+			var part = sample.get("part", "chest")
+			var cur_tier = sample.get("tier", "tier_d")
+			ready.append({
+				"key": key,
+				"name": get_group_display_name(key),
+				"count": indices.size(),
+				"item_type": itype,
+				"part": part,
+				"cur_tier": cur_tier,
+				"next_tier": get_next_tier(cur_tier),
+				"indices": indices
+			})
+	return ready
 
 ## Tạo ra món đồ mới ở next_tier dựa theo thông tin nhóm
 static func create_upgraded_item(item_type: String, part: String, next_tier: String) -> Dictionary:

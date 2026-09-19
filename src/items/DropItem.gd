@@ -152,17 +152,15 @@ func _apply_pickup(player: Player) -> void:
 				}
 				if player.has_method("add_to_inventory"):
 					player.add_to_inventory(item_data)
-				if player.has_method("equip_weapon_dict"):
+				elif player.has_method("equip_weapon_dict"):
 					player.equip_weapon_dict(item_data)
-				elif player.has_method("equip_weapon_tier"):
-					player.equip_weapon_tier(item_type)
 			elif item_type.begins_with("shield_"):
 				# Format: "shield_<tier>" (vd: "shield_tier_b")
 				var tier = item_type.replace("shield_", "")
 				var shield_item = ShieldSystem.create_shield_item(tier)
 				if player.has_method("add_to_inventory"):
 					player.add_to_inventory(shield_item)
-				if player.has_method("equip_shield"):
+				elif player.has_method("equip_shield"):
 					player.equip_shield(shield_item)
 			elif item_type.begins_with("armor_"):
 				# Format: "armor_<part>_<tier>" (vd: "armor_helmet_tier_b")
@@ -173,6 +171,5 @@ func _apply_pickup(player: Player) -> void:
 					var armor_item = ArmorSystem.create_armor_item(part, tier)
 					if player.has_method("add_to_inventory"):
 						player.add_to_inventory(armor_item)
-					if player.has_method("equip_armor_piece"):
-						# Tự động trang bị nếu phẩm cấp tốt hơn hoặc chưa có
+					elif player.has_method("equip_armor_piece"):
 						player.equip_armor_piece(armor_item)
