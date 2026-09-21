@@ -1,10 +1,12 @@
-[gd_scene load_steps=4 format=3 uid="uid://cportal_system_01"]
+[gd_scene load_steps=6 format=3 uid="uid://cportal_system_01"]
 
 [ext_resource type="FontFile" path="res://assets/fonts/pixel_font.ttf" id="1_font"]
 [ext_resource type="Script" path="res://src/combat/Portal.gd" id="2_portal_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/portal_vortex_sheet.png" id="3_vortex_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/portal_gothic_frame.png" id="4_frame_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_portal"]
-size = Vector2(40, 58)
+size = Vector2(44, 70)
 
 [node name="Portal" type="Area2D"]
 collision_layer = 128
@@ -12,41 +14,34 @@ collision_mask = 2
 script = ExtResource("2_portal_script")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -29)
+position = Vector2(0, -35)
 shape = SubResource("RectangleShape2D_portal")
 
-[node name="PortalGlow" type="ColorRect" parent="."]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -16.0
-offset_top = -56.0
-offset_right = 16.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.2, 0.8, 1, 0.5)
+[node name="VortexAura" type="Sprite2D" parent="."]
+texture_filter = 0
+position = Vector2(0, -38)
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("3_vortex_tex")
+hframes = 8
 
-[node name="PortalCore" type="ColorRect" parent="."]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -11.0
-offset_top = -51.0
-offset_right = 11.0
-offset_bottom = -5.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.9, 1, 1, 0.85)
+[node name="VortexCore" type="Sprite2D" parent="."]
+texture_filter = 0
+position = Vector2(0, -38)
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("3_vortex_tex")
+hframes = 8
+
+[node name="GothicArchFrame" type="Sprite2D" parent="."]
+texture_filter = 0
+position = Vector2(0, -38)
+scale = Vector2(0.52, 0.52)
+texture = ExtResource("4_frame_tex")
 
 [node name="TitleLabel" type="Label" parent="."]
-offset_left = -80.0
-offset_top = -88.0
-offset_right = 80.0
-offset_bottom = -74.0
+offset_left = -90.0
+offset_top = -100.0
+offset_right = 90.0
+offset_bottom = -86.0
 theme_override_fonts/font = ExtResource("1_font")
 theme_override_font_sizes/font_size = 8
 text = "✦ CỔNG TIẾN BƯỚC"
@@ -54,10 +49,10 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="DescLabel" type="Label" parent="."]
-offset_left = -90.0
-offset_top = -74.0
-offset_right = 90.0
-offset_bottom = -62.0
+offset_left = -100.0
+offset_top = -86.0
+offset_right = 100.0
+offset_bottom = -74.0
 theme_override_fonts/font = ExtResource("1_font")
 theme_override_font_sizes/font_size = 6
 text = "Mật độ quái dày • Tăng rơi phôi"
@@ -65,10 +60,10 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Label" type="Label" parent="."]
-offset_left = -75.0
-offset_top = -60.0
-offset_right = 75.0
-offset_bottom = -48.0
+offset_left = -80.0
+offset_top = -72.0
+offset_right = 80.0
+offset_bottom = -60.0
 theme_override_fonts/font = ExtResource("1_font")
 theme_override_font_sizes/font_size = 6
 text = "[W / UP / E] VÀO"

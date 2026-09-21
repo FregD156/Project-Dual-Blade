@@ -20,14 +20,18 @@ enum PortalType {
 
 signal player_chosen_portal(type: PortalType)
 
-@onready var glow: ColorRect = $PortalGlow
-@onready var core: ColorRect = $PortalCore
+@onready var vortex_aura: Sprite2D = get_node_or_null("VortexAura")
+@onready var vortex_core: Sprite2D = get_node_or_null("VortexCore")
+@onready var gothic_frame: Sprite2D = get_node_or_null("GothicArchFrame")
 @onready var label: Label = $Label
 @onready var title_label: Label = get_node_or_null("TitleLabel")
 @onready var desc_label: Label = get_node_or_null("DescLabel")
 
 var player_in_range: Player = null
 var is_active: bool = false
+var anim_timer: float = 0.0
+var current_frame: int = 0
+const FRAME_TIME: float = 0.08 # 12.5 FPS cho hoạt ảnh xoáy mượt mà
 
 func _ready() -> void:
 	collision_layer = 128
@@ -41,50 +45,65 @@ func setup(type: PortalType) -> void:
 	_update_visuals()
 
 func _update_visuals() -> void:
-	if not glow or not core or not label:
+	if not is_node_ready():
 		return
 
 	match portal_type:
 		PortalType.COMBAT:
-			glow.color = Color(1.0, 0.25, 0.15, 0.65) # Đỏ cam chiến trận
-			core.color = Color(1.0, 0.9, 0.4, 0.9)
+			if vortex_aura:
+				vortex_aura.modulate = Color(1.0, 0.25, 0.1, 0.65) # Đỏ cam rực lửa
+			if vortex_core:
+				vortex_core.modulate = Color(1.3, 0.85, 0.3, 0.95)
+			if gothic_frame:
+				gothic_frame.modulate = Color(1.1, 0.75, 0.7, 1.0)
 			if title_label:
 				title_label.text = "⚔ CỔNG ĐAO KIẾM"
 				title_label.modulate = Color(1.0, 0.4, 0.3)
 			if desc_label:
 				desc_label.text = "Mật độ quái dày • Tăng rơi phôi trang bị"
 				desc_label.modulate = Color(1.0, 0.85, 0.5)
-			label.text = "[W / UP / E] VÀO CHIẾN TRẬN"
-			label.modulate = Color(1.0, 0.4, 0.3)
+			if label:
+				label.text = "[W / UP / E] VÀO CHIẾN TRẬN"
+				label.modulate = Color(1.0, 0.4, 0.3)
 		PortalType.SUSTAIN:
-			glow.color = Color(0.15, 0.95, 0.5, 0.65) # Xanh ngọc sinh mệnh
-			core.color = Color(0.7, 1.0, 0.9, 0.9)
+			if vortex_aura:
+				vortex_aura.modulate = Color(0.1, 1.0, 0.45, 0.65) # Xanh ngọc sinh mệnh
+			if vortex_core:
+				vortex_core.modulate = Color(0.6, 1.2, 0.9, 0.95)
+			if gothic_frame:
+				gothic_frame.modulate = Color(0.7, 1.1, 0.85, 1.0)
 			if title_label:
 				title_label.text = "❤ CỔNG SINH MỆNH"
 				title_label.modulate = Color(0.2, 1.0, 0.6)
 			if desc_label:
 				desc_label.text = "Quái thưa • Chắc chắn rớt Bình Máu"
 				desc_label.modulate = Color(0.6, 1.0, 0.8)
-			label.text = "[W / UP / E] VÀO BẢO TOÀN"
-			label.modulate = Color(0.2, 1.0, 0.6)
+			if label:
+				label.text = "[W / UP / E] VÀO BẢO TOÀN"
+				label.modulate = Color(0.2, 1.0, 0.6)
 		PortalType.STANDARD:
-			glow.color = Color(0.2, 0.8, 1.0, 0.55) # Xanh lam thần bí
-			core.color = Color(0.9, 1.0, 1.0, 0.85)
+			if vortex_aura:
+				vortex_aura.modulate = Color(0.2, 0.75, 1.2, 0.65) # Xanh lam thần bí
+			if vortex_core:
+				vortex_core.modulate = Color(0.85, 1.1, 1.3, 0.95)
+			if gothic_frame:
+				gothic_frame.modulate = Color(0.85, 0.95, 1.1, 1.0)
 			if title_label:
 				title_label.text = "✦ CỔNG TIẾN BƯỚC"
 				title_label.modulate = Color(0.4, 0.9, 1.0)
 			if desc_label:
 				desc_label.text = "Đường tới ải tiếp theo"
 				desc_label.modulate = Color(0.8, 0.9, 1.0)
-			label.text = "[W / UP / E] VÀO ẢI TIẾP THEO"
-			label.modulate = Color(0.4, 0.9, 1.0)
+			if label:
+				label.text = "[W / UP / E] VÀO ẢI TIẾP THEO"
+				label.modulate = Color(0.4, 0.9, 1.0)
 
 func activate() -> void:
 	is_active = true
 	visible = true
 	set_deferred("monitoring", true)
 	
-	# Hiệu ứng xuất hiện nở bừng
+	# Hiệu ứng xuất hiện nở bừng mượt mà
 	scale = Vector2(0.1, 0.1)
 	var tw = create_tween()
 	tw.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
@@ -96,14 +115,29 @@ func deactivate() -> void:
 	set_deferred("monitoring", false)
 	player_in_range = null
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not is_active or not visible:
 		return
 		
-	# Hiệu ứng xung nhịp năng lượng của cổng (Pulsing Glow)
-	if glow:
-		var pulse = 0.55 + 0.15 * sin(Time.get_ticks_msec() * 0.005)
-		glow.color.a = pulse
+	# Hoạt ảnh lốc xoáy ma thuật 8 frames
+	anim_timer += delta
+	if anim_timer >= FRAME_TIME:
+		anim_timer -= FRAME_TIME
+		current_frame = (current_frame + 1) % 8
+		if vortex_aura:
+			vortex_aura.frame = current_frame
+		if vortex_core:
+			# Lõi xoay lệch pha tạo chiều sâu 3D 2 lớp
+			vortex_core.frame = (current_frame + 4) % 8
+
+	# Hiệu ứng nhấp nhô & xung nhịp năng lượng
+	var time_ms = Time.get_ticks_msec()
+	if vortex_aura:
+		var pulse = 1.05 + 0.08 * sin(time_ms * 0.005)
+		vortex_aura.scale = Vector2(pulse, pulse)
+	if vortex_core:
+		var pulse_inner = 0.85 + 0.06 * cos(time_ms * 0.006)
+		vortex_core.scale = Vector2(pulse_inner, pulse_inner)
 
 	# Kiểm tra người chơi kích hoạt cổng
 	if player_in_range and is_instance_valid(player_in_range):
@@ -116,21 +150,17 @@ func _trigger_portal() -> void:
 	is_active = false
 	set_deferred("monitoring", false)
 	
-	# Emit signal lựa chọn cổng ngay lập tức
 	player_chosen_portal.emit(portal_type)
 	
-	# Hiệu ứng phóng to và tan biến
-	var tw = create_tween()
-	tw.tween_property(self, "scale", Vector2(1.3, 1.3), 0.1)
-	tw.tween_property(self, "scale", Vector2(0.0, 0.0), 0.15)
-	tw.tween_callback(queue_free)
+	# Hiệu ứng hút xoáy thu nhỏ rồi biến mất
+	var tw = create_tween().set_parallel(true)
+	tw.tween_property(self, "scale", Vector2(1.35, 1.35), 0.1)
+	tw.tween_property(self, "modulate:a", 0.0, 0.2).set_delay(0.08)
+	tw.chain().tween_callback(queue_free)
 
 func _on_body_entered(body: Node2D) -> void:
 	if body is Player:
 		player_in_range = body
-		# Nhấn trực tiếp hoặc bấm nút W/E
-		if not is_active:
-			return
 
 func _on_body_exited(body: Node2D) -> void:
 	if body == player_in_range:
