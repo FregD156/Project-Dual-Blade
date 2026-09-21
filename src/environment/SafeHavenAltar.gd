@@ -9,11 +9,18 @@ signal player_rested()
 
 @export var world_index: int = 1
 @onready var prompt_label: Label = $PromptLabel
+@onready var flame_aura: Sprite2D = get_node_or_null("SanctuaryFlameAura")
+@onready var flame_core: Sprite2D = get_node_or_null("SanctuaryFlameCore")
+@onready var monolith: Sprite2D = get_node_or_null("AltarMonolith")
 
 var player_in_range: Player = null
 var has_used: bool = false
 var current_dialogue_idx: int = 0
 var haven_dialogues: Array[Dictionary] = []
+
+var anim_timer: float = 0.0
+var current_frame: int = 0
+const FRAME_TIME: float = 0.09
 
 func _ready() -> void:
 	collision_layer = 0
@@ -25,8 +32,59 @@ func _ready() -> void:
 	haven_dialogues = DialogueManager.get_dialogue_for_haven(world_index)
 	if prompt_label:
 		prompt_label.visible = false
+	_apply_world_theme_colors()
 
-func _process(_delta: float) -> void:
+func _apply_world_theme_colors() -> void:
+	# Cấu hình màu sắc ngọn lửa thánh và hoa văn đài tế theo từng Thế giới
+	var flame_color = Color(0.2, 1.0, 0.65, 0.75) # Mặc định xanh ngọc phục sinh
+	var core_color = Color(0.75, 1.2, 0.9, 0.95)
+	var stone_tint = Color(1.0, 1.0, 1.0, 1.0)
+	
+	match world_index:
+		1:
+			flame_color = Color(0.2, 0.9, 1.0, 0.75) # Xanh lam thần thánh Cổ Thành
+			core_color = Color(0.7, 1.1, 1.3, 0.95)
+			stone_tint = Color(0.9, 0.95, 1.05, 1.0)
+		2:
+			flame_color = Color(0.15, 1.0, 0.5, 0.75) # Xanh ngọc thanh tẩy độc dược Huyết Rễ
+			core_color = Color(0.65, 1.3, 0.8, 0.95)
+			stone_tint = Color(0.85, 1.05, 0.9, 1.0)
+		3:
+			flame_color = Color(1.0, 0.8, 0.25, 0.75) # Lửa hơi nước vàng hổ phách Cơ Giới
+			core_color = Color(1.3, 1.1, 0.6, 0.95)
+			stone_tint = Color(1.05, 1.0, 0.85, 1.0)
+		4:
+			flame_color = Color(0.85, 0.35, 1.0, 0.75) # Lửa tím hư không Đền Thờ
+			core_color = Color(1.2, 0.8, 1.3, 0.95)
+			stone_tint = Color(1.0, 0.85, 1.1, 1.0)
+			
+	if flame_aura:
+		flame_aura.modulate = flame_color
+	if flame_core:
+		flame_core.modulate = core_color
+	if monolith:
+		monolith.modulate = stone_tint
+
+func _process(delta: float) -> void:
+	# Hoạt ảnh ngọn lửa thánh bập bùng
+	anim_timer += delta
+	if anim_timer >= FRAME_TIME:
+		anim_timer -= FRAME_TIME
+		current_frame = (current_frame + 1) % 8
+		if flame_aura:
+			flame_aura.frame = current_frame
+		if flame_core:
+			flame_core.frame = (current_frame + 2) % 8
+
+	# Nhịp thở xung điện từ của đài tế
+	var time_ms = Time.get_ticks_msec()
+	if flame_aura:
+		var pulse = 0.8 + 0.06 * sin(time_ms * 0.005)
+		flame_aura.scale = Vector2(pulse, pulse)
+	if flame_core:
+		var pulse_core = 0.65 + 0.04 * cos(time_ms * 0.006)
+		flame_core.scale = Vector2(pulse_core, pulse_core)
+
 	if player_in_range and (Input.is_key_pressed(KEY_E) or Input.is_action_just_pressed("attack")):
 		rest_at_altar()
 
@@ -74,11 +132,17 @@ func rest_at_altar() -> void:
 	if player_in_range.has_method("refill_armor_after_round"):
 		player_in_range.refill_armor_after_round()
 	
-	# Hiệu ứng ánh sáng thanh tẩy (Purifying Light)
+	# Hiệu ứng ánh sáng thanh tẩy bừng sáng (Purifying Light)
 	if player_in_range.sprite:
 		var tween = create_tween()
 		tween.tween_property(player_in_range.sprite, "modulate", Color(0.2, 1.5, 0.6, 1.0), 0.25)
 		tween.tween_property(player_in_range.sprite, "modulate", Color.WHITE, 0.3)
+		
+	# Hiệu ứng ngọn lửa đài tế bùng sáng khi ban phước
+	if flame_aura:
+		var tw_flame = create_tween()
+		tw_flame.tween_property(flame_aura, "scale", Vector2(1.2, 1.3), 0.15)
+		tw_flame.tween_property(flame_aura, "scale", Vector2(0.8, 0.8), 0.25)
 		
 	if prompt_label:
 		if haven_dialogues.size() > 0:
