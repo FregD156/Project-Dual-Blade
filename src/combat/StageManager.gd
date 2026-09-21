@@ -46,6 +46,8 @@ const ENEMY_BOSS_W1 = preload("res://scenes/enemies/EnemyBossCommander.tscn")
 # Quái & Môi Trường World 2
 const ENEMY_MUSHROOM = preload("res://scenes/enemies/EnemyToxicMushroom.tscn")
 const ENEMY_SPIDER = preload("res://scenes/enemies/EnemyCrimsonSpider.tscn")
+const ENEMY_FLOOR_ROOT = preload("res://scenes/enemies/EnemyFloorRoot.tscn")
+const ENEMY_WALL_PARASITE = preload("res://scenes/enemies/EnemyWallParasite.tscn")
 const ENEMY_ELITE_TREE = preload("res://scenes/enemies/EnemyEliteTree.tscn")
 const ENEMY_BOSS_BROODMOTHER = preload("res://scenes/enemies/EnemyBossBroodmother.tscn")
 const BOUNCY_MUSHROOM_SCENE = preload("res://scenes/environment/BouncyMushroom.tscn")
@@ -324,90 +326,95 @@ func _get_world2_spawns(stage: int, branch: RoomBranch) -> Array:
 		1:
 			spawn_list = [
 				{"scene": ENEMY_MUSHROOM, "pos": Vector2(420, 192)},
-				{"scene": ENEMY_SPIDER, "pos": Vector2(680, 192)}
+				{"scene": ENEMY_WALL_PARASITE, "pos": Vector2(580, 108)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(780, 192)}
 			]
 		2:
 			if branch == RoomBranch.COMBAT:
 				spawn_list = [
 					{"scene": ENEMY_MUSHROOM, "pos": Vector2(380, 192)},
-					{"scene": ENEMY_MUSHROOM, "pos": Vector2(580, 192)},
-					{"scene": ENEMY_SPIDER, "pos": Vector2(750, 192)},
-					{"scene": ENEMY_SPIDER, "pos": Vector2(920, 192)},
-					{"scene": ENEMY_ARCHER, "pos": Vector2(850, 108)}
+					{"scene": ENEMY_FLOOR_ROOT, "pos": Vector2(520, 192)},
+					{"scene": ENEMY_WALL_PARASITE, "pos": Vector2(650, 108)},
+					{"scene": ENEMY_SPIDER, "pos": Vector2(800, 192)},
+					{"scene": ENEMY_SPIDER, "pos": Vector2(950, 192)}
 				]
 			elif branch == RoomBranch.SUSTAIN:
 				spawn_list = [
 					{"scene": ENEMY_MUSHROOM, "pos": Vector2(450, 192)},
-					{"scene": ENEMY_SPIDER, "pos": Vector2(750, 192)}
+					{"scene": ENEMY_FLOOR_ROOT, "pos": Vector2(650, 192)},
+					{"scene": ENEMY_SPIDER, "pos": Vector2(820, 192)}
 				]
 			else:
 				spawn_list = [
 					{"scene": ENEMY_MUSHROOM, "pos": Vector2(400, 192)},
-					{"scene": ENEMY_SPIDER, "pos": Vector2(650, 192)},
-					{"scene": ENEMY_ARCHER, "pos": Vector2(850, 108)}
+					{"scene": ENEMY_WALL_PARASITE, "pos": Vector2(600, 108)},
+					{"scene": ENEMY_SPIDER, "pos": Vector2(760, 192)},
+					{"scene": ENEMY_FLOOR_ROOT, "pos": Vector2(920, 192)}
 				]
 		3:
 			if branch == RoomBranch.COMBAT:
 				spawn_list = [
 					{"scene": ENEMY_SPIDER, "pos": Vector2(380, 192)},
-					{"scene": ENEMY_SPIDER, "pos": Vector2(560, 192)},
-					{"scene": ENEMY_MUSHROOM, "pos": Vector2(740, 192)},
-					{"scene": ENEMY_MUSHROOM, "pos": Vector2(920, 192)},
-					{"scene": ENEMY_ARCHER, "pos": Vector2(850, 108)},
-					{"scene": ENEMY_ARCHER, "pos": Vector2(1100, 108)}
+					{"scene": ENEMY_FLOOR_ROOT, "pos": Vector2(540, 192)},
+					{"scene": ENEMY_WALL_PARASITE, "pos": Vector2(700, 108)},
+					{"scene": ENEMY_MUSHROOM, "pos": Vector2(860, 192)},
+					{"scene": ENEMY_SPIDER, "pos": Vector2(1020, 192)}
 				]
 			elif branch == RoomBranch.SUSTAIN:
 				spawn_list = [
 					{"scene": ENEMY_SPIDER, "pos": Vector2(480, 192)},
-					{"scene": ENEMY_MUSHROOM, "pos": Vector2(800, 192)}
+					{"scene": ENEMY_MUSHROOM, "pos": Vector2(750, 192)}
 				]
 			else:
 				spawn_list = [
 					{"scene": ENEMY_SPIDER, "pos": Vector2(420, 192)},
-					{"scene": ENEMY_MUSHROOM, "pos": Vector2(640, 192)},
-					{"scene": ENEMY_SPIDER, "pos": Vector2(860, 192)}
+					{"scene": ENEMY_FLOOR_ROOT, "pos": Vector2(620, 192)},
+					{"scene": ENEMY_MUSHROOM, "pos": Vector2(800, 192)},
+					{"scene": ENEMY_WALL_PARASITE, "pos": Vector2(980, 108)}
 				]
 		4:
 			spawn_list = [
-				{"scene": ENEMY_MUSHROOM, "pos": Vector2(400, 192)},
-				{"scene": ENEMY_SPIDER, "pos": Vector2(600, 192)},
-				{"scene": ENEMY_SPIDER, "pos": Vector2(800, 192)},
-				{"scene": ENEMY_ARCHER, "pos": Vector2(950, 108)}
+				{"scene": ENEMY_MUSHROOM, "pos": Vector2(380, 192)},
+				{"scene": ENEMY_FLOOR_ROOT, "pos": Vector2(520, 192)},
+				{"scene": ENEMY_WALL_PARASITE, "pos": Vector2(680, 108)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(840, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(1040, 192)}
 			]
 		5:
 			# Quái Tinh Anh 2.5: Cổ Thụ Biến Dị
 			spawn_list = [
 				{"scene": ENEMY_ELITE_TREE, "pos": Vector2(780, 192)},
-				{"scene": ENEMY_SPIDER, "pos": Vector2(450, 192)},
-				{"scene": ENEMY_MUSHROOM, "pos": Vector2(980, 192)}
+				{"scene": ENEMY_FLOOR_ROOT, "pos": Vector2(560, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(980, 192)}
 			]
 		6:
 			spawn_list = [
-				{"scene": ENEMY_MUSHROOM, "pos": Vector2(420, 192)},
-				{"scene": ENEMY_SPIDER, "pos": Vector2(640, 192)},
-				{"scene": ENEMY_SPIDER, "pos": Vector2(850, 192)},
-				{"scene": ENEMY_ARCHER, "pos": Vector2(1050, 108)}
+				{"scene": ENEMY_MUSHROOM, "pos": Vector2(400, 192)},
+				{"scene": ENEMY_FLOOR_ROOT, "pos": Vector2(580, 192)},
+				{"scene": ENEMY_WALL_PARASITE, "pos": Vector2(750, 108)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(920, 192)}
 			]
 		7:
 			spawn_list = [
-				{"scene": ENEMY_SPIDER, "pos": Vector2(450, 192)},
-				{"scene": ENEMY_SPIDER, "pos": Vector2(680, 192)},
-				{"scene": ENEMY_MUSHROOM, "pos": Vector2(880, 192)},
-				{"scene": ENEMY_ARCHER, "pos": Vector2(1100, 108)}
+				{"scene": ENEMY_SPIDER, "pos": Vector2(420, 192)},
+				{"scene": ENEMY_FLOOR_ROOT, "pos": Vector2(600, 192)},
+				{"scene": ENEMY_WALL_PARASITE, "pos": Vector2(780, 108)},
+				{"scene": ENEMY_MUSHROOM, "pos": Vector2(940, 192)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(1100, 192)}
 			]
 		8:
-			# Đẩy cao độ khó trước boss
+			# Đẩy cao độ khó trước boss: Cổ Thụ kết hợp dàn trap rễ và nhện
 			spawn_list = [
 				{"scene": ENEMY_ELITE_TREE, "pos": Vector2(720, 192)},
-				{"scene": ENEMY_SPIDER, "pos": Vector2(500, 192)},
-				{"scene": ENEMY_SPIDER, "pos": Vector2(920, 192)},
-				{"scene": ENEMY_ARCHER, "pos": Vector2(1150, 108)}
+				{"scene": ENEMY_FLOOR_ROOT, "pos": Vector2(480, 192)},
+				{"scene": ENEMY_WALL_PARASITE, "pos": Vector2(900, 108)},
+				{"scene": ENEMY_SPIDER, "pos": Vector2(1080, 192)}
 			]
 		10:
-			# Đại Trùm Cuối World 2 (2.10): Mẫu Thể Ký Sinh
+			# Đại Trùm Cuối World 2 (2.10): Mẫu Thể Ký Sinh + bầy nhện bảo vệ
 			spawn_list = [
 				{"scene": ENEMY_BOSS_BROODMOTHER, "pos": Vector2(880, 192)},
-				{"scene": ENEMY_SPIDER, "pos": Vector2(1150, 192)}
+				{"scene": ENEMY_SPIDER, "pos": Vector2(1120, 192)}
 			]
 	return spawn_list
 
