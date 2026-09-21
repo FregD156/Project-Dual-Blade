@@ -7,11 +7,17 @@ extends Area2D
 
 signal player_rested()
 
-@export var world_index: int = 1
+@export var world_index: int = 1:
+	set(val):
+		world_index = val
+		if is_node_ready():
+			_apply_world_theme_colors()
+
 @onready var prompt_label: Label = $PromptLabel
 @onready var flame_aura: Sprite2D = get_node_or_null("SanctuaryFlameAura")
 @onready var flame_core: Sprite2D = get_node_or_null("SanctuaryFlameCore")
 @onready var monolith: Sprite2D = get_node_or_null("AltarMonolith")
+@onready var warp_beam: Sprite2D = get_node_or_null("TeleportWarpBeam")
 
 var player_in_range: Player = null
 var has_used: bool = false
@@ -21,6 +27,10 @@ var haven_dialogues: Array[Dictionary] = []
 var anim_timer: float = 0.0
 var current_frame: int = 0
 const FRAME_TIME: float = 0.09
+
+var beam_anim_timer: float = 0.0
+var beam_frame: int = 0
+var is_channeling: bool = false
 
 func _ready() -> void:
 	collision_layer = 0
@@ -35,6 +45,8 @@ func _ready() -> void:
 	_apply_world_theme_colors()
 
 func _apply_world_theme_colors() -> void:
+	if not is_node_ready():
+		return
 	# Cấu hình màu sắc ngọn lửa thánh và hoa văn đài tế theo từng Thế giới
 	var flame_color = Color(0.2, 1.0, 0.65, 0.75) # Mặc định xanh ngọc phục sinh
 	var core_color = Color(0.75, 1.2, 0.9, 0.95)
@@ -62,6 +74,8 @@ func _apply_world_theme_colors() -> void:
 		flame_aura.modulate = flame_color
 	if flame_core:
 		flame_core.modulate = core_color
+	if warp_beam:
+		warp_beam.modulate = core_color
 	if monolith:
 		monolith.modulate = stone_tint
 
@@ -75,6 +89,18 @@ func _process(delta: float) -> void:
 			flame_aura.frame = current_frame
 		if flame_core:
 			flame_core.frame = (current_frame + 2) % 8
+
+	# Hoạt ảnh cột sáng thanh tẩy / dịch chuyển
+	if is_channeling and warp_beam:
+		beam_anim_timer += delta
+		if beam_anim_timer >= 0.05:
+			beam_anim_timer -= 0.05
+			beam_frame += 1
+			if beam_frame >= 8:
+				is_channeling = false
+				warp_beam.visible = false
+			else:
+				warp_beam.frame = beam_frame
 
 	# Nhịp thở xung điện từ của đài tế
 	var time_ms = Time.get_ticks_msec()
@@ -108,13 +134,22 @@ func _show_player_prompt(player: Player) -> void:
 	player_in_range = player
 	if prompt_label:
 		prompt_label.visible = true
-		prompt_label.text = "[E/Chém]: ĐÀI TẾ HỒI PHỤC  |  [M]: DỊCH CHUYỂN NHANH"
+		prompt_label.text = "[E/Chém]: ĐÀI TẾ HỒI PHỤC  |  [M]: BẢN ĐỒ DỊCH CHUYỂN"
 		prompt_label.modulate = Color(0.2, 1.0, 0.6)
 
 func _hide_player_prompt() -> void:
 	player_in_range = null
 	if prompt_label:
 		prompt_label.visible = false
+
+func trigger_checkpoint_warp_animation() -> void:
+	# Kích hoạt hiệu ứng cột sáng không gian khi player dịch chuyển tới đây
+	is_channeling = true
+	beam_frame = 0
+	beam_anim_timer = 0.0
+	if warp_beam:
+		warp_beam.visible = true
+		warp_beam.frame = 0
 
 func rest_at_altar() -> void:
 	if not player_in_range:
@@ -132,16 +167,25 @@ func rest_at_altar() -> void:
 	if player_in_range.has_method("refill_armor_after_round"):
 		player_in_range.refill_armor_after_round()
 	
-	# Hiệu ứng ánh sáng thanh tẩy bừng sáng (Purifying Light)
+	# 1. Bật cột sáng thánh thanh tẩy (Sanctuary Beam)
+	trigger_checkpoint_warp_animation()
+	
+	# 2. Hiệu ứng ánh sáng thanh tẩy bừng sáng trên người nhân vật (Purifying Light)
 	if player_in_range.sprite:
 		var tween = create_tween()
-		tween.tween_property(player_in_range.sprite, "modulate", Color(0.2, 1.5, 0.6, 1.0), 0.25)
+		tween.tween_property(player_in_range.sprite, "modulate", Color(0.2, 1.6, 0.7, 1.0), 0.25)
 		tween.tween_property(player_in_range.sprite, "modulate", Color.WHITE, 0.3)
 		
-	# Hiệu ứng ngọn lửa đài tế bùng sáng khi ban phước
+	# 3. Rung chấn mặt đất nhẹ khi kích hoạt thánh địa
+	if player_in_range.has_node("Camera2D"):
+		var cam: Camera2D = player_in_range.get_node("Camera2D")
+		if cam:
+			VFXManager.screen_shake(cam, 2.0, 0.2)
+		
+	# 4. Hiệu ứng ngọn lửa đài tế bùng sáng khi ban phước
 	if flame_aura:
 		var tw_flame = create_tween()
-		tw_flame.tween_property(flame_aura, "scale", Vector2(1.2, 1.3), 0.15)
+		tw_flame.tween_property(flame_aura, "scale", Vector2(1.25, 1.35), 0.15)
 		tw_flame.tween_property(flame_aura, "scale", Vector2(0.8, 0.8), 0.25)
 		
 	if prompt_label:

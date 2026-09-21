@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://cportal_system_01"]
+[gd_scene load_steps=7 format=3 uid="uid://cportal_system_01"]
 
 [ext_resource type="FontFile" path="res://assets/fonts/pixel_font.ttf" id="1_font"]
 [ext_resource type="Script" path="res://src/combat/Portal.gd" id="2_portal_script"]
 [ext_resource type="Texture2D" path="res://assets/sprites/vfx/portal_vortex_sheet.png" id="3_vortex_tex"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/portal_gothic_frame.png" id="4_frame_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/teleport_warp_beam.png" id="5_beam_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_portal"]
 size = Vector2(44, 70)
@@ -36,6 +37,13 @@ texture_filter = 0
 position = Vector2(0, -38)
 scale = Vector2(0.52, 0.52)
 texture = ExtResource("4_frame_tex")
+
+[node name="TeleportWarpBeam" type="Sprite2D" parent="."]
+visible = false
+texture_filter = 0
+position = Vector2(0, -56)
+texture = ExtResource("5_beam_tex")
+hframes = 8
 
 [node name="TitleLabel" type="Label" parent="."]
 offset_left = -90.0

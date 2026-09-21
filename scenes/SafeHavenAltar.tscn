@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://csafe_haven_altar"]
+[gd_scene load_steps=7 format=3 uid="uid://csafe_haven_altar"]
 
 [ext_resource type="Script" path="res://src/environment/SafeHavenAltar.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://assets/fonts/pixel_font.ttf" id="2_font"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/altar_gothic_monolith.png" id="3_monolith_tex"]
 [ext_resource type="Texture2D" path="res://assets/sprites/vfx/altar_flame_sheet.png" id="4_flame_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/teleport_warp_beam.png" id="5_beam_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_altar"]
 size = Vector2(80, 70)
@@ -35,6 +36,13 @@ texture_filter = 0
 position = Vector2(0, -66)
 scale = Vector2(0.65, 0.65)
 texture = ExtResource("4_flame_tex")
+hframes = 8
+
+[node name="TeleportWarpBeam" type="Sprite2D" parent="."]
+visible = false
+texture_filter = 0
+position = Vector2(0, -56)
+texture = ExtResource("5_beam_tex")
 hframes = 8
 
 [node name="PromptLabel" type="Label" parent="."]
