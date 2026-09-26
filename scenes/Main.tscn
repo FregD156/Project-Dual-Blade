@@ -574,7 +574,7 @@ text = "Thạch: 0"
 vertical_alignment = 1
 
 [node name="BagBtn" type="Button" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(36, 18)
+custom_minimum_size = Vector2(46, 18)
 layout_mode = 2
 focus_mode = 0
 theme_override_fonts/font = ExtResource("5_font")
@@ -582,7 +582,7 @@ theme_override_font_sizes/font_size = 6
 text = "[B] Túi"
 
 [node name="MapBtn" type="Button" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(38, 18)
+custom_minimum_size = Vector2(46, 18)
 layout_mode = 2
 focus_mode = 0
 theme_override_fonts/font = ExtResource("5_font")

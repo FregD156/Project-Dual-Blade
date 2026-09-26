@@ -1029,20 +1029,8 @@ func _check_and_notify_merge_ready(recent_item: Dictionary) -> void:
 			_show_merge_ready_toast(grp_name, count)
 			break
 
-func _show_merge_ready_toast(grp_name: String, count: int) -> void:
-	# 1. Floating text vàng rực trên đầu người chơi báo đã gom đủ 5 món
-	if get_parent():
-		var dmg_num = DamageNumber.new()
-		dmg_num.global_position = global_position + Vector2(0, -34)
-		dmg_num.setup(0, false, Color(1.0, 0.88, 0.2))
-		for child in dmg_num.get_children():
-			if child is Label:
-				child.text = "✦ ĐÃ THU THẬP ĐỦ %d %s!" % [count, grp_name]
-				child.custom_minimum_size = Vector2(220, 20)
-				child.position = Vector2(-110, -10)
-		get_parent().call_deferred("add_child", dmg_num)
-	
-	# 2. Hào quang vàng kim bừng sáng trên người nhân vật
+func _show_merge_ready_toast(_grp_name: String, _count: int) -> void:
+	# Hào quang vàng kim bừng sáng trên người nhân vật
 	if sprite:
 		var tw = create_tween()
 		tw.tween_property(sprite, "modulate", Color(2.0, 1.8, 0.4, 1.0), 0.12)

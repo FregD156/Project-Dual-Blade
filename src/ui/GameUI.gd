@@ -80,9 +80,23 @@ const WEAPON_TEXTURES = {
 	"tier_ssr": preload("res://assets/sprites/items/sliced/weapon_tier_ssr.png")
 }
 
+const ICON_BAG = preload("res://assets/sprites/ui/icon_bag.png")
+const ICON_MAP = preload("res://assets/sprites/ui/icon_map.png")
+
+var right_notify_panel: PanelContainer = null
+var right_notify_label: Label = null
+var right_notify_tween: Tween = null
+var bag_btn_glow_tween: Tween = null
+
 func _ready() -> void:
 	if boss_bar_container:
 		boss_bar_container.visible = false
+	if bag_btn:
+		bag_btn.icon = ICON_BAG
+		bag_btn.expand_icon = true
+	if map_btn:
+		map_btn.icon = ICON_MAP
+		map_btn.expand_icon = true
 
 func _process(delta: float) -> void:
 	var t = Time.get_ticks_msec() * 0.001
@@ -143,6 +157,8 @@ func connect_player(player: Player) -> void:
 	_on_inventory_changed_for_hints(player.inventory)
 		
 	if bag_btn:
+		bag_btn.icon = ICON_BAG
+		bag_btn.expand_icon = true
 		bag_btn.pressed.connect(func():
 			var inv = get_parent().get_node_or_null("UI_Layer/InventoryUI")
 			if not inv:
@@ -152,6 +168,8 @@ func connect_player(player: Player) -> void:
 		)
 		
 	if map_btn:
+		map_btn.icon = ICON_MAP
+		map_btn.expand_icon = true
 		map_btn.pressed.connect(func():
 			var map_ui = get_parent().get_node_or_null("UI_Layer/FastTravelMapUI")
 			if not map_ui:
@@ -377,24 +395,97 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 		if flow_frame:
 			flow_frame.modulate = Color.WHITE
 
-var bag_btn_glow_tween: Tween = null
+func _setup_right_notify_box() -> void:
+	if right_notify_panel and is_instance_valid(right_notify_panel):
+		return
+		
+	right_notify_panel = PanelContainer.new()
+	right_notify_panel.name = "RightNotifyPanel"
+	right_notify_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	# Định vị góc trên bên phải màn hình (Right Side Popup)
+	right_notify_panel.anchors_preset = Control.PRESET_TOP_RIGHT
+	right_notify_panel.anchor_left = 1.0
+	right_notify_panel.anchor_right = 1.0
+	right_notify_panel.anchor_top = 0.0
+	right_notify_panel.anchor_bottom = 0.0
+	right_notify_panel.offset_left = -175.0
+	right_notify_panel.offset_top = 38.0
+	right_notify_panel.offset_right = -8.0
+	right_notify_panel.offset_bottom = 70.0
+	right_notify_panel.custom_minimum_size = Vector2(167, 32)
+	
+	# Phong cách Dark Gothic: Nền thạch anh tối viền vàng đồng
+	var style_box = StyleBoxFlat.new()
+	style_box.bg_color = Color(0.08, 0.09, 0.13, 0.92)
+	style_box.border_color = Color(0.85, 0.72, 0.25, 0.95)
+	style_box.set_border_width_all(1)
+	style_box.corner_radius_top_left = 3
+	style_box.corner_radius_top_right = 3
+	style_box.corner_radius_bottom_left = 3
+	style_box.corner_radius_bottom_right = 3
+	style_box.content_margin_left = 6
+	style_box.content_margin_right = 6
+	style_box.content_margin_top = 4
+	style_box.content_margin_bottom = 4
+	right_notify_panel.add_theme_stylebox_override("panel", style_box)
+	
+	var hbox = HBoxContainer.new()
+	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hbox.add_theme_constant_override("separation", 6)
+	
+	var icon_rect = TextureRect.new()
+	icon_rect.texture = ICON_BAG
+	icon_rect.custom_minimum_size = Vector2(16, 16)
+	icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hbox.add_child(icon_rect)
+	
+	right_notify_label = Label.new()
+	var font = preload("res://assets/fonts/pixel_font.ttf")
+	right_notify_label.add_theme_font_override("font", font)
+	right_notify_label.add_theme_font_size_override("font_size", 6)
+	right_notify_label.add_theme_color_override("font_color", Color(1.0, 0.92, 0.45, 1.0))
+	right_notify_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1.0))
+	right_notify_label.add_theme_constant_override("outline_size", 2)
+	right_notify_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	right_notify_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hbox.add_child(right_notify_label)
+	
+	right_notify_panel.add_child(hbox)
+	right_notify_panel.visible = false
+	add_child(right_notify_panel)
 
 func _on_player_merge_ready(grp_name: String, count: int) -> void:
-	# Hiển thị banner thông báo nổi bật trên màn hình khi thu thập đủ 5 trang bị
-	var banner = get_node_or_null("StageBanner")
-	var banner_lbl = get_node_or_null("StageBanner/BannerLabel")
-	if banner and banner_lbl:
-		banner_lbl.text = "✦ ĐÃ THU THẬP ĐỦ %d %s! BẤM [B] ĐỂ GHÉP ✦" % [count, grp_name]
-		banner.visible = true
-		banner.modulate = Color(1.8, 1.6, 0.4, 1.0)
-		var tw = create_tween()
-		tw.tween_property(banner, "modulate:a", 1.0, 0.2)
-		tw.tween_interval(2.2)
-		tw.tween_property(banner, "modulate:a", 0.0, 0.4)
-		tw.tween_callback(func():
-			banner.visible = false
-			banner.modulate = Color.WHITE
-		)
+	# Khung thông báo nhỏ gọn tinh tế ở mép phải màn hình
+	_setup_right_notify_box()
+	if not right_notify_panel or not right_notify_label:
+		return
+		
+	right_notify_label.text = "Đủ %d %s!\n[B] Túi để ghép" % [count, grp_name]
+	right_notify_panel.visible = true
+	
+	if right_notify_tween and right_notify_tween.is_valid():
+		right_notify_tween.kill()
+		
+	# Animation trượt êm từ phải sang và mờ dần biến mất
+	right_notify_panel.modulate.a = 0.0
+	right_notify_panel.position.x = 480.0
+	
+	right_notify_tween = create_tween()
+	# Slide in
+	right_notify_tween.parallel().tween_property(right_notify_panel, "position:x", 305.0, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	right_notify_tween.parallel().tween_property(right_notify_panel, "modulate:a", 1.0, 0.2)
+	# Giữ lại hiển thị 3 giây
+	right_notify_tween.tween_interval(3.0)
+	# Fade out & slide out nhẹ
+	right_notify_tween.parallel().tween_property(right_notify_panel, "modulate:a", 0.0, 0.35)
+	right_notify_tween.parallel().tween_property(right_notify_panel, "position:x", 325.0, 0.35)
+	right_notify_tween.tween_callback(func():
+		if right_notify_panel:
+			right_notify_panel.visible = false
+	)
 
 func _on_inventory_changed_for_hints(inventory: Array[Dictionary]) -> void:
 	if not bag_btn:
