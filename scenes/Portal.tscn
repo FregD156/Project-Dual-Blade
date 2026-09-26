@@ -1,13 +1,14 @@
-[gd_scene load_steps=7 format=3 uid="uid://cportal_system_01"]
+[gd_scene load_steps=8 format=3 uid="uid://cportal_system_01"]
 
 [ext_resource type="FontFile" path="res://assets/fonts/pixel_font.ttf" id="1_font"]
 [ext_resource type="Script" path="res://src/combat/Portal.gd" id="2_portal_script"]
-[ext_resource type="Texture2D" path="res://assets/sprites/vfx/portal_vortex_sheet.png" id="3_vortex_tex"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ui/portal_gothic_frame.png" id="4_frame_tex"]
-[ext_resource type="Texture2D" path="res://assets/sprites/vfx/teleport_warp_beam.png" id="5_beam_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/portal_vortex_12f.png" id="3_vortex_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/portal_gothic_gate.png" id="4_gate_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/portal_teleport_burst.png" id="5_burst_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/portal_banner_plate.png" id="6_plate_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_portal"]
-size = Vector2(44, 70)
+size = Vector2(40, 72)
 
 [node name="Portal" type="Area2D"]
 collision_layer = 128
@@ -15,63 +16,67 @@ collision_mask = 2
 script = ExtResource("2_portal_script")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -35)
+position = Vector2(0, -36)
 shape = SubResource("RectangleShape2D_portal")
 
-[node name="VortexAura" type="Sprite2D" parent="."]
+[node name="GateVortex" type="Sprite2D" parent="."]
 texture_filter = 0
-position = Vector2(0, -38)
-scale = Vector2(1.1, 1.1)
+position = Vector2(0, -56)
 texture = ExtResource("3_vortex_tex")
-hframes = 8
+hframes = 12
 
-[node name="VortexCore" type="Sprite2D" parent="."]
+[node name="GothicGateFrame" type="Sprite2D" parent="."]
 texture_filter = 0
-position = Vector2(0, -38)
-scale = Vector2(0.9, 0.9)
-texture = ExtResource("3_vortex_tex")
-hframes = 8
+position = Vector2(0, -56)
+texture = ExtResource("4_gate_tex")
 
-[node name="GothicArchFrame" type="Sprite2D" parent="."]
-texture_filter = 0
-position = Vector2(0, -38)
-scale = Vector2(0.52, 0.52)
-texture = ExtResource("4_frame_tex")
-
-[node name="TeleportWarpBeam" type="Sprite2D" parent="."]
+[node name="TeleportBurst" type="Sprite2D" parent="."]
 visible = false
 texture_filter = 0
 position = Vector2(0, -56)
-texture = ExtResource("5_beam_tex")
-hframes = 8
+texture = ExtResource("5_burst_tex")
+hframes = 10
 
-[node name="TitleLabel" type="Label" parent="."]
-offset_left = -90.0
-offset_top = -100.0
-offset_right = 90.0
-offset_bottom = -86.0
+[node name="BannerContainer" type="Node2D" parent="."]
+position = Vector2(0, -125)
+
+[node name="BannerPlate" type="Sprite2D" parent="BannerContainer"]
+texture_filter = 0
+position = Vector2(0, 8)
+texture = ExtResource("6_plate_tex")
+
+[node name="TitleLabel" type="Label" parent="BannerContainer"]
+offset_left = -66.0
+offset_top = -6.0
+offset_right = 66.0
+offset_bottom = 6.0
 theme_override_fonts/font = ExtResource("1_font")
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 7
 text = "✦ CỔNG TIẾN BƯỚC"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DescLabel" type="Label" parent="."]
-offset_left = -100.0
-offset_top = -86.0
-offset_right = 100.0
-offset_bottom = -74.0
+[node name="DescLabel" type="Label" parent="BannerContainer"]
+offset_left = -66.0
+offset_top = 7.0
+offset_right = 66.0
+offset_bottom = 19.0
 theme_override_fonts/font = ExtResource("1_font")
-theme_override_font_sizes/font_size = 6
+theme_override_font_sizes/font_size = 5
 text = "Mật độ quái dày • Tăng rơi phôi"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="."]
-offset_left = -80.0
-offset_top = -72.0
-offset_right = 80.0
-offset_bottom = -60.0
+[node name="PromptContainer" type="Node2D" parent="."]
+position = Vector2(0, -96)
+
+[node name="Label" type="Label" parent="PromptContainer"]
+offset_left = -60.0
+offset_top = -6.0
+offset_right = 60.0
+offset_bottom = 6.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("1_font")
 theme_override_font_sizes/font_size = 6
 text = "[W / UP / E] VÀO"
