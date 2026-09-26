@@ -47,8 +47,11 @@ var burst_frame: int = 0
 var is_teleporting: bool = false
 var base_banner_y: float = -125.0
 var base_prompt_y: float = -96.0
+var warp_player: Player = null
+var player_tween: Tween = null
 
 func _ready() -> void:
+	z_index = -1 # Cổng dịch chuyển luôn nằm ở lớp sau (background) để nhân vật hiển thị rõ ràng phía trước
 	collision_layer = 128
 	collision_mask = 2 # Player CharacterBody2D layer
 	body_entered.connect(_on_body_entered)
@@ -193,6 +196,8 @@ func _trigger_portal() -> void:
 	is_teleporting = true
 	set_deferred("monitoring", false)
 	
+	warp_player = player_in_range
+	
 	# 1. Kích hoạt hiệu ứng Vụ Nổ Dịch Chuyển Không Gian (Teleport Burst)
 	if teleport_burst:
 		teleport_burst.visible = true
@@ -201,30 +206,40 @@ func _trigger_portal() -> void:
 		burst_anim_timer = 0.0
 
 	# 2. Hoạt ảnh hút nhân vật vào cổng chiều không gian (Warp Suction Pull)
-	if player_in_range and is_instance_valid(player_in_range):
-		player_in_range.velocity = Vector2.ZERO
-		var p_tw = create_tween().set_parallel(true)
-		p_tw.tween_property(player_in_range, "global_position", global_position + Vector2(0, -32), 0.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		if player_in_range.sprite:
-			p_tw.tween_property(player_in_range.sprite, "modulate:a", 0.0, 0.28)
-			p_tw.tween_property(player_in_range.sprite, "scale", Vector2(0.01, 0.01), 0.28)
+	if warp_player and is_instance_valid(warp_player):
+		warp_player.velocity = Vector2.ZERO
+		if player_tween:
+			player_tween.kill()
+		player_tween = create_tween().set_parallel(true)
+		player_tween.tween_property(warp_player, "global_position", global_position + Vector2(0, -32), 0.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		if warp_player.sprite:
+			player_tween.tween_property(warp_player.sprite, "modulate:a", 0.0, 0.28)
+			player_tween.tween_property(warp_player.sprite, "scale", Vector2(0.01, 0.01), 0.28)
 
 	# Rung chấn màn hình mạnh mẽ khi dịch chuyển
 	var cam: Camera2D = null
-	if player_in_range and player_in_range.has_node("Camera2D"):
-		cam = player_in_range.get_node("Camera2D")
+	if warp_player and is_instance_valid(warp_player) and warp_player.has_node("Camera2D"):
+		cam = warp_player.get_node("Camera2D")
 	if cam:
 		VFXManager.screen_shake(cam, 4.0, 0.28)
 
 	# Chờ hiệu ứng bùng nổ năng lượng hoàn tất
 	await get_tree().create_timer(0.38).timeout
 	
+	# Dừng tween nhân vật và phục hồi hiển thị đầy đủ cho Player TRƯỚC KHI emit chuyển ải
+	if player_tween:
+		player_tween.kill()
+		player_tween = null
+	if is_instance_valid(warp_player) and warp_player.sprite:
+		warp_player.sprite.modulate.a = 1.0
+		warp_player.sprite.scale = Vector2.ONE
+	
 	player_chosen_portal.emit(portal_type)
 	
-	# Phục hồi sprite người chơi khi tới ải mới
-	if is_instance_valid(player_in_range) and player_in_range.sprite:
-		player_in_range.sprite.modulate.a = 1.0
-		player_in_range.sprite.scale = Vector2.ONE
+	# Đảm bảo chắc chắn sprite người chơi hiển thị đầy đủ ở ải mới
+	if is_instance_valid(warp_player) and warp_player.sprite:
+		warp_player.sprite.modulate.a = 1.0
+		warp_player.sprite.scale = Vector2.ONE
 	
 	# Thu hẹp cổng và biến mất
 	var tw = create_tween().set_parallel(true)

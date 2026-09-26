@@ -147,6 +147,11 @@ func _reposition_player() -> void:
 	if player and is_instance_valid(player):
 		player.global_position = Vector2(100, 192)
 		player.velocity = Vector2.ZERO
+		if player.sprite:
+			player.sprite.modulate.a = 1.0
+			player.sprite.scale = Vector2.ONE
+			player.sprite.visible = true
+		player.visible = true
 		if player.has_node("Camera2D"):
 			player.get_node("Camera2D").reset_smoothing()
 		if player.has_method("refill_armor_after_round"):
