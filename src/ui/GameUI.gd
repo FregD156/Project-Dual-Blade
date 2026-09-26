@@ -83,9 +83,9 @@ const WEAPON_TEXTURES = {
 const ICON_BAG = preload("res://assets/sprites/ui/icon_bag.png")
 const ICON_MAP = preload("res://assets/sprites/ui/icon_map.png")
 
-var right_notify_panel: PanelContainer = null
-var right_notify_label: Label = null
-var right_notify_tween: Tween = null
+var notify_panel: PanelContainer = null
+var notify_label: Label = null
+var notify_tween: Tween = null
 var bag_btn_glow_tween: Tween = null
 
 func _ready() -> void:
@@ -395,27 +395,28 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 		if flow_frame:
 			flow_frame.modulate = Color.WHITE
 
-func _setup_right_notify_box() -> void:
-	if right_notify_panel and is_instance_valid(right_notify_panel):
+func _setup_bottom_left_notify_box() -> void:
+	if notify_panel and is_instance_valid(notify_panel):
 		return
 		
-	right_notify_panel = PanelContainer.new()
-	right_notify_panel.name = "RightNotifyPanel"
-	right_notify_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	notify_panel = PanelContainer.new()
+	notify_panel.name = "BottomLeftNotifyPanel"
+	notify_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
-	# Định vị góc trên bên phải màn hình (Right Side Popup)
-	right_notify_panel.anchors_preset = Control.PRESET_TOP_RIGHT
-	right_notify_panel.anchor_left = 1.0
-	right_notify_panel.anchor_right = 1.0
-	right_notify_panel.anchor_top = 0.0
-	right_notify_panel.anchor_bottom = 0.0
-	right_notify_panel.offset_left = -175.0
-	right_notify_panel.offset_top = 38.0
-	right_notify_panel.offset_right = -8.0
-	right_notify_panel.offset_bottom = 70.0
-	right_notify_panel.custom_minimum_size = Vector2(167, 32)
+	# Định vị dưới màn hình góc bên trái (Bottom Left Toast)
+	# Màn hình chuẩn: 480x270. Đặt tại offset_left: 10, offset_bottom: -10
+	notify_panel.anchors_preset = Control.PRESET_BOTTOM_LEFT
+	notify_panel.anchor_left = 0.0
+	notify_panel.anchor_right = 0.0
+	notify_panel.anchor_top = 1.0
+	notify_panel.anchor_bottom = 1.0
+	notify_panel.offset_left = 10.0
+	notify_panel.offset_top = -42.0
+	notify_panel.offset_right = 175.0
+	notify_panel.offset_bottom = -10.0
+	notify_panel.custom_minimum_size = Vector2(165, 32)
 	
-	# Phong cách Dark Gothic: Nền thạch anh tối viền vàng đồng
+	# Phong cách Dark Gothic: Nền thạch anh tối viền vàng đồng sang trọng
 	var style_box = StyleBoxFlat.new()
 	style_box.bg_color = Color(0.08, 0.09, 0.13, 0.92)
 	style_box.border_color = Color(0.85, 0.72, 0.25, 0.95)
@@ -428,7 +429,7 @@ func _setup_right_notify_box() -> void:
 	style_box.content_margin_right = 6
 	style_box.content_margin_top = 4
 	style_box.content_margin_bottom = 4
-	right_notify_panel.add_theme_stylebox_override("panel", style_box)
+	notify_panel.add_theme_stylebox_override("panel", style_box)
 	
 	var hbox = HBoxContainer.new()
 	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -442,49 +443,49 @@ func _setup_right_notify_box() -> void:
 	icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hbox.add_child(icon_rect)
 	
-	right_notify_label = Label.new()
+	notify_label = Label.new()
 	var font = preload("res://assets/fonts/pixel_font.ttf")
-	right_notify_label.add_theme_font_override("font", font)
-	right_notify_label.add_theme_font_size_override("font_size", 6)
-	right_notify_label.add_theme_color_override("font_color", Color(1.0, 0.92, 0.45, 1.0))
-	right_notify_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1.0))
-	right_notify_label.add_theme_constant_override("outline_size", 2)
-	right_notify_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	right_notify_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	hbox.add_child(right_notify_label)
+	notify_label.add_theme_font_override("font", font)
+	notify_label.add_theme_font_size_override("font_size", 6)
+	notify_label.add_theme_color_override("font_color", Color(1.0, 0.92, 0.45, 1.0))
+	notify_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1.0))
+	notify_label.add_theme_constant_override("outline_size", 2)
+	notify_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	notify_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hbox.add_child(notify_label)
 	
-	right_notify_panel.add_child(hbox)
-	right_notify_panel.visible = false
-	add_child(right_notify_panel)
+	notify_panel.add_child(hbox)
+	notify_panel.visible = false
+	add_child(notify_panel)
 
 func _on_player_merge_ready(grp_name: String, count: int) -> void:
-	# Khung thông báo nhỏ gọn tinh tế ở mép phải màn hình
-	_setup_right_notify_box()
-	if not right_notify_panel or not right_notify_label:
+	# Khung thông báo nhỏ gọn tinh tế ở mép dưới góc bên trái màn hình
+	_setup_bottom_left_notify_box()
+	if not notify_panel or not notify_label:
 		return
 		
-	right_notify_label.text = "Đủ %d %s!\n[B] Túi để ghép" % [count, grp_name]
-	right_notify_panel.visible = true
+	notify_label.text = "Đủ %d %s!\n[B] Túi để ghép" % [count, grp_name]
+	notify_panel.visible = true
 	
-	if right_notify_tween and right_notify_tween.is_valid():
-		right_notify_tween.kill()
+	if notify_tween and notify_tween.is_valid():
+		notify_tween.kill()
 		
-	# Animation trượt êm từ phải sang và mờ dần biến mất
-	right_notify_panel.modulate.a = 0.0
-	right_notify_panel.position.x = 480.0
+	# Animation trượt nhẹ từ dưới lên và mờ dần biến mất
+	notify_panel.modulate.a = 0.0
+	notify_panel.position = Vector2(10.0, 270.0) # Vị trí ngay mép dưới
 	
-	right_notify_tween = create_tween()
-	# Slide in
-	right_notify_tween.parallel().tween_property(right_notify_panel, "position:x", 305.0, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	right_notify_tween.parallel().tween_property(right_notify_panel, "modulate:a", 1.0, 0.2)
-	# Giữ lại hiển thị 3 giây
-	right_notify_tween.tween_interval(3.0)
-	# Fade out & slide out nhẹ
-	right_notify_tween.parallel().tween_property(right_notify_panel, "modulate:a", 0.0, 0.35)
-	right_notify_tween.parallel().tween_property(right_notify_panel, "position:x", 325.0, 0.35)
-	right_notify_tween.tween_callback(func():
-		if right_notify_panel:
-			right_notify_panel.visible = false
+	notify_tween = create_tween()
+	# Slide up nhẹ nhàng vào vị trí (y: 228 -> 270 - 42)
+	notify_tween.parallel().tween_property(notify_panel, "position:y", 228.0, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	notify_tween.parallel().tween_property(notify_panel, "modulate:a", 1.0, 0.22)
+	# Giữ lại hiển thị 3.2 giây cho người chơi kịp đọc
+	notify_tween.tween_interval(3.2)
+	# Fade out & slide down nhẹ
+	notify_tween.parallel().tween_property(notify_panel, "modulate:a", 0.0, 0.35)
+	notify_tween.parallel().tween_property(notify_panel, "position:y", 240.0, 0.35)
+	notify_tween.tween_callback(func():
+		if notify_panel:
+			notify_panel.visible = false
 	)
 
 func _on_inventory_changed_for_hints(inventory: Array[Dictionary]) -> void:
