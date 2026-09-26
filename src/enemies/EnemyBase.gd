@@ -18,6 +18,7 @@ enum State { IDLE, PATROL, CHASE, WINDUP, ATTACK, HURT, DEAD }
 @export var enemy_name: String = "Enemy"
 @export var is_elite: bool = false
 @export var is_boss: bool = false
+@export var world_number: int = 1
 @export var stage_number: int = 1
 @export var is_combat_room: bool = false
 
@@ -334,24 +335,27 @@ func _spawn_loot_drops() -> void:
 		_drop_item("upgrade_crystal")
 
 	# --------------------------------------------------------------------------
-	# CƠ CHẾ RƠI TRANG BỊ MỚI PHỤC VỤ HỆ THỐNG GHÉP 5-LÊN-1
+	# CƠ CHẾ RƠI TRANG BỊ ĐƯỢC CÂN BẰNG LẠI THEO YÊU CẦU:
+	# 1. Giảm 30% tỉ lệ rơi đồ:
+	#    - Quái thường: 31.5% rơi đồ (1 món)
+	#    - Elite: 70% rơi (1 - 2 món)
+	#    - Boss: 100% rơi (2 - 3 món)
+	#    - Cổng Đao Kiếm (Combat Room): 49% rơi đồ quái thường
+	# 2. Giới hạn phẩm cấp Map 1 & 2:
+	#    - Chỉ rớt trang bị Bậc D (không rớt cấp D trở lên như C, B, A,...)
+	#    - Người chơi thu thập đủ 5 món Bậc D cùng loại để ghép lên Bậc C, B,...
 	# --------------------------------------------------------------------------
-	# 1. Tỉ lệ và số lượng rơi:
-	#    - Quái thường: 45% rơi đồ (1 món)
-	#    - Elite: 100% rơi (2 món)
-	#    - Boss: 100% rơi (3 - 4 món)
-	# Trong Cổng Đao Kiếm (Combat Portal): Quái rớt nhiều phôi trang bị và quặng hơn (detail.md IV.2)
-	var equip_chance = 0.45 if not is_elite else 1.0
+	var equip_chance = 0.315 if not is_elite else 0.70
 	var drop_count = 1
 	if is_combat_room:
-		equip_chance = 0.70 if not is_elite else 1.0
-		if randf() < 0.35 and not is_elite:
+		equip_chance = 0.49 if not is_elite else 0.85
+		if randf() < 0.25 and not is_elite:
 			drop_count = 2
 
 	if is_boss:
-		drop_count = randi_range(3, 4)
+		drop_count = randi_range(2, 3)
 	elif is_elite:
-		drop_count = 3 if is_combat_room else 2
+		drop_count = 2 if is_combat_room else (2 if randf() < 0.5 else 1)
 
 	if randf() < equip_chance:
 		for i in range(drop_count):
@@ -360,15 +364,27 @@ func _spawn_loot_drops() -> void:
 			_drop_item(item_key)
 
 func _roll_equipment_tier() -> String:
-	# Yêu cầu World 1 (Ải 1.1 -> 1.10): Tỷ lệ rơi cao nhất là Tier B:
-	# D: 60%, C: 30%, B: 10%
-	var r = randf()
-	if r < 0.10:
-		return "tier_b"
-	elif r < 0.40:
-		return "tier_c"
-	else:
+	# Nếu ở World 1 hoặc World 2: Tuyệt đối chỉ rơi Bậc D (người chơi ghép 5 món D lên C)
+	if world_number <= 2:
 		return "tier_d"
+	elif world_number == 3:
+		# World 3: D: 50%, C: 40%, B: 10%
+		var r = randf()
+		if r < 0.10:
+			return "tier_b"
+		elif r < 0.50:
+			return "tier_c"
+		else:
+			return "tier_d"
+	else:
+		# World 4+: C: 50%, B: 35%, A: 15%
+		var r = randf()
+		if r < 0.15:
+			return "tier_a"
+		elif r < 0.50:
+			return "tier_b"
+		else:
+			return "tier_c"
 
 func _pick_smart_equipment_item(tier: String) -> String:
 	# Kiểm tra túi đồ của người chơi để kích hoạt Smart Fill

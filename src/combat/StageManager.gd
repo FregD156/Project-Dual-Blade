@@ -290,6 +290,7 @@ func _spawn_stage_wave(world: int, stage: int, branch: RoomBranch) -> void:
 		var pos: Vector2 = item["pos"]
 		var enemy: EnemyBase = scn.instantiate()
 		enemy.global_position = pos
+		enemy.world_number = current_world
 		enemy.stage_number = current_stage
 		enemy.is_combat_room = (branch == RoomBranch.COMBAT)
 		enemy.died.connect(_on_enemy_died)

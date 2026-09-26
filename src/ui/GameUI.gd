@@ -382,13 +382,13 @@ func _on_inventory_changed_for_hints(inventory: Array[Dictionary]) -> void:
 		return
 	var can_merge = MergeSystem.can_merge(inventory)
 	if can_merge:
-		bag_btn.text = "[B] Túi Đồ (!)"
+		bag_btn.text = "[B] Túi (!)"
 		if not bag_btn_glow_tween or not bag_btn_glow_tween.is_valid():
 			bag_btn_glow_tween = create_tween().set_loops()
 			bag_btn_glow_tween.tween_property(bag_btn, "modulate", Color(1.8, 1.6, 0.3, 1.0), 0.4)
 			bag_btn_glow_tween.tween_property(bag_btn, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.4)
 	else:
-		bag_btn.text = "[B] Túi Đồ"
+		bag_btn.text = "[B] Túi"
 		if bag_btn_glow_tween:
 			bag_btn_glow_tween.kill()
 			bag_btn_glow_tween = null
