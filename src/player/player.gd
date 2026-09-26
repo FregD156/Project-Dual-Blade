@@ -37,6 +37,7 @@ signal armor_changed(current_armor: float, max_armor: float)
 signal armor_equipped(equipped_armor: Dictionary)
 signal shield_equipped(shield_data: Dictionary)
 signal items_merged(merged_items: Array[Dictionary])
+signal merge_ready(group_name: String, count: int)
 signal player_died()
 
 # ------------------------------------------------------------------------------
@@ -1011,9 +1012,41 @@ func add_to_inventory(item_dict: Dictionary) -> void:
 	inventory.append(item_dict)
 	# Kiểm tra tự động trang bị nếu món đồ mới nhặt có bậc cao hơn món đang dùng
 	auto_equip_if_better(item_dict)
-	# Quét kiểm tra ghép nếu có nhóm đủ 5 món
-	check_and_merge_inventory()
+	
+	# Kiểm tra xem việc nhặt món đồ này có làm đủ 5 món của nhóm nào không
+	_check_and_notify_merge_ready(item_dict)
+	
 	emit_signal("inventory_changed", inventory)
+
+func _check_and_notify_merge_ready(recent_item: Dictionary) -> void:
+	var ready_groups = MergeSystem.get_merge_ready_groups(inventory)
+	var recent_key = MergeSystem.get_merge_group_key(recent_item)
+	for grp in ready_groups:
+		if grp.get("key", "") == recent_key:
+			var grp_name = grp.get("name", "Trang Bị")
+			var count = grp.get("count", 5)
+			emit_signal("merge_ready", grp_name, count)
+			_show_merge_ready_toast(grp_name, count)
+			break
+
+func _show_merge_ready_toast(grp_name: String, count: int) -> void:
+	# 1. Floating text vàng rực trên đầu người chơi báo đã gom đủ 5 món
+	if get_parent():
+		var dmg_num = DamageNumber.new()
+		dmg_num.global_position = global_position + Vector2(0, -34)
+		dmg_num.setup(0, false, Color(1.0, 0.88, 0.2))
+		for child in dmg_num.get_children():
+			if child is Label:
+				child.text = "✦ ĐÃ THU THẬP ĐỦ %d %s!" % [count, grp_name]
+				child.custom_minimum_size = Vector2(220, 20)
+				child.position = Vector2(-110, -10)
+		get_parent().call_deferred("add_child", dmg_num)
+	
+	# 2. Hào quang vàng kim bừng sáng trên người nhân vật
+	if sprite:
+		var tw = create_tween()
+		tw.tween_property(sprite, "modulate", Color(2.0, 1.8, 0.4, 1.0), 0.12)
+		tw.tween_property(sprite, "modulate", Color.WHITE, 0.25)
 
 func auto_equip_if_better(item_dict: Dictionary) -> bool:
 	var itype = item_dict.get("type", "weapon")

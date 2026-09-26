@@ -138,6 +138,8 @@ func connect_player(player: Player) -> void:
 		_on_weapon_equipped(player.current_weapon_tier, player.base_atk, player.crit_rate)
 		
 	player.inventory_changed.connect(_on_inventory_changed_for_hints)
+	if player.has_signal("merge_ready"):
+		player.merge_ready.connect(_on_player_merge_ready)
 	_on_inventory_changed_for_hints(player.inventory)
 		
 	if bag_btn:
@@ -376,6 +378,23 @@ func _on_flow_changed(stacks: int, is_full: bool) -> void:
 			flow_frame.modulate = Color.WHITE
 
 var bag_btn_glow_tween: Tween = null
+
+func _on_player_merge_ready(grp_name: String, count: int) -> void:
+	# Hiển thị banner thông báo nổi bật trên màn hình khi thu thập đủ 5 trang bị
+	var banner = get_node_or_null("StageBanner")
+	var banner_lbl = get_node_or_null("StageBanner/BannerLabel")
+	if banner and banner_lbl:
+		banner_lbl.text = "✦ ĐÃ THU THẬP ĐỦ %d %s! BẤM [B] ĐỂ GHÉP ✦" % [count, grp_name]
+		banner.visible = true
+		banner.modulate = Color(1.8, 1.6, 0.4, 1.0)
+		var tw = create_tween()
+		tw.tween_property(banner, "modulate:a", 1.0, 0.2)
+		tw.tween_interval(2.2)
+		tw.tween_property(banner, "modulate:a", 0.0, 0.4)
+		tw.tween_callback(func():
+			banner.visible = false
+			banner.modulate = Color.WHITE
+		)
 
 func _on_inventory_changed_for_hints(inventory: Array[Dictionary]) -> void:
 	if not bag_btn:
