@@ -206,10 +206,10 @@ theme_override_constants/margin_right = 6
 [node name="HBoxContainer" type="HBoxContainer" parent="UI_Layer/TopContainer/MarginContainer"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
 [node name="VitalPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(120, 22)
+custom_minimum_size = Vector2(126, 26)
 layout_mode = 2
 mouse_filter = 2
 
@@ -228,10 +228,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 1.0
-offset_top = 1.0
-offset_right = -1.0
-offset_bottom = -1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -242,10 +238,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 13.0
-offset_top = 3.0
-offset_right = -13.0
-offset_bottom = -3.0
+offset_left = 12.0
+offset_top = 7.0
+offset_right = -12.0
+offset_bottom = -5.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -258,10 +254,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 1
+theme_override_constants/separation = 2
 
 [node name="HPBar" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox"]
-custom_minimum_size = Vector2(94, 9)
+custom_minimum_size = Vector2(102, 6)
 layout_mode = 2
 mouse_filter = 2
 
@@ -276,21 +272,21 @@ color = Color(0.18, 0.04, 0.06, 1)
 
 [node name="CatchupFill" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background"]
 layout_mode = 0
-offset_right = 94.0
-offset_bottom = 9.0
+offset_right = 102.0
+offset_bottom = 6.0
 color = Color(0.95, 0.8, 0.2, 1)
 
 [node name="Fill" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background"]
 layout_mode = 0
-offset_right = 94.0
-offset_bottom = 9.0
+offset_right = 102.0
+offset_bottom = 6.0
 color = Color(0.88, 0.18, 0.25, 1)
 
 [node name="Shimmer" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar/Background"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 0
 offset_right = 16.0
-offset_bottom = 9.0
+offset_bottom = 6.0
 color = Color(1, 1, 1, 0.6)
 
 [node name="HPText" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/HPBar"]
@@ -298,18 +294,20 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -1.0
+offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("5_font")
-theme_override_font_sizes/font_size = 6
+theme_override_font_sizes/font_size = 5
 text = "HP: 100/100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ArmorBar" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox"]
-custom_minimum_size = Vector2(94, 6)
+custom_minimum_size = Vector2(102, 5)
 layout_mode = 2
 mouse_filter = 2
 
@@ -324,21 +322,21 @@ color = Color(0.04, 0.08, 0.14, 1)
 
 [node name="CatchupFill" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background"]
 layout_mode = 0
-offset_right = 94.0
-offset_bottom = 6.0
+offset_right = 102.0
+offset_bottom = 5.0
 color = Color(0.75, 0.95, 1, 0.6)
 
 [node name="Fill" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background"]
 layout_mode = 0
-offset_right = 94.0
-offset_bottom = 6.0
+offset_right = 102.0
+offset_bottom = 5.0
 color = Color(0.15, 0.75, 0.95, 1)
 
 [node name="Shimmer" type="ColorRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar/Background"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 0
 offset_right = 12.0
-offset_bottom = 7.0
+offset_bottom = 5.0
 color = Color(1, 1, 1, 0.6)
 
 [node name="ArmorText" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel/Border/Background/VBox/ArmorBar"]
@@ -346,6 +344,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -1.0
+offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.9, 0.98, 1, 1)
@@ -362,10 +362,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -3.0
-offset_top = -2.0
-offset_right = 3.0
-offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -375,16 +371,16 @@ expand_mode = 1
 [node name="RubyGem" type="TextureRect" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/VitalPanel"]
 layout_mode = 0
 offset_left = -6.0
-offset_top = 5.0
+offset_top = 7.0
 offset_right = 6.0
-offset_bottom = 17.0
+offset_bottom = 19.0
 pivot_offset = Vector2(6, 6)
 mouse_filter = 2
 texture = ExtResource("14_ruby_gem")
 expand_mode = 1
 
 [node name="FlowPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(110, 18)
+custom_minimum_size = Vector2(104, 18)
 layout_mode = 2
 mouse_filter = 2
 
@@ -503,7 +499,7 @@ texture = ExtResource("13_flow_frame")
 expand_mode = 1
 
 [node name="WeaponPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(100, 18)
+custom_minimum_size = Vector2(72, 18)
 layout_mode = 2
 mouse_filter = 2
 
@@ -542,7 +538,7 @@ text = "D (ATK:12)"
 vertical_alignment = 1
 
 [node name="FlaskPanel" type="Control" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(110, 18)
+custom_minimum_size = Vector2(78, 18)
 layout_mode = 2
 mouse_filter = 2
 
@@ -550,14 +546,14 @@ mouse_filter = 2
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_right = 55.0
+offset_right = 44.0
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.9, 0.3, 0.3, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 6
-text = "[O] Bình: 1/3"
+text = "[O] 1/3"
 vertical_alignment = 1
 
 [node name="CrystalLabel" type="Label" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer/FlaskPanel"]
@@ -566,7 +562,7 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -50.0
+offset_left = -34.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.8, 0.5, 1, 1)
@@ -578,20 +574,20 @@ text = "Thạch: 0"
 vertical_alignment = 1
 
 [node name="BagBtn" type="Button" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(46, 18)
+custom_minimum_size = Vector2(36, 18)
 layout_mode = 2
 focus_mode = 0
 theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 6
-text = "[B] Túi Đồ"
+text = "[B] Túi"
 
 [node name="MapBtn" type="Button" parent="UI_Layer/TopContainer/MarginContainer/HBoxContainer"]
-custom_minimum_size = Vector2(46, 18)
+custom_minimum_size = Vector2(38, 18)
 layout_mode = 2
 focus_mode = 0
 theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 6
-text = "[M] Bản Đồ"
+text = "[M] Đồ"
 
 [node name="InventoryUI" parent="UI_Layer" instance=ExtResource("10_inv")]
 visible = false

@@ -54,8 +54,8 @@ extends CanvasLayer
 @onready var boss_hp_fill: ColorRect = get_node_or_null("BossBarContainer/VBox/BarBorder/Background/Fill")
 @onready var boss_hp_catchup: ColorRect = get_node_or_null("BossBarContainer/VBox/BarBorder/Background/Catchup")
 
-const HP_BAR_MAX_WIDTH: float = 94.0
-const ARMOR_BAR_MAX_WIDTH: float = 94.0
+const HP_BAR_MAX_WIDTH: float = 102.0
+const ARMOR_BAR_MAX_WIDTH: float = 102.0
 const BOSS_BAR_MAX_WIDTH: float = 236.0
 
 var catchup_tween: Tween = null
