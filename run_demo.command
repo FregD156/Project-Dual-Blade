@@ -4,9 +4,9 @@ echo "=== ĐANG KHỞI CHẠY PROJECT DUAL BLADE ==="
 
 # Ưu tiên ứng dụng Godot.app trong máy hoặc Homebrew godot
 if [ -f "/Applications/Godot.app/Contents/MacOS/Godot" ]; then
-    /Applications/Godot.app/Contents/MacOS/Godot --path . scenes_3d/World1_Bastion_3D.tscn
+    /Applications/Godot.app/Contents/MacOS/Godot --path . scenes/MainMenu.tscn
 elif command -v godot &> /dev/null; then
-    godot --path . scenes_3d/World1_Bastion_3D.tscn
+    godot --path . scenes/MainMenu.tscn
 else
     echo "❌ Không tìm thấy Godot!"
     read -p "Nhấn Enter để thoát..."

@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3]
+[gd_scene load_steps=30 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes_3d/Player3D.tscn" id="1_player_scn"]
 [ext_resource type="PackedScene" path="res://scenes_3d/EnemyRustyGuard3D.tscn" id="2_guard_scn"]
@@ -20,6 +20,9 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_map.png" id="18_icon_map"]
 [ext_resource type="PackedScene" path="res://scenes/InventoryUI.tscn" id="19_inv_scn"]
 [ext_resource type="PackedScene" path="res://scenes/FastTravelMapUI.tscn" id="20_map_scn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/stone_step_bridge.png" id="21_step_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/gothic_stone_arch.png" id="22_arch_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/gothic_iron_barricade.png" id="23_barricade_tex"]
 
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
@@ -293,6 +296,51 @@ mesh = SubResource("CylinderMesh_pillar")
 [node name="Pillar4" type="MeshInstance3D" parent="BackgroundScenery"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 8, -5)
 mesh = SubResource("CylinderMesh_pillar")
+
+[node name="GothicArchCenter" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 4.5, -2.8)
+pixel_size = 0.016
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("22_arch_tex")
+
+[node name="StoneStepLeft" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.5, 2.0, -1.8)
+pixel_size = 0.0055
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("21_step_tex")
+
+[node name="StoneStepRight" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 2.0, -1.8)
+pixel_size = 0.0055
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("21_step_tex")
+
+[node name="BarricadeFloor1" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0.95, -0.6)
+pixel_size = 0.0022
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("23_barricade_tex")
+
+[node name="BarricadeFloor2" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0.95, -0.6)
+pixel_size = 0.0022
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("23_barricade_tex")
 
 [node name="Player3D" parent="." instance=ExtResource("1_player_scn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0.5, 0)
