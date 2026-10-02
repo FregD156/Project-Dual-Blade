@@ -1,0 +1,28 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=3]
+
+[ext_resource type="Shader" path="res://src_3d/shaders/cel_toon.gdshader" id="1_toon"]
+[ext_resource type="Shader" path="res://src_3d/shaders/outline.gdshader" id="2_outline"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_outline"]
+render_priority = 1
+shader = ExtResource("2_outline")
+shader_parameter/outline_color = Color(0.05, 0.05, 0.1, 1)
+shader_parameter/outline_width = 0.015
+
+[resource]
+render_priority = 0
+next_pass = SubResource("ShaderMaterial_outline")
+shader = ExtResource("1_toon")
+shader_parameter/base_color = Color(0.85, 0.95, 1, 1)
+shader_parameter/shadow_color = Color(0.2, 0.35, 0.5, 1)
+shader_parameter/shadow_threshold = 0.1
+shader_parameter/shadow_softness = 0.05
+shader_parameter/rim_color = Color(0.4, 0.9, 1, 1)
+shader_parameter/rim_threshold = 0.5
+shader_parameter/rim_smoothness = 0.05
+shader_parameter/specular_color = Color(1, 1, 1, 1)
+shader_parameter/specular_size = 0.3
+shader_parameter/specular_smoothness = 0.05
+shader_parameter/emission_color = Color(0.2, 0.75, 1, 1)
+shader_parameter/emission_energy = 1.8
+shader_parameter/use_texture = false

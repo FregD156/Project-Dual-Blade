@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://src_3d/shaders/slash_arc.gdshader" id="1_slash"]
+
+[resource]
+render_priority = 2
+shader = ExtResource("1_slash")
+shader_parameter/slash_color = Color(0.3, 0.75, 1, 1)
+shader_parameter/core_color = Color(1, 1, 1, 1)
+shader_parameter/progress = 0.0
+shader_parameter/trail_length = 0.65
