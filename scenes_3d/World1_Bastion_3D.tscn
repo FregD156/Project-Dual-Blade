@@ -265,20 +265,26 @@ texture = ExtResource("11_bg_tex")
 
 [node name="WallBanner1" type="Sprite3D" parent="BackgroundScenery"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 7.5, -4.5)
-pixel_size = 0.038
+pixel_size = 0.005
 texture_filter = 0
+transparent = true
+alpha_cut = 1
 texture = ExtResource("13_banner_tex")
 
 [node name="WallBanner2" type="Sprite3D" parent="BackgroundScenery"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 7.5, -5.5)
-pixel_size = 0.038
+pixel_size = 0.005
 texture_filter = 0
+transparent = true
+alpha_cut = 1
 texture = ExtResource("13_banner_tex")
 
 [node name="WallBanner3" type="Sprite3D" parent="BackgroundScenery"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 7.5, -4.5)
-pixel_size = 0.038
+pixel_size = 0.005
 texture_filter = 0
+transparent = true
+alpha_cut = 1
 texture = ExtResource("13_banner_tex")
 
 [node name="Pillar1" type="MeshInstance3D" parent="BackgroundScenery"]
