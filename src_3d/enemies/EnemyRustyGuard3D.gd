@@ -28,6 +28,7 @@ func _process_enemy_behavior(delta: float) -> void:
 		return
 		
 	var dist_x = player.global_position.x - global_position.x
+	var dist_y = abs(player.global_position.y - global_position.y)
 	facing_direction = 1 if dist_x > 0 else -1
 	
 	if is_attacking:
@@ -35,6 +36,11 @@ func _process_enemy_behavior(delta: float) -> void:
 		return
 		
 	attack_timer -= delta
+	
+	# Nếu người chơi ở tầng khác (quá cao hoặc quá thấp), lính gác giữ vị trí cảnh giác
+	if dist_y > 2.0:
+		velocity.x = move_toward(velocity.x, 0.0, 8.0 * delta)
+		return
 	
 	if abs(dist_x) > 1.8:
 		# Tiếp cận người chơi

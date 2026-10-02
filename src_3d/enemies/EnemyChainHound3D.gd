@@ -28,6 +28,10 @@ func _process_enemy_behavior(delta: float) -> void:
 		return
 		
 	pounce_timer -= delta
+	var dist_y = player.global_position.y - global_position.y
+	if dist_y > 2.5:
+		velocity.x = move_toward(velocity.x, 0.0, 10.0 * delta)
+		return
 	
 	if abs(dist_x) > 3.8:
 		# Chạy nhanh áp sát

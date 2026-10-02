@@ -23,8 +23,8 @@ sky_material = SubResource("ProceduralSkyMaterial_1")
 background_mode = 2
 sky = SubResource("Sky_1")
 ambient_light_source = 2
-ambient_light_color = Color(0.3, 0.35, 0.45, 1)
-ambient_light_energy = 0.8
+ambient_light_color = Color(0.32, 0.36, 0.48, 1)
+ambient_light_energy = 0.85
 tonemap_mode = 3
 glow_enabled = true
 glow_intensity = 0.6
@@ -32,29 +32,36 @@ glow_bloom = 0.2
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 material = ExtResource("7_mat_stone")
-size = Vector3(45, 1, 6)
+size = Vector3(80, 1.2, 6)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
-size = Vector3(45, 1, 6)
+size = Vector3(80, 1.2, 6)
 
-[sub_resource type="BoxMesh" id="BoxMesh_plat"]
+[sub_resource type="BoxMesh" id="BoxMesh_plat_large"]
 material = ExtResource("7_mat_stone")
-size = Vector3(4.5, 0.6, 3)
+size = Vector3(8, 0.6, 3.5)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_plat"]
-size = Vector3(4.5, 0.6, 3)
+[sub_resource type="BoxShape3D" id="BoxShape3D_plat_large"]
+size = Vector3(8, 0.6, 3.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_plat_med"]
+material = ExtResource("7_mat_stone")
+size = Vector3(5.5, 0.6, 3.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_plat_med"]
+size = Vector3(5.5, 0.6, 3.5)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_pillar"]
 material = ExtResource("7_mat_stone")
-top_radius = 0.8
-bottom_radius = 0.9
-height = 9.0
+top_radius = 0.9
+bottom_radius = 1.1
+height = 16.0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
-size = Vector3(1, 15, 6)
+size = Vector3(1.5, 25, 6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
-bg_color = Color(0.1, 0.12, 0.18, 0.8)
+bg_color = Color(0.1, 0.12, 0.18, 0.85)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -73,27 +80,47 @@ corner_radius_bottom_left = 4
 environment = SubResource("Environment_1")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.866, -0.25, 0.433, 0, 0.866, 0.5, -0.5, -0.433, 0.75, 5, 10, 8)
+transform = Transform3D(0.866, -0.25, 0.433, 0, 0.866, 0.5, -0.5, -0.433, 0.75, 5, 14, 10)
 light_color = Color(1, 0.92, 0.85, 1)
-light_energy = 1.3
+light_energy = 1.35
 shadow_enabled = true
 
-[node name="TorchLight1" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 2.5, 0.5)
-light_color = Color(1, 0.6, 0.2, 1)
-light_energy = 2.5
-omni_range = 7.0
+[node name="Torches" type="Node3D" parent="."]
 
-[node name="TorchLight2" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2.5, 0.5)
+[node name="Torch1" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 3.2, 0.5)
 light_color = Color(1, 0.6, 0.2, 1)
 light_energy = 2.5
-omni_range = 7.0
+omni_range = 8.0
+
+[node name="Torch2" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4.0, 0.5)
+light_color = Color(1, 0.6, 0.2, 1)
+light_energy = 2.5
+omni_range = 8.0
+
+[node name="Torch3" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 4.0, 0.5)
+light_color = Color(1, 0.6, 0.2, 1)
+light_energy = 2.5
+omni_range = 8.0
+
+[node name="Torch4" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 3.2, 0.5)
+light_color = Color(1, 0.6, 0.2, 1)
+light_energy = 2.5
+omni_range = 8.0
+
+[node name="TorchTop" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 10.5, 0.5)
+light_color = Color(1, 0.65, 0.25, 1)
+light_energy = 3.0
+omni_range = 9.0
 
 [node name="StageGeometry" type="Node3D" parent="."]
 
 [node name="MainFloor" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0)
 collision_layer = 1
 collision_mask = 6
 
@@ -103,30 +130,8 @@ mesh = SubResource("BoxMesh_floor")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/MainFloor"]
 shape = SubResource("BoxShape3D_floor")
 
-[node name="PlatformLeft" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2.4, 0)
-collision_layer = 1
-collision_mask = 6
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/PlatformLeft"]
-mesh = SubResource("BoxMesh_plat")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/PlatformLeft"]
-shape = SubResource("BoxShape3D_plat")
-
-[node name="PlatformRight" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2.4, 0)
-collision_layer = 1
-collision_mask = 6
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/PlatformRight"]
-mesh = SubResource("BoxMesh_plat")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/PlatformRight"]
-shape = SubResource("BoxShape3D_plat")
-
 [node name="WallLeft" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 6, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39, 10, 0)
 collision_layer = 1
 collision_mask = 6
 
@@ -134,55 +139,163 @@ collision_mask = 6
 shape = SubResource("BoxShape3D_wall")
 
 [node name="WallRight" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 6, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 10, 0)
 collision_layer = 1
 collision_mask = 6
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/WallRight"]
 shape = SubResource("BoxShape3D_wall")
 
+[node name="Tier2_Left" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 2.8, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier2_Left"]
+mesh = SubResource("BoxMesh_plat_large")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier2_Left"]
+shape = SubResource("BoxShape3D_plat_large")
+
+[node name="Tier2_MidLeft" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 3.2, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier2_MidLeft"]
+mesh = SubResource("BoxMesh_plat_med")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier2_MidLeft"]
+shape = SubResource("BoxShape3D_plat_med")
+
+[node name="Tier2_MidRight" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 3.2, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier2_MidRight"]
+mesh = SubResource("BoxMesh_plat_med")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier2_MidRight"]
+shape = SubResource("BoxShape3D_plat_med")
+
+[node name="Tier2_Right" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 2.8, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier2_Right"]
+mesh = SubResource("BoxMesh_plat_large")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier2_Right"]
+shape = SubResource("BoxShape3D_plat_large")
+
+[node name="Tier3_BridgeLeft" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 6.2, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier3_BridgeLeft"]
+mesh = SubResource("BoxMesh_plat_large")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier3_BridgeLeft"]
+shape = SubResource("BoxShape3D_plat_large")
+
+[node name="Tier3_BridgeRight" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 6.2, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier3_BridgeRight"]
+mesh = SubResource("BoxMesh_plat_large")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier3_BridgeRight"]
+shape = SubResource("BoxShape3D_plat_large")
+
+[node name="Tier4_HighTower" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 9.4, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier4_HighTower"]
+mesh = SubResource("BoxMesh_plat_large")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier4_HighTower"]
+shape = SubResource("BoxShape3D_plat_large")
+
 [node name="BackgroundScenery" type="Node3D" parent="."]
 
 [node name="Pillar1" type="MeshInstance3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4.5, -4.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 8, -5)
 mesh = SubResource("CylinderMesh_pillar")
 
 [node name="Pillar2" type="MeshInstance3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 4.5, -5.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 8, -6)
 mesh = SubResource("CylinderMesh_pillar")
 
 [node name="Pillar3" type="MeshInstance3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 4.5, -4.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 8, -6)
 mesh = SubResource("CylinderMesh_pillar")
 
 [node name="Pillar4" type="MeshInstance3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 4.5, -5.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 8, -5)
 mesh = SubResource("CylinderMesh_pillar")
 
 [node name="Player3D" parent="." instance=ExtResource("1_player_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0.5, 0)
 
 [node name="Camera25D" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
-transform = Transform3D(1, 0, 0, 0, 0.985, 0.174, 0, -0.174, 0.985, 0, 2.5, 6.8)
-fov = 48.0
+transform = Transform3D(1, 0, 0, 0, 0.985, 0.174, 0, -0.174, 0.985, -34, 2.5, 7.5)
+fov = 50.0
 script = ExtResource("6_cam_script")
 target = NodePath("../Player3D")
+default_distance = 7.5
 
 [node name="Portal3D" parent="." instance=ExtResource("5_portal_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, 0)
 
 [node name="StageManager3D" type="Node3D" parent="." node_paths=PackedStringArray("portal")]
 script = ExtResource("9_stage_mgr")
 portal = NodePath("../Portal3D")
 
-[node name="EnemyRustyGuard3D" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
+[node name="Floor_Guard1" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.5, 0)
+
+[node name="Floor_Hound1" parent="StageManager3D" instance=ExtResource("4_hound_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0.5, 0)
+
+[node name="Floor_Guard2" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.5, 0)
 
-[node name="EnemyChainHound3D" parent="StageManager3D" instance=ExtResource("4_hound_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.5, 0)
+[node name="Floor_Hound2" parent="StageManager3D" instance=ExtResource("4_hound_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.5, 0)
 
-[node name="EnemyArcher3D" parent="StageManager3D" instance=ExtResource("3_archer_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2.7, 0)
+[node name="Floor_Guard3" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0.5, 0)
+
+[node name="Floor_Hound3" parent="StageManager3D" instance=ExtResource("4_hound_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0.5, 0)
+
+[node name="Tier2_ArcherLeft" parent="StageManager3D" instance=ExtResource("3_archer_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 3.6, 0)
+
+[node name="Tier2_GuardMidLeft" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4.0, 0)
+
+[node name="Tier2_GuardMidRight" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 4.0, 0)
+
+[node name="Tier2_ArcherRight" parent="StageManager3D" instance=ExtResource("3_archer_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 3.6, 0)
+
+[node name="Tier3_ArcherBridgeLeft" parent="StageManager3D" instance=ExtResource("3_archer_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 7.0, 0)
+
+[node name="Tier3_HoundBridgeRight" parent="StageManager3D" instance=ExtResource("4_hound_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 7.0, 0)
+
+[node name="Tier4_HighSniper" parent="StageManager3D" instance=ExtResource("3_archer_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 10.2, 0)
 
 [node name="HUD3D" type="CanvasLayer" parent="."]
 script = ExtResource("8_hud_script")

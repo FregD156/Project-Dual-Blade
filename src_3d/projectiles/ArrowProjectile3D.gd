@@ -3,19 +3,24 @@ extends Area3D
 
 @export var speed: float = 14.0
 @export var damage: float = 12.0
-var direction_x: float = 1.0
+var move_dir: Vector3 = Vector3.RIGHT
 
-func setup(pos: Vector3, dir_x: float, dmg: float = 12.0) -> void:
+func setup(pos: Vector3, dir: Variant, dmg: float = 12.0) -> void:
 	global_position = pos
-	direction_x = dir_x
 	damage = dmg
-	rotation.y = deg_to_rad(90.0 if dir_x > 0 else -90.0)
+	if dir is Vector3:
+		move_dir = Vector3(dir.x, dir.y, 0.0).normalized()
+	elif dir is float or dir is int:
+		move_dir = Vector3(float(dir), 0.0, 0.0).normalized()
+		
+	var angle_z = atan2(move_dir.y, move_dir.x)
+	rotation = Vector3(0, 0, angle_z)
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 
 func _physics_process(delta: float) -> void:
-	global_position.x += direction_x * speed * delta
+	global_position += move_dir * speed * delta
 	global_position.z = 0.0
 
 func _on_body_entered(body: Node3D) -> void:

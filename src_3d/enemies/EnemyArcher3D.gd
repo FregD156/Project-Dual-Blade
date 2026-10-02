@@ -43,7 +43,13 @@ func _process_enemy_behavior(delta: float) -> void:
 func _shoot_arrow() -> void:
 	if not ARROW_SCENE:
 		return
+	var player = get_player()
+	var spawn_pos = global_position + Vector3(facing_direction * 0.7, 0.8, 0.0)
+	var shoot_dir = Vector3(float(facing_direction), 0.0, 0.0)
+	if player:
+		shoot_dir = (player.global_position + Vector3(0, 0.8, 0) - spawn_pos).normalized()
+		shoot_dir.z = 0.0
+		
 	var arrow = ARROW_SCENE.instantiate()
 	get_parent().add_child(arrow)
-	var spawn_pos = global_position + Vector3(facing_direction * 0.7, 0.8, 0.0)
-	arrow.setup(spawn_pos, float(facing_direction), base_atk)
+	arrow.setup(spawn_pos, shoot_dir, base_atk)
