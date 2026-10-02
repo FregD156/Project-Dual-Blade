@@ -79,10 +79,10 @@ func _on_start_pressed() -> void:
 		var tw = create_tween()
 		tw.tween_property(transition_fade, "modulate:a", 1.0, 0.35)
 		tw.tween_callback(func():
-			get_tree().change_scene_to_file("res://scenes/Main.tscn")
+			get_tree().change_scene_to_file("res://scenes_3d/World1_Bastion_3D.tscn")
 		)
 	else:
-		get_tree().change_scene_to_file("res://scenes/Main.tscn")
+		get_tree().change_scene_to_file("res://scenes_3d/World1_Bastion_3D.tscn")
 
 func _on_controls_pressed() -> void:
 	if controls_modal:
