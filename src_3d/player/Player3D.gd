@@ -565,6 +565,27 @@ func _die() -> void:
 	velocity = Vector3.ZERO
 	_play_anim("Die")
 	player_died.emit()
+	
+	# Death Penalty theo Detail.md Phần A.VI:
+	# Bảo toàn 100% trang bị, hồi sinh về Checkpoint gần nhất (X.1, X.5, hoặc X.9)
+	var stage_mgr = get_node_or_null("../StageManager3D")
+	if stage_mgr:
+		var cp_mgr = CheckpointManager.get_instance()
+		var respawn_world = cp_mgr.current_world
+		var respawn_stage = cp_mgr.current_checkpoint_stage
+		
+		var hud = get_node_or_null("../HUD3D")
+		if hud and hud.has_method("show_stage_banner"):
+			hud.show_stage_banner("💀 BẠN ĐÃ NGÃ XUỐNG — ĐANG HỒI SINH TẠI MỐC %d.%d..." % [respawn_world, respawn_stage])
+			
+		await get_tree().create_timer(2.5).timeout
+		current_hp = max_hp
+		current_armor = max_armor
+		current_state = State.IDLE
+		hp_changed.emit(current_hp, max_hp)
+		armor_changed.emit(current_armor, max_armor)
+		stage_mgr.start_stage(respawn_world, respawn_stage)
+
 
 func _update_facing() -> void:
 	if visual_root:
@@ -609,6 +630,7 @@ func _on_attack_area_body_entered(body: Node3D) -> void:
 		var damage = base_atk * (1.2 if is_overdrive else 1.0)
 		if combo_index == 4:
 			damage *= 1.6 # Finisher
-		body.take_hit(damage, global_position)
+		var is_crit = (randf() < crit_rate)
+		body.take_hit(damage, global_position, is_crit)
 		add_flow(1)
 		_create_screen_shake(0.08)

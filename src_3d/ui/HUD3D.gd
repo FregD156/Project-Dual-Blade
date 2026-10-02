@@ -129,3 +129,37 @@ func update_boss_bar(curr: float) -> void:
 			tw.tween_interval(1.0)
 			tw.tween_property(boss_con, "modulate:a", 0.0, 0.5)
 			tw.tween_callback(func(): boss_con.visible = false)
+
+func show_stage_banner(text: String) -> void:
+	var banner = get_node_or_null("StageBanner")
+	if not banner:
+		banner = PanelContainer.new()
+		banner.name = "StageBanner"
+		banner.set_anchors_preset(Control.PRESET_CENTER_TOP)
+		banner.offset_left = -180.0
+		banner.offset_right = 180.0
+		banner.offset_top = 40.0
+		banner.offset_bottom = 75.0
+		banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		
+		var lbl = Label.new()
+		lbl.name = "BannerLabel"
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lbl.add_theme_font_size_override("font_size", 12)
+		lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
+		banner.add_child(lbl)
+		add_child(banner)
+
+	var label_node = banner.get_node_or_null("BannerLabel")
+	if label_node:
+		label_node.text = text
+		
+	banner.visible = true
+	banner.modulate.a = 0.0
+	var tw = create_tween()
+	tw.tween_property(banner, "modulate:a", 1.0, 0.25)
+	tw.tween_interval(2.2)
+	tw.tween_property(banner, "modulate:a", 0.0, 0.35)
+	tw.tween_callback(func(): banner.visible = false)
+

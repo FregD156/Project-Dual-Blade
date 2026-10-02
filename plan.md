@@ -13,118 +13,51 @@
   - Gothic Vitals & Flow Meter (`vitals_hud_frame.png`, `flow_hud_frame.png`, `ruby_gem.png`): HP Bar, Armor Bar (Lớp Giáp Bảo Vệ), 5 Ngọc Ruby phát sáng.
   - Túi Đồ [B] (`InventoryUI.tscn`): Trang bị Vũ Khí D→SSR, Bộ Giáp 4 món (Mũ, Áo Giáp, Hộ Thủ, Chiến Ngoa), Khiên Hộ Thân (Shield), Lưới ô chứa đồ và Tính năng Ghép 5-thành-1 (`MergeSystem.gd`).
   - Bản đồ nhanh [M] (`FastTravelMapUI.tscn`): Xem 4 World và chọn Checkpoint.
-- [x] **P3 — Stage 1.1 Bastion 3D (Đấu Trường 80m & 4 Tầng Kiến Trúc)**:
-  - Sàn đấu 80m, kiến trúc 4 tầng, bẫy chông sàn `SpikeTrap3D.tscn`, cờ vương triều Gothic `gothic_wall_banner.png`.
-  - Quái vật World 1 (Lính Gác Rỉ Sét, Cung Thủ Bắn Tỉa, Chó Săn Xích Sắt, Đao Phủ Tinh Anh).
-  - Cổng Dịch Chuyển Hoàng Gia (`portal_gothic_gate.png` + 12-frame xoay vortex).
-  - Loot rơi 3D (`DropItem3D.gd`): Hạt Sinh Mệnh (tự hút nam châm), Bình Máu, Tim Huyết Tế, Song Đao D->SSR chiếu tia sáng.
-- [ ] **P4 — Boss 1.10 Thống Lĩnh Thiết Vệ (2.5D Boss Rush)**
-- [ ] **P5 — Hệ Thống Checkpoint, Đài Tế Safe Haven & Bóng Ma Pixel**
+- [x] **P3 — Hệ Thống Vượt Ải 1.1 -> 1.10 (Loop Progression & Pacing)**:
+  - Vòng lặp dọn quái qua từng ải: 1.1 đến 1.10.
+  - Checkpoint tự động kích hoạt và lưu mốc tại 1.1, 1.5, 1.9, 1.10 (`CheckpointManager.gd`).
+  - Cơ chế Phân Nhánh Cổng (Portal Choice): Cổng Đao Kiếm (Combat) vs Cổng Sinh Mệnh (Sustain).
+  - Quái vật dàn trải các tầng lầu Bastion (Lính gác, Chó săn, Cung thủ bắn tỉa).
+- [x] **P4 — Quái Tinh Anh 1.5 & Boss 1.10 (2-Phase & Mercy Drops)**:
+  - Ải 1.5: Thủ Lĩnh Đao Phủ Quỷ (450 HP, đòn búa chấn động Unparryable).
+  - Ải 1.9: Trạm Nghỉ An Toàn (Safe Haven) với Đài Tế Hoàng Gia (`SafeHavenAltar3D.tscn`) hồi 100% HP, Giáp, 3 Bình Máu.
+  - Ải 1.10: Đại Trùm Thống Lĩnh Thiết Vệ (`BossIroncladCommander3D.gd`): 3,800 HP, DEF 4, Phase 1 Đại kiếm (báo đỏ tập Parry), Phase 2 Song đao cuồng nộ, quy tắc Mercy Drop mỗi 25% HP rơi 2 Bình Máu Lớn.
+- [x] **P5 — Công Thức Máu & Sát Thương ARPG Chuẩn**:
+  - `Mitigation% = DEF / (DEF + 50)`.
+  - Sát thương hấp thụ qua Giáp trước rồi tới Máu; tỉ lệ Block từ Khiên; Crit Rate phụ thuộc phẩm cấp vũ khí.
 - [ ] **P6 — Mở Rộng World 2, 3, 4 (2.5D Environments)**
 - [ ] **P7 — Balance Pass, Polish & Full Release**
 
 ---
 
-## P0 — NỀN TẢNG KỸ THUẬT 2.5D CEL-SHADED (HOÀN THÀNH)
+## CHI TIẾT CÁC GIAI ĐOẠN ĐÃ THỰC HIỆN
 
-**Mục tiêu:** Xây dựng hệ sinh thái 2.5D (HD-2D) trên Godot 4.7 Forward+.
-- [x] Thiết lập cấu trúc `src_3d/` và `scenes_3d/`.
-- [x] Khóa cứng trục Z (`global_position.z = 0.0`, `velocity.z = 0.0`) tạo mặt phẳng chuyển động 2.5D hoàn hảo.
-- [x] Pipeline Cel-Shading Toon Shader 3 dải sáng + Inverted Hull Outline đen phong cách manga/anime.
-- [x] Dynamic Lighting: DirectionalLight3D đổ bóng mềm + OmniLight3D ngọn đuốc lâu đài.
-- [x] Camera 2.5D (`Camera25D.gd`): Smooth Follow, Look Ahead theo hướng nhìn, Screen Shake chấn động khi parry/hit.
-- [x] VFX Không Gian 3D: Dư ảnh ma quái (`GhostTrail3D.gd`), Nhát chém lưỡi liềm phát sáng (`SlashArc3D.gd`), Số sát thương nhảy (`DamageNumber3D.gd`).
+### 1. Vòng Lặp Vượt Ải (StageManager3D)
+- **1.1 (Khởi đầu):** 2 Lính Gác Rỉ Sét dưới sàn để làm quen nhịp combo.
+- **1.2 - 1.4 (Tăng nhịp):** Bổ sung Chó Săn bứt tốc và Cung Thủ bắn tỉa trên các bục lầu 2, 3.
+- **1.5 (Quái Tinh Anh):** Thủ Lĩnh Đao Phủ Quỷ (450 HP, DEF=6) tung đòn bổ cự búa chấn động sàn, gọi cung thủ trợ chiến.
+- **1.6 - 1.8 (Khốc liệt):** Lính bắn tỉa xuất hiện trên tháp cao tầng 4 (10.2m), bầy chó săn và lính giáp đen phục kích.
+- **1.9 (Trạm Nghỉ An Toàn):** Không có quái. Đài Tế Cổ Xưa cho phép bấm `[E]` hồi phục 100% sinh lực, giáp và 3 bình máu, tạo điểm hồi sinh an toàn.
+- **1.10 (Đại Trùm Cuối):** Thống Lĩnh Thiết Vệ 2 Phase (Phase 1 tập Parry đại kiếm, Phase 2 song kiếm cuồng nộ, mỗi 25% HP rơi 2 bình máu).
 
----
+### 2. Phân Nhánh Cổng Dịch Chuyển (Portal Choice)
+- Sau khi dọn sạch ải thường (1.1, 1.2, 1.3, 1.6, 1.7), xuất hiện 2 cánh cổng:
+  - **Cổng Đao Kiếm (Màu Đỏ):** Mật độ quái dày hơn, rơi nhiều phôi vũ khí & quặng rèn.
+  - **Cổng Sinh Mệnh (Màu Lục):** Ít quái hơn, chắc chắn rải thêm các bình máu lớn để hồi sức.
+- Tại các ải 1.4, 1.8, 1.9 và 1.10 chỉ mở 1 Cổng Hoàng Gia chuẩn (Màu Lam) để tiến vào ải then chốt.
 
-## P1 — CORE COMBAT SONG ĐAO 2.5D (HOÀN THÀNH)
-
-**Mục tiêu:** Cảm giác chặt chém tốc độ cao, nhịp nhàng theo `Detail.md` Phần A.II.
-- [x] **Platforming 2.5D:** Chạy mượt, Nhảy đơn, Nhảy đúp (Double Jump), Bám tường trượt chậm (Wall Slide), Bật tường nhảy cao (Wall Jump).
-- [x] **Combo Song Đao 4 Nhát:** Đòn 1-2 chém chéo chữ X → Đòn 3 xoay chém ngang 360° → Đòn 4 Finisher quét cực mạnh lùi nhẹ tạo khoảng cách.
-- [x] **Không Chiến:** Air Combo lơ lửng trên không 0.25s + Spinning Dive bổ nhào thần tốc nảy người khi chạm đất/quái.
-- [x] **Shadow Dash:** Lướt nhanh 16m/s xuyên thấu thân thể địch, bất tử i-frame 0.22s, sinh chuỗi dư ảnh xanh ngọc.
-- [x] **Cross-Parry:** Khung thủ 0.16s, hit-stop đóng băng khung hình khi chặn đúng đòn, tốc biến sau lưng mục tiêu và kích hoạt đòn phản chí mạng.
-- [x] **Flow Meter & Xuất Quỷ (Overdrive):** Tích lũy 5 nấc ngọc Ruby, tăng 20% tốc độ chạy + 20% sát thương, bừng sáng dư ảnh đỏ thẫm rực cháy, tự decay sau 2.5s.
-- [x] **Blade Dance:** Chiêu tất sát bão kiếm khi đầy 5 nấc Flow, chém liên hoàn lướt qua kẻ thù.
-
----
-
-## P2 — TRANG CHỦ, GOTHIC HUD & TÚI ĐỒ INVENTORY (HOÀN THÀNH)
-
-**Mục tiêu:** Hệ thống giao diện Dark Fantasy và quản lý trang bị rèn ghép.
-- [x] **Trang Chủ (Main Menu):**
-  - Dark Fantasy UI với logo thở Breathing, nút bấm viền vàng Gothic.
-  - Chuyển cảnh Fade mượt mà sang `scenes_3d/World1_Bastion_3D.tscn`.
-  - Bảng hướng dẫn phím tắt và tuỳ chọn âm thanh/hình ảnh.
-- [x] **Gothic HUD 3D:**
-  - Khung Vitals Gothic (`vitals_hud_frame.png`): HP Bar xanh lá và Armor Bar xanh ngọc.
-  - Khung Flow Meter (`flow_hud_frame.png`): 5 viên Ngọc Ruby phát sáng đỏ rực rỡ khi tích đủ nấc.
-  - Icon Nút bấm Túi Đồ [B] và Bản Đồ [M] góc trên màn hình.
-  - Thanh HP Boss / Tinh Anh với vương miện hoàng gia vàng kim.
-- [x] **Túi Đồ (Inventory Panel) & Ghép Đồ 5-thành-1:**
-  - Mở/đóng bằng phím `[B]`, `[Tab]` hoặc click chuột vào icon Túi.
-  - Hiển thị trang bị: Vũ khí đang cầm (D→SSR) kèm thuộc tính ATK, Crit, Dòng Option Pool.
-  - Bộ giáp 4 món: Mũ Thiết Vệ, Áo Giáp Huyết Nguyệt, Hộ Thủ Gai Thép, Chiến Ngoa Thiết Giáp.
-  - Khiên Hộ Thân (Shield System): Tăng Max HP, Tăng Giáp, Tỉ lệ Block đòn đánh hoàn toàn.
-  - Lưới ô chứa đồ nhặt được và tính năng Hợp thành (Merge 5 món cùng loại/cùng bậc lên bậc kế tiếp).
+### 3. Công Thức Máu & Dame ARPG (Data-Driven)
+- Sử dụng `DamageCalculator.gd`:
+  $$\text{Mitigation\%} = \frac{\text{DEF}}{\text{DEF} + 50}$$
+  $$\text{Damage} = \max(1, \text{ATK} \times \text{SkillMult} \times (1 - \text{Mitigation\%}))$$
+- Toàn bộ quái vật và Boss có chỉ số DEF riêng (Lính thường DEF=0, Tinh Anh DEF=6, Boss DEF=4).
+- Người chơi có Crit Rate tăng dần theo bậc song đao (D: 5% -> SSR: 28%), sát thương nhảy số 3D kèm hiệu ứng chí mạng vàng rực.
 
 ---
 
-## P3 — STAGE 1.1 BASTION 3D & LOOT DROPS (HOÀN THÀNH)
+## KẾ HOẠCH BƯỚC TIẾP THEO (WORLD 2, 3, 4 & RELEASE)
 
-**Mục tiêu:** Đấu trường mẫu mực hoàn chỉnh phong cách Octopath Traveler / Ender Lilies.
-- [x] Đấu trường đá dài 80m, cấu trúc 4 tầng lầu với bậc thang nhảy leo trèo.
-- [x] Phông nền lâu đài Bastion u ám (`world1_bastion_bg.png`), cờ vương triều Gothic, cột trụ đá cổ.
-- [x] Bẫy chông sàn `SpikeTrap3D.tscn` gây sát thương khi giẫm phải.
-- [x] Cổng Dịch Chuyển Cổ Xưa (`Portal3D.tscn`): Khung cổng Gothic kết hợp 12 frame vòng xoáy hư không phát sáng, tự động mở khi dọn sạch quái.
-- [x] Roster quái vật 3D: Lính Gác Rỉ Sét, Cung Thủ Tháp Canh, Chó Săn Xích Sắt, Đao Phủ Tinh Anh.
-- [x] Loot rơi 3D (`DropItem3D.gd`): Hạt Sinh Mệnh (hút nam châm về người chơi), Bình Máu Lớn, Tim Huyết Tế, Song Đao rực sáng theo bậc (D=Trắng, B=Lục, A=Lam, R=Tím, SR=Vàng kim, SSR=Hồng tím thần thánh).
-
----
-
-## P4 — BOSS 1.10 THỐNG LĨNH THIẾT VỆ (ƯU TIÊN TIẾP THEO)
-
-**Mục tiêu:** Trận Boss đỉnh cao khép lại World 1 theo `Detail.md` Phần A.V và Phần D.V.
-- [ ] Dựng scene `Boss1_IroncladCommander_3D.tscn` kế thừa `EnemyBase3D`.
-- [ ] **Phase 1 (Đại Kiếm & Đại Khiên):** 
-  - Vung kiếm chém quét báo vệt đỏ 0.8s (tập luyện Cross-Parry).
-  - Giậm khiên chấn động mặt đất gây sóng xung kích sàn.
-- [ ] **Phase 2 (Thức Tỉnh Song Kiếm <50% HP):**
-  - Vứt bỏ đại khiên, cầm song kiếm cuồng nộ, tăng 35% tốc độ.
-  - Combo 3 nhát chém chéo hình chữ X + Xung kích phóng sóng kiếm tầm xa.
-  - Bão xoay kiếm (Whirlwind) đòi hỏi người chơi dùng Shadow Dash luồn ra sau.
-- [ ] Tích hợp thanh máu Boss 2-phase trên `HUD3D.gd`, mốc rơi máu Mercy Drop (mỗi 25% HP rơi bình máu).
-
----
-
-## P5 — HỆ THỐNG CHECKPOINT & AN TOÀN (SAFE HAVEN 1.9)
-
-**Mục tiêu:** Cơ chế sinh tồn, hồi sinh và bàn thợ rèn.
-- [ ] Checkpoint 1.1, 1.5 (sau khi diệt Elite) và 1.9 (Safe Haven).
-- [ ] Đài Tế Cổ Xưa (`altar_gothic_monolith.png`) tại Safe Haven 1.9: Tương tác hồi phục 100% HP & Giáp.
-- [ ] Rương Đa Năng lưu trữ trang bị và Bàn Thợ Rèn nâng cấp dòng Option.
-- [ ] Death Penalty: Khi chết lưu lại "Bóng Ma Pixel" 3D chứa 50% tinh thể rơi ra, người chơi có 1 mạng để nhặt lại.
-
----
-
-## P6 — MỞ RỘNG WORLD 2, 3, 4 (2.5D WORLDS)
-
-- [ ] **World 2: Hầm Ngục Huyết Rễ (Root Catacombs):**
-  - Môi trường cống rễ máu, bào tử nấm nảy, vũng axit độc hại rút máu.
-  - Boss 2.10: Mẫu Thể Ký Sinh (Nhện khổng lồ bám vách, phun tơ độc).
-- [ ] **World 3: Tháp Đồng Hồ Cơ Giới (Clockwork Spire):**
-  - Bánh răng khổng lồ xoay 3D, piston dập trần, bẫy cưa máy.
-  - Boss 3.10: Kẻ Hành Quyết Cơ Giới (Robot 4 tay cưa xoay + đại bác laser).
-- [ ] **World 4: Đền Thờ Hư Vô (Void Sanctuary):**
-  - Tàn tích trôi nổi giữa vũ trụ tím thẫm, bục đá tan biến, trọng lực dị thường.
-  - Boss 4.10: Kẻ Thao Túng Hư Không (Bóng ma song sinh của chính nhân vật).
-
----
-
-## P7 — BALANCE PASS, POLISH & TỐI ƯU HÓA
-
-- [ ] Cân chỉnh TTK (Time-To-Kill) của Boss theo bảng Phần D.V (Boss 1 ~90s, Boss 2 ~110s, Boss 3 ~125s, Boss 4 ~140s).
-- [ ] Tối ưu hóa hiệu năng Forward+ rendering trên máy Mac và PC: Giảm draw call, bật Occlusion Culling.
-- [ ] Cân bằng tỉ lệ rơi đồ và chỉ số các Option Pool SSR (Luân Hồi Hư Không, Diệt Thế Thần Khí).
-- [ ] Kiểm thử toàn diện không crash, hoàn thiện build xuất bản.
+- [ ] **P6.1 — World 2: Hầm Ngục Huyết Rễ (The Crimson Catacombs)**: Bào tử nấm, vũng axit ăn mòn, Cổ Thụ Biến Dị (2.5), Mẫu Thể Ký Sinh (2.10).
+- [ ] **P6.2 — World 3: Tháp Đồng Hồ Cơ Giới (The Clockwork Spire)**: Sàn bánh răng xoay 3D, bẫy cưa, Cỗ Máy Hộ Vệ Lõi (3.5), Kẻ Hành Quyết Cơ Giới (3.10).
+- [ ] **P6.3 — World 4: Đền Thờ Hư Vô (The Void Sanctum)**: Trọng lực đổi hướng, bục vỡ, Chiến Binh Ảo Ảnh (4.5), Kẻ Thao Túng Hư Không (4.10).
+- [ ] **P7 — Cân Bằng TTK & Polish Cuối Cùng**: Đo đạc thời gian hạ gục Boss, tối ưu hiệu năng và build phát hành.

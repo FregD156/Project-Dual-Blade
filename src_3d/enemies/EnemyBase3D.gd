@@ -14,6 +14,8 @@ const DamageNumber3D = preload("res://src_3d/vfx/DamageNumber3D.gd")
 @export var max_hp: float = 120.0
 var current_hp: float = 120.0
 @export var base_atk: float = 15.0
+@export var def: float = 0.0 # Giáp phòng thủ theo Detail.md Phần D
+@export var resist: float = 0.0 # Kháng sát thương %
 @export var move_speed: float = 3.2
 @export var gravity: float = 28.0
 
@@ -75,11 +77,18 @@ func get_player() -> Node3D:
 		return players[0]
 	return null
 
-func take_hit(amount: float, attacker_pos: Vector3) -> void:
+func take_hit(amount: float, attacker_pos: Vector3, incoming_crit: bool = false) -> void:
 	if is_dead:
 		return
+
+	# Tính toán sát thương chuẩn ARPG Detail.md Phần D:
+	# Mitigation% = DEF / (DEF + 50)
+	# Damage = max(1, ATK * (1 - Mitigation%) * (1 - Resist%))
+	var calc_res = DamageCalculator.calculate_damage(amount, 1.0, def, resist, 50.0, incoming_crit)
+	var final_dmg: float = calc_res.get("damage", amount)
+	var is_crit: bool = calc_res.get("is_crit", incoming_crit)
 		
-	current_hp = max(0.0, current_hp - amount)
+	current_hp = max(0.0, current_hp - final_dmg)
 	hp_changed.emit(current_hp, max_hp)
 	
 	flash_timer = 0.12
@@ -95,9 +104,7 @@ func take_hit(amount: float, attacker_pos: Vector3) -> void:
 	if get_parent():
 		var num = DamageNumber3D.new()
 		get_parent().add_child(num)
-		var is_crit = (randf() < 0.2)
-		var dmg = amount * (1.5 if is_crit else 1.0)
-		num.setup(dmg, global_position + Vector3(0, 1.4, 0), is_crit, false)
+		num.setup(final_dmg, global_position + Vector3(0, 1.4, 0), is_crit, false)
 		
 	if current_hp <= 0.0:
 		die()

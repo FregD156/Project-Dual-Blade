@@ -20,6 +20,7 @@ func _ready() -> void:
 	enemy_name = "Thủ Lĩnh Đao Phủ Quỷ"
 	max_hp = 450.0
 	current_hp = 450.0
+	def = 6.0 # Mitigation 10.7%
 	base_atk = 26.0
 	move_speed = 2.2
 	super._ready()

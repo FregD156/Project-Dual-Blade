@@ -302,54 +302,9 @@ script = ExtResource("6_cam_script")
 target = NodePath("../Player3D")
 default_distance = 7.5
 
-[node name="Portal3D" parent="." instance=ExtResource("5_portal_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, 0)
-
-[node name="StageManager3D" type="Node3D" parent="." node_paths=PackedStringArray("portal")]
+[node name="StageManager3D" type="Node3D" parent="."]
 script = ExtResource("9_stage_mgr")
-portal = NodePath("../Portal3D")
 
-[node name="EnemyEliteExecutioner3D" parent="StageManager3D" instance=ExtResource("10_elite_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-
-[node name="Floor_Guard1" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.5, 0)
-
-[node name="Floor_Hound1" parent="StageManager3D" instance=ExtResource("4_hound_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0.5, 0)
-
-[node name="Floor_Guard2" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.5, 0)
-
-[node name="Floor_Hound2" parent="StageManager3D" instance=ExtResource("4_hound_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.5, 0)
-
-[node name="Floor_Guard3" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0.5, 0)
-
-[node name="Floor_Hound3" parent="StageManager3D" instance=ExtResource("4_hound_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0.5, 0)
-
-[node name="Tier2_ArcherLeft" parent="StageManager3D" instance=ExtResource("3_archer_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 3.6, 0)
-
-[node name="Tier2_GuardMidLeft" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4.0, 0)
-
-[node name="Tier2_GuardMidRight" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 4.0, 0)
-
-[node name="Tier2_ArcherRight" parent="StageManager3D" instance=ExtResource("3_archer_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 3.6, 0)
-
-[node name="Tier3_ArcherBridgeLeft" parent="StageManager3D" instance=ExtResource("3_archer_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 7.0, 0)
-
-[node name="Tier3_HoundBridgeRight" parent="StageManager3D" instance=ExtResource("4_hound_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 7.0, 0)
-
-[node name="Tier4_HighSniper" parent="StageManager3D" instance=ExtResource("3_archer_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 10.2, 0)
 
 [node name="HUD3D" type="CanvasLayer" parent="."]
 script = ExtResource("8_hud_script")
