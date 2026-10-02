@@ -1,55 +1,36 @@
 [gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://src_3d/player/Player3D.gd" id="1_player"]
-[ext_resource type="Material" path="res://src_3d/materials/toon_player.tres" id="2_mat_player"]
-[ext_resource type="Material" path="res://src_3d/materials/toon_blade.tres" id="3_mat_blade"]
-[ext_resource type="Material" path="res://src_3d/materials/slash_vfx.tres" id="4_mat_slash"]
-[ext_resource type="Script" path="res://src_3d/vfx/SlashArc3D.gd" id="5_slash_arc"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/player/player_sheet_grid.png" id="2_sheet"]
+[ext_resource type="Material" path="res://src_3d/materials/slash_vfx.tres" id="3_mat_slash"]
+[ext_resource type="Script" path="res://src_3d/vfx/SlashArc3D.gd" id="4_slash_arc"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.35
-height = 1.6
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_torso"]
-material = ExtResource("2_mat_player")
-radius = 0.22
-height = 0.65
-
-[sub_resource type="SphereMesh" id="SphereMesh_head"]
-material = ExtResource("2_mat_player")
-radius = 0.18
-height = 0.36
-
-[sub_resource type="BoxMesh" id="BoxMesh_blade"]
-material = ExtResource("3_mat_blade")
-size = Vector3(0.05, 0.85, 0.08)
+height = 1.7
 
 [sub_resource type="QuadMesh" id="QuadMesh_slash"]
-material = ExtResource("4_mat_slash")
+material = ExtResource("3_mat_slash")
 size = Vector2(2.2, 2.2)
-
-[sub_resource type="TorusMesh" id="TorusMesh_shield"]
-inner_radius = 0.5
-outer_radius = 0.65
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_attack"]
 size = Vector3(1.6, 1.4, 1.2)
 
 [sub_resource type="Animation" id="Animation_idle"]
 resource_name = "Idle"
-length = 1.2
+length = 0.6
 loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("VisualRoot/Torso:position")
-tracks/0/interp = 2
+tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
+tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.6, 1.2),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector3(0, 0.75, 0), Vector3(0, 0.72, 0), Vector3(0, 0.75, 0)]
+"times": PackedFloat32Array(0, 0.15, 0.3, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3]
 }
 
 [sub_resource type="Animation" id="Animation_run"]
@@ -59,94 +40,110 @@ loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("VisualRoot/Torso:rotation")
-tracks/0/interp = 2
+tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
+tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector3(0.15, 0, 0), Vector3(-0.1, 0, 0), Vector3(0.15, 0, 0)]
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [6, 7, 8, 9, 10, 11]
 }
 
 [sub_resource type="Animation" id="Animation_jump"]
 resource_name = "Jump"
-length = 0.4
+length = 0.3
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("VisualRoot/Torso:position")
+tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.2),
+"times": PackedFloat32Array(0, 0.15),
 "transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Vector3(0, 0.7, 0), Vector3(0, 0.85, 0)]
+"update": 1,
+"values": [24, 25]
 }
 
 [sub_resource type="Animation" id="Animation_attack1"]
 resource_name = "Attack1"
-length = 0.28
+length = 0.25
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("VisualRoot/RightBlade:rotation")
-tracks/0/interp = 2
+tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
+tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.28),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector3(-0.6, 0, 0.8), Vector3(1.2, 0, -0.4), Vector3(0, 0, 0)]
+"times": PackedFloat32Array(0, 0.12),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [12, 13]
 }
 
 [sub_resource type="Animation" id="Animation_attack2"]
 resource_name = "Attack2"
-length = 0.28
+length = 0.25
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("VisualRoot/LeftBlade:rotation")
-tracks/0/interp = 2
+tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
+tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.28),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector3(0.6, 0, -0.8), Vector3(-1.2, 0, 0.4), Vector3(0, 0, 0)]
+"times": PackedFloat32Array(0, 0.12),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [14, 15]
 }
 
 [sub_resource type="Animation" id="Animation_attack3"]
 resource_name = "Attack3"
-length = 0.32
+length = 0.28
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("VisualRoot:rotation")
+tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.15, 0.32),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector3(0, 0, 0), Vector3(0, 3.14159, 0), Vector3(0, 6.28318, 0)]
+"times": PackedFloat32Array(0, 0.14),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [16, 17]
 }
 
 [sub_resource type="Animation" id="Animation_attack4"]
 resource_name = "Attack4"
-length = 0.38
+length = 0.32
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("VisualRoot/Torso:position")
-tracks/0/interp = 2
+tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
+tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.15, 0.38),
+"times": PackedFloat32Array(0, 0.1, 0.2),
 "transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector3(0, 0.75, 0), Vector3(0.4, 0.75, 0), Vector3(-0.2, 0.75, 0)]
+"update": 1,
+"values": [12, 14, 16]
+}
+
+[sub_resource type="Animation" id="Animation_dash"]
+resource_name = "ShadowDash"
+length = 0.24
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.06, 0.12, 0.18),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [18, 19, 20, 21]
 }
 
 [sub_resource type="Animation" id="Animation_parry"]
@@ -155,26 +152,46 @@ length = 0.25
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("VisualRoot/RightBlade:rotation")
+tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.08),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Vector3(0, 0, 0), Vector3(0, 0, 0.785)]
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [28, 29, 30, 31, 32]
 }
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("VisualRoot/LeftBlade:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.08),
+
+[sub_resource type="Animation" id="Animation_hurt"]
+resource_name = "Hurt"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [34]
+}
+
+[sub_resource type="Animation" id="Animation_die"]
+resource_name = "Die"
+length = 0.6
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
 "transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Vector3(0, 0, 0), Vector3(0, 0, -0.785)]
+"update": 1,
+"values": [34, 35]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_player"]
@@ -184,9 +201,12 @@ _data = {
 "Attack3": SubResource("Animation_attack3"),
 "Attack4": SubResource("Animation_attack4"),
 "CrossParry": SubResource("Animation_parry"),
+"Die": SubResource("Animation_die"),
+"Hurt": SubResource("Animation_hurt"),
 "Idle": SubResource("Animation_idle"),
 "Jump": SubResource("Animation_jump"),
-"Run": SubResource("Animation_run")
+"Run": SubResource("Animation_run"),
+"ShadowDash": SubResource("Animation_dash")
 }
 
 [node name="Player3D" type="CharacterBody3D" groups=["player"]]
@@ -195,39 +215,28 @@ collision_mask = 5
 script = ExtResource("1_player")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 shape = SubResource("CapsuleShape3D_player")
 
 [node name="VisualRoot" type="Node3D" parent="."]
 
-[node name="Torso" type="MeshInstance3D" parent="VisualRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
-mesh = SubResource("CapsuleMesh_torso")
-
-[node name="Head" type="MeshInstance3D" parent="VisualRoot/Torso"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
-mesh = SubResource("SphereMesh_head")
-
-[node name="RightBlade" type="MeshInstance3D" parent="VisualRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 0.65, 0.2)
-mesh = SubResource("BoxMesh_blade")
-
-[node name="LeftBlade" type="MeshInstance3D" parent="VisualRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, 0.65, 0.2)
-mesh = SubResource("BoxMesh_blade")
+[node name="Sprite3D" type="Sprite3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+cast_shadow = 2
+alpha_cut = 1
+texture_filter = 0
+pixel_size = 0.03
+texture = ExtResource("2_sheet")
+hframes = 6
+vframes = 6
 
 [node name="SlashArc" type="MeshInstance3D" parent="VisualRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.75, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.85, 0)
 mesh = SubResource("QuadMesh_slash")
-script = ExtResource("5_slash_arc")
-
-[node name="ParryShieldFX" type="MeshInstance3D" parent="VisualRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.3)
-visible = false
-mesh = SubResource("TorusMesh_shield")
+script = ExtResource("4_slash_arc")
 
 [node name="AttackArea" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.8, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.85, 0)
 collision_layer = 0
 collision_mask = 4
 

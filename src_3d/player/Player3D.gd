@@ -359,9 +359,9 @@ func _die() -> void:
 
 func _update_facing() -> void:
 	if visual_root:
-		# Quay góc Y: 90 độ khi nhìn sang phải, -90 độ khi sang trái
-		var target_rot_y = deg_to_rad(90.0 if facing_direction > 0 else -90.0)
-		visual_root.rotation.y = lerp_angle(visual_root.rotation.y, target_rot_y, 0.35)
+		var sp = visual_root.get_node_or_null("Sprite3D")
+		if sp:
+			sp.flip_h = (facing_direction < 0)
 
 func _trigger_hitbox(active: bool) -> void:
 	if attack_area:
@@ -374,6 +374,7 @@ func _spawn_slash_vfx(combo_num: int) -> void:
 	# VFX chém 3D
 	var vfx = get_node_or_null("VisualRoot/SlashArc")
 	if vfx and vfx.has_method("play_slash"):
+		vfx.position.x = facing_direction * 0.4
 		vfx.play_slash(combo_num, is_overdrive)
 
 func _process_blade_dance(_delta: float) -> void:

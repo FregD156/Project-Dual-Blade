@@ -1,14 +1,10 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://src_3d/items/DropItem3D.gd" id="1_drop"]
-[ext_resource type="Material" path="res://src_3d/materials/toon_blade.tres" id="2_blade_mat"]
+[ext_resource type="Texture2D" path="res://assets/sprites/items/sliced/life_shard.png" id="2_item_tex"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_item"]
 radius = 0.8
-
-[sub_resource type="PrismMesh" id="PrismMesh_crystal"]
-material = ExtResource("2_blade_mat")
-size = Vector3(0.4, 0.6, 0.4)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_beam"]
 transparency = 1
@@ -31,9 +27,13 @@ script = ExtResource("1_drop")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("SphereShape3D_item")
 
-[node name="VisualMesh" type="MeshInstance3D" parent="."]
+[node name="ItemSprite" type="Sprite3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-mesh = SubResource("PrismMesh_crystal")
+billboard = 1
+alpha_cut = 1
+texture_filter = 0
+pixel_size = 0.035
+texture = ExtResource("2_item_tex")
 
 [node name="BeamMesh" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, 0)

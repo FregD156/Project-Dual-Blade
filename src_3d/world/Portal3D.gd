@@ -6,7 +6,7 @@ signal portal_entered()
 @export var is_active: bool = false
 @export var branch_type: int = 0 # 0: Combat, 1: Sustain
 
-@onready var vortex_mesh: MeshInstance3D = $VortexMesh
+@onready var vortex_node: Node = get_node_or_null("VortexSprite") if get_node_or_null("VortexSprite") else get_node_or_null("VortexMesh")
 @onready var portal_light: OmniLight3D = $PortalLight
 @onready var prompt_label: Label3D = $PromptLabel
 

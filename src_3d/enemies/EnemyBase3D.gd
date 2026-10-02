@@ -62,8 +62,12 @@ func _apply_gravity(delta: float) -> void:
 
 func _update_visual_facing() -> void:
 	if visual_root:
-		var target_rot_y = deg_to_rad(90.0 if facing_direction > 0 else -90.0)
-		visual_root.rotation.y = lerp_angle(visual_root.rotation.y, target_rot_y, 0.25)
+		var sp = visual_root.get_node_or_null("Sprite3D")
+		if sp:
+			sp.flip_h = (facing_direction > 0)
+		else:
+			var target_rot_y = deg_to_rad(90.0 if facing_direction > 0 else -90.0)
+			visual_root.rotation.y = lerp_angle(visual_root.rotation.y, target_rot_y, 0.25)
 
 func get_player() -> Node3D:
 	var players = get_tree().get_nodes_in_group("player")
@@ -99,6 +103,9 @@ func take_hit(amount: float, attacker_pos: Vector3) -> void:
 		die()
 
 func _flash_white() -> void:
+	for sp in find_children("*", "Sprite3D"):
+		if sp is Sprite3D:
+			sp.modulate = Color(3.0, 1.2, 1.2)
 	for m in find_children("*", "MeshInstance3D"):
 		if m is MeshInstance3D and m.material_override:
 			if m.material_override is ShaderMaterial:
@@ -106,6 +113,9 @@ func _flash_white() -> void:
 				m.material_override.set_shader_parameter("emission_energy", 3.0)
 
 func _reset_flash() -> void:
+	for sp in find_children("*", "Sprite3D"):
+		if sp is Sprite3D:
+			sp.modulate = Color.WHITE
 	for m in find_children("*", "MeshInstance3D"):
 		if m is MeshInstance3D and m.material_override:
 			if m.material_override is ShaderMaterial:

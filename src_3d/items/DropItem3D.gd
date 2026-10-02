@@ -16,7 +16,19 @@ var float_offset: float = 0.0
 var base_y: float = 0.0
 var magnet_speed: float = 0.0
 
-@onready var visual_mesh: MeshInstance3D = $VisualMesh
+const TEX_LIFE_SHARD = preload("res://assets/sprites/items/sliced/life_shard.png")
+const TEX_LIFE_FLASK = preload("res://assets/sprites/items/sliced/life_flask.png")
+const TEX_HEART_CORE = preload("res://assets/sprites/items/sliced/heart_core.png")
+const TEX_WEAPON_D = preload("res://assets/sprites/items/sliced/weapon_tier_d.png")
+const TEX_WEAPON_C = preload("res://assets/sprites/items/sliced/weapon_tier_c.png")
+const TEX_WEAPON_B = preload("res://assets/sprites/items/sliced/weapon_tier_b.png")
+const TEX_WEAPON_A = preload("res://assets/sprites/items/sliced/weapon_tier_a.png")
+const TEX_WEAPON_R = preload("res://assets/sprites/items/sliced/weapon_tier_r.png")
+const TEX_WEAPON_SR = preload("res://assets/sprites/items/sliced/weapon_tier_sr.png")
+const TEX_WEAPON_SSR = preload("res://assets/sprites/items/sliced/weapon_tier_ssr.png")
+
+@onready var item_sprite: Sprite3D = get_node_or_null("ItemSprite")
+@onready var visual_mesh: MeshInstance3D = get_node_or_null("VisualMesh")
 @onready var item_light: OmniLight3D = $ItemLight
 @onready var beam_mesh: MeshInstance3D = get_node_or_null("BeamMesh")
 @onready var label: Label3D = get_node_or_null("Label3D")
@@ -62,15 +74,27 @@ func _apply_visual_style() -> void:
 		ItemType.LIFE_SHARD:
 			color = Color(0.2, 0.9, 0.4)
 			if label: label.text = "💚 Hạt Sinh Mệnh"
+			if item_sprite: item_sprite.texture = TEX_LIFE_SHARD
 		ItemType.LIFE_FLASK:
 			color = Color(1.0, 0.3, 0.3)
 			if label: label.text = "🧪 Bình Máu Lớn"
+			if item_sprite: item_sprite.texture = TEX_LIFE_FLASK
 		ItemType.HEART_CORE:
 			color = Color(1.0, 0.1, 0.35)
 			if label: label.text = "❤️ Trái Tim Huyết Tế"
+			if item_sprite: item_sprite.texture = TEX_HEART_CORE
 		ItemType.WEAPON:
 			color = _get_rarity_color(rarity)
 			if label: label.text = "[%s] %s" % [_get_rarity_str(rarity), item_name]
+			if item_sprite:
+				match rarity:
+					Rarity.D: item_sprite.texture = TEX_WEAPON_D
+					Rarity.C: item_sprite.texture = TEX_WEAPON_C
+					Rarity.B: item_sprite.texture = TEX_WEAPON_B
+					Rarity.A: item_sprite.texture = TEX_WEAPON_A
+					Rarity.R: item_sprite.texture = TEX_WEAPON_R
+					Rarity.SR: item_sprite.texture = TEX_WEAPON_SR
+					Rarity.SSR: item_sprite.texture = TEX_WEAPON_SSR
 			
 	if item_light:
 		item_light.light_color = color
