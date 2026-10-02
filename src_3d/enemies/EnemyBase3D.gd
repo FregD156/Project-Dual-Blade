@@ -111,12 +111,37 @@ func _reset_flash() -> void:
 			if m.material_override is ShaderMaterial:
 				m.material_override.set_shader_parameter("emission_energy", 0.0)
 
+const DROP_ITEM_SCENE = preload("res://scenes_3d/DropItem3D.tscn")
+
 func die() -> void:
 	if is_dead:
 		return
 	is_dead = true
 	enemy_died.emit(self)
+	_spawn_loot()
 	
 	var tw = create_tween()
 	tw.tween_property(self, "scale", Vector3(0.0, 0.0, 0.0), 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	tw.tween_callback(queue_free)
+
+func _spawn_loot() -> void:
+	if not DROP_ITEM_SCENE or not get_parent():
+		return
+	var player = get_player()
+	var player_low_hp = false
+	if player and "current_hp" in player and "max_hp" in player:
+		player_low_hp = (player.current_hp / player.max_hp) < 0.35
+		
+	var roll = randf()
+	if roll < (0.60 if player_low_hp else 0.35):
+		var item = DROP_ITEM_SCENE.instantiate()
+		get_parent().add_child(item)
+		item.global_position = global_position + Vector3(0, 0.4, 0)
+		item.setup(0, 0, "Hạt Sinh Mệnh")
+	elif roll < 0.55:
+		var item = DROP_ITEM_SCENE.instantiate()
+		get_parent().add_child(item)
+		item.global_position = global_position + Vector3(0, 0.4, 0)
+		var r = 1 if randf() < 0.3 else 0
+		var w_name = "Song Đao Thép Thô" if r == 1 else "Song Đao Rỉ Sét"
+		item.setup(3, r, w_name)

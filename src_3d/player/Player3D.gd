@@ -150,6 +150,13 @@ func _handle_movement(delta: float) -> void:
 	var input_x = Input.get_axis("move_left", "move_right")
 	var speed = move_speed * (1.2 if is_overdrive else 1.0)
 	
+	# Bám tường trượt chậm (Wall Slide theo detail.md II.2)
+	var is_wall_sliding = false
+	if is_on_wall_only() and velocity.y < 0 and input_x != 0:
+		is_wall_sliding = true
+		velocity.y = max(velocity.y, -3.2)
+		jump_count = 0
+	
 	if input_x != 0:
 		velocity.x = input_x * speed
 		facing_direction = 1 if input_x > 0 else -1
@@ -160,12 +167,20 @@ func _handle_movement(delta: float) -> void:
 		if is_on_floor():
 			current_state = State.IDLE
 			
-	# Nhảy / Nhảy đúp
-	if Input.is_action_just_pressed("jump") and jump_count < max_jumps:
-		velocity.y = jump_force * (0.9 if jump_count > 0 else 1.0)
-		jump_count += 1
-		current_state = State.JUMP
-		_play_anim("Jump" if jump_count == 1 else "DoubleJump")
+	# Nhảy / Nhảy đúp / Đạp tường nhảy cao (Wall Jump)
+	if Input.is_action_just_pressed("jump"):
+		if is_wall_sliding:
+			var wall_norm = get_wall_normal()
+			velocity.x = wall_norm.x * move_speed * 1.35
+			velocity.y = jump_force * 1.08
+			facing_direction = 1 if wall_norm.x > 0 else -1
+			jump_count = 1
+			_play_anim("Jump")
+		elif jump_count < max_jumps:
+			velocity.y = jump_force * (0.9 if jump_count > 0 else 1.0)
+			jump_count += 1
+			current_state = State.JUMP
+			_play_anim("Jump" if jump_count == 1 else "DoubleJump")
 		
 	# Shadow Dash
 	if Input.is_action_just_pressed("dash") and dash_cooldown_timer <= 0.0:

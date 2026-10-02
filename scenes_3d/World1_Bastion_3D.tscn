@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes_3d/Player3D.tscn" id="1_player_scn"]
 [ext_resource type="PackedScene" path="res://scenes_3d/EnemyRustyGuard3D.tscn" id="2_guard_scn"]
@@ -9,6 +9,7 @@
 [ext_resource type="Material" path="res://src_3d/materials/toon_stone.tres" id="7_mat_stone"]
 [ext_resource type="Script" path="res://src_3d/ui/HUD3D.gd" id="8_hud_script"]
 [ext_resource type="Script" path="res://src_3d/combat/StageManager3D.gd" id="9_stage_mgr"]
+[ext_resource type="PackedScene" path="res://scenes_3d/EnemyEliteExecutioner3D.tscn" id="10_elite_scn"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_top_color = Color(0.12, 0.15, 0.28, 1)
@@ -258,6 +259,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, 0)
 script = ExtResource("9_stage_mgr")
 portal = NodePath("../Portal3D")
 
+[node name="EnemyEliteExecutioner3D" parent="StageManager3D" instance=ExtResource("10_elite_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+
 [node name="Floor_Guard1" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.5, 0)
 
@@ -359,3 +363,29 @@ color = Color(0.2, 0.25, 0.35, 0.5)
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
 text = "FLOW: 0/5"
+
+[node name="BossContainer" type="VBoxContainer" parent="HUD3D"]
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -160.0
+offset_top = 18.0
+offset_right = 160.0
+offset_bottom = 50.0
+grow_horizontal = 2
+
+[node name="BossNameLabel" type="Label" parent="HUD3D/BossContainer"]
+layout_mode = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 12
+text = "👑 QUÁI TINH ANH"
+horizontal_alignment = 1
+
+[node name="BossBar" type="ProgressBar" parent="HUD3D/BossContainer"]
+custom_minimum_size = Vector2(320, 12)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_fill")
+value = 100.0
+show_percentage = false

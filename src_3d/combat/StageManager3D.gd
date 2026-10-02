@@ -33,6 +33,14 @@ func register_enemy(enemy: Node) -> void:
 		active_enemies.append(enemy)
 		if enemy.has_signal("enemy_died"):
 			enemy.enemy_died.connect(_on_enemy_died)
+			
+		# Nếu là quái Tinh Anh hoặc Boss, hiển thị thanh máu lớn
+		if "enemy_name" in enemy and ("Thủ Lĩnh" in enemy.enemy_name or "Boss" in enemy.enemy_name):
+			var hud = get_node_or_null("../HUD3D")
+			if hud and hud.has_method("show_boss_bar"):
+				hud.show_boss_bar(enemy.enemy_name, enemy.max_hp)
+				if enemy.has_signal("hp_changed"):
+					enemy.hp_changed.connect(func(c, _m): hud.update_boss_bar(c))
 
 func _on_enemy_died(enemy: Node) -> void:
 	active_enemies.erase(enemy)

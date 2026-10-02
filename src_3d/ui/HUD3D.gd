@@ -44,3 +44,26 @@ func _on_parry_success() -> void:
 	if state_label:
 		state_label.text = "⚔️ CROSS-PARRY THÀNH CÔNG! ⚔️"
 		state_label.modulate = Color(1.0, 0.9, 0.2)
+
+func show_boss_bar(b_name: String, b_max_hp: float) -> void:
+	var boss_con = get_node_or_null("BossContainer")
+	if boss_con:
+		boss_con.visible = true
+		var name_lbl = boss_con.get_node_or_null("BossNameLabel")
+		if name_lbl: name_lbl.text = "👑 " + b_name
+		var bar = boss_con.get_node_or_null("BossBar")
+		if bar:
+			bar.max_value = b_max_hp
+			bar.value = b_max_hp
+
+func update_boss_bar(curr: float) -> void:
+	var boss_con = get_node_or_null("BossContainer")
+	if boss_con:
+		var bar = boss_con.get_node_or_null("BossBar")
+		if bar:
+			bar.value = curr
+		if curr <= 0:
+			var tw = create_tween()
+			tw.tween_interval(1.0)
+			tw.tween_property(boss_con, "modulate:a", 0.0, 0.5)
+			tw.tween_callback(func(): boss_con.visible = false)
