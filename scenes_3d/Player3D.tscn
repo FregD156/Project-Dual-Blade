@@ -11,10 +11,10 @@ height = 1.7
 
 [sub_resource type="QuadMesh" id="QuadMesh_slash"]
 material = ExtResource("3_mat_slash")
-size = Vector2(2.2, 2.2)
+size = Vector2(2.4, 2.4)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_attack"]
-size = Vector3(1.6, 1.4, 1.2)
+size = Vector3(1.8, 1.5, 1.2)
 
 [sub_resource type="Animation" id="Animation_idle"]
 resource_name = "Idle"
@@ -35,7 +35,7 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_run"]
 resource_name = "Run"
-length = 0.6
+length = 0.48
 loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -44,7 +44,7 @@ tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
+"times": PackedFloat32Array(0, 0.08, 0.16, 0.24, 0.32, 0.4),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [6, 7, 8, 9, 10, 11]
@@ -66,6 +66,22 @@ tracks/0/keys = {
 "values": [24, 25]
 }
 
+[sub_resource type="Animation" id="Animation_fall"]
+resource_name = "Fall"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.15),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [26, 27]
+}
+
 [sub_resource type="Animation" id="Animation_attack1"]
 resource_name = "Attack1"
 length = 0.25
@@ -76,10 +92,10 @@ tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.12),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.08, 0.16),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 1,
-"values": [12, 13]
+"values": [12, 13, 14]
 }
 
 [sub_resource type="Animation" id="Animation_attack2"]
@@ -92,15 +108,15 @@ tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.12),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.08, 0.16),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 1,
-"values": [14, 15]
+"values": [14, 15, 16]
 }
 
 [sub_resource type="Animation" id="Animation_attack3"]
 resource_name = "Attack3"
-length = 0.28
+length = 0.25
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -108,15 +124,15 @@ tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.14),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0, 0.08, 0.16),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 1,
-"values": [16, 17]
+"values": [16, 17, 13]
 }
 
 [sub_resource type="Animation" id="Animation_attack4"]
 resource_name = "Attack4"
-length = 0.32
+length = 0.35
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -124,10 +140,10 @@ tracks/0/path = NodePath("VisualRoot/Sprite3D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.08, 0.16, 0.24),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 1,
-"values": [12, 14, 16]
+"values": [12, 14, 15, 17]
 }
 
 [sub_resource type="Animation" id="Animation_dash"]
@@ -202,6 +218,7 @@ _data = {
 "Attack4": SubResource("Animation_attack4"),
 "CrossParry": SubResource("Animation_parry"),
 "Die": SubResource("Animation_die"),
+"Fall": SubResource("Animation_fall"),
 "Hurt": SubResource("Animation_hurt"),
 "Idle": SubResource("Animation_idle"),
 "Jump": SubResource("Animation_jump"),
@@ -231,7 +248,7 @@ hframes = 6
 vframes = 6
 
 [node name="SlashArc" type="MeshInstance3D" parent="VisualRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.85, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 0.9, 0)
 mesh = SubResource("QuadMesh_slash")
 script = ExtResource("4_slash_arc")
 

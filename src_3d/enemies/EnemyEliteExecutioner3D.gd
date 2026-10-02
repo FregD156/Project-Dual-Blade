@@ -56,6 +56,9 @@ func _process_enemy_behavior(delta: float) -> void:
 
 func _start_heavy_slam() -> void:
 	is_slamming = true
+	var sp = visual_root.get_node_or_null("Sprite3D") if visual_root else null
+	if sp: sp.frame = 1 # Giơ cao cự búa khổng lồ
+	
 	if telegraph_light:
 		telegraph_light.visible = true
 		telegraph_light.light_energy = 8.0
@@ -69,11 +72,15 @@ func _start_heavy_slam() -> void:
 	tw.tween_callback(func():
 		is_slamming = false
 		attack_timer = attack_cooldown
+		if sp: sp.frame = 0
 	)
 
 func _execute_shockwave_slam() -> void:
 	if telegraph_light:
 		telegraph_light.visible = false
+		
+	var sp = visual_root.get_node_or_null("Sprite3D") if visual_root else null
+	if sp: sp.frame = 2 # Nện thẳng cự búa xuống mặt sàn chấn động
 		
 	# Rung màn hình chấn động
 	var cam = get_viewport().get_camera_3d()

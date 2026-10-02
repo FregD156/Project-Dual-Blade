@@ -56,6 +56,10 @@ func _start_attack_cycle() -> void:
 	if telegraph_light:
 		telegraph_light.visible = true
 		
+	var sp = visual_root.get_node_or_null("Sprite3D") if visual_root else null
+	if sp:
+		sp.frame = 2 # Giơ cao thanh đao lấy đà
+		
 	# Báo hiệu đỏ 0.65s trước khi chém (cửa sổ chuẩn bị cho người chơi parry)
 	var tw = create_tween()
 	tw.tween_interval(0.65)
@@ -64,12 +68,18 @@ func _start_attack_cycle() -> void:
 	tw.tween_callback(func():
 		is_attacking = false
 		attack_timer = attack_cooldown
+		var anim = get_node_or_null("AnimationPlayer")
+		if anim: anim.play("walk")
 	)
 
 func _strike() -> void:
 	is_telegraphing = false
 	if telegraph_light:
 		telegraph_light.visible = false
+		
+	var sp = visual_root.get_node_or_null("Sprite3D") if visual_root else null
+	if sp:
+		sp.frame = 3 # Vung đao chém dứt khoát
 		
 	var player = get_player()
 	if player and global_position.distance_to(player.global_position) < 2.3:

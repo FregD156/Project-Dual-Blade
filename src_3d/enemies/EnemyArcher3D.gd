@@ -28,17 +28,25 @@ func _process_enemy_behavior(delta: float) -> void:
 	facing_direction = 1 if dist_x > 0 else -1
 	
 	shoot_timer -= delta
+	var sp = visual_root.get_node_or_null("Sprite3D") if visual_root else null
 	if shoot_timer <= 0.8 and not is_aiming:
 		is_aiming = true
+		if sp: sp.frame = 2 # Rút cung ngắm bắn
 		if aim_light:
 			aim_light.visible = true
 			
 	if shoot_timer <= 0.0:
+		if sp: sp.frame = 3 # Thả dây bắn tên
 		_shoot_arrow()
 		shoot_timer = shoot_cooldown
 		is_aiming = false
 		if aim_light:
 			aim_light.visible = false
+		var tw = create_tween()
+		tw.tween_interval(0.2)
+		tw.tween_callback(func():
+			if sp and not is_aiming: sp.frame = 0
+		)
 
 func _shoot_arrow() -> void:
 	if not ARROW_SCENE:
