@@ -10,7 +10,7 @@
 [ext_resource type="Script" path="res://src_3d/ui/HUD3D.gd" id="8_hud_script"]
 [ext_resource type="Script" path="res://src_3d/combat/StageManager3D.gd" id="9_stage_mgr"]
 [ext_resource type="PackedScene" path="res://scenes_3d/EnemyEliteExecutioner3D.tscn" id="10_elite_scn"]
-[ext_resource type="Texture2D" path="res://assets/sprites/environment/world1_bastion_bg.png" id="11_bg_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/world1_bastion_bg_faded.png" id="11_bg_tex"]
 [ext_resource type="PackedScene" path="res://scenes_3d/SpikeTrap3D.tscn" id="12_spike_scn"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/props/gothic_wall_banner.png" id="13_banner_tex"]
 [ext_resource type="Texture2D" path="res://assets/sprites/ui/vitals_hud_frame.png" id="14_vitals_frame"]
@@ -252,10 +252,12 @@ shape = SubResource("BoxShape3D_plat_large")
 [node name="BackgroundScenery" type="Node3D" parent="."]
 
 [node name="BastionBackdrop" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, -8.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14, -8.5)
 pixel_size = 0.065
 texture_filter = 1
 shaded = false
+transparent = true
+alpha_cut = 2
 texture = ExtResource("11_bg_tex")
 
 [node name="WallBanner1" type="Sprite3D" parent="BackgroundScenery"]

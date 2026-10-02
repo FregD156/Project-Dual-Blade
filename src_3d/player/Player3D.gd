@@ -193,12 +193,18 @@ func _handle_movement(delta: float) -> void:
 	if input_x != 0:
 		velocity.x = input_x * speed
 		facing_direction = 1 if input_x > 0 else -1
-		if is_on_floor():
-			current_state = State.RUN
 	else:
 		velocity.x = move_toward(velocity.x, 0, speed * 8.0 * delta)
-		if is_on_floor():
-			current_state = State.IDLE
+
+	# Cập nhật trạng thái animation khi di chuyển trên mặt đất / trên không
+	if not is_on_floor():
+		if velocity.y < 0:
+			_change_state(State.FALL)
+	else:
+		if abs(velocity.x) > 0.4:
+			_change_state(State.RUN)
+		else:
+			_change_state(State.IDLE)
 			
 	# Nhảy / Nhảy đúp / Đạp tường nhảy cao (Wall Jump)
 	if Input.is_action_just_pressed("jump"):
@@ -212,8 +218,8 @@ func _handle_movement(delta: float) -> void:
 		elif jump_count < max_jumps:
 			velocity.y = jump_force * (0.9 if jump_count > 0 else 1.0)
 			jump_count += 1
-			current_state = State.JUMP
-			_play_anim("Jump" if jump_count == 1 else "DoubleJump")
+			_change_state(State.JUMP)
+			_play_anim("Jump")
 		
 	# Shadow Dash
 	if Input.is_action_just_pressed("dash") and dash_cooldown_timer <= 0.0:
@@ -237,6 +243,11 @@ func _handle_combat_inputs() -> void:
 	if Input.is_action_just_pressed("blade_dance"):
 		if current_flow >= max_flow:
 			_start_blade_dance()
+		return
+
+	# Uống bình máu (Q / O)
+	if Input.is_action_just_pressed("use_flask"):
+		use_flask()
 		return
 
 func _start_attack_combo() -> void:
@@ -264,7 +275,11 @@ func _process_attack_state(delta: float) -> void:
 		
 	if attack_busy_timer <= 0.0:
 		_trigger_hitbox(false)
-		current_state = State.IDLE if is_on_floor() else State.FALL
+		if is_on_floor():
+			var cur_input = Input.get_axis("move_left", "move_right")
+			_change_state(State.RUN if cur_input != 0 else State.IDLE)
+		else:
+			_change_state(State.FALL)
 
 func _start_spinning_dive() -> void:
 	current_state = State.DIVE
@@ -296,7 +311,7 @@ func _process_parry_state(delta: float) -> void:
 		is_parrying = false
 		if parry_shield_fx:
 			parry_shield_fx.visible = false
-		current_state = State.IDLE
+		_change_state(State.IDLE)
 
 func trigger_parry_counter(attacker_pos: Vector3) -> void:
 	# Thành công: Hit-stop, biến ra sau lưng kẻ địch và phản đòn
@@ -311,21 +326,31 @@ func trigger_parry_counter(attacker_pos: Vector3) -> void:
 	global_position.x = target_x
 	facing_direction = -facing_direction
 	
-	# Phản đòn chí mạng
+	# Phản đòn chí mạng & kích hoạt Phản Kích Tử Thần (Detail.md III.2)
 	_start_attack_combo()
 	add_flow(2)
+	
+	for opt in weapon_options:
+		if opt.has("counter_heal"):
+			current_hp = min(max_hp, current_hp + (max_hp * opt["counter_heal"]))
+			hp_changed.emit(current_hp, max_hp)
 
 func _start_shadow_dash() -> void:
+	var bonus_iframe = 0.0
+	for opt in weapon_options:
+		if opt.has("dash_iframe"):
+			bonus_iframe += opt["dash_iframe"]
+
 	dash_cooldown_timer = DASH_COOLDOWN
 	is_dashing = true
 	is_invulnerable = true
-	dash_timer = DASH_DURATION
+	dash_timer = DASH_DURATION + bonus_iframe
 	velocity.x = facing_direction * DASH_SPEED
 	velocity.y = 0.0
 	_play_anim("ShadowDash")
 	
 	var tween = create_tween()
-	tween.tween_interval(DASH_DURATION)
+	tween.tween_interval(DASH_DURATION + bonus_iframe)
 	tween.tween_callback(func():
 		is_dashing = false
 		is_invulnerable = false
@@ -338,19 +363,26 @@ func _start_blade_dance() -> void:
 	_reset_flow()
 	_play_anim("BladeDance")
 	
+	# Kiểm tra option Vô Hạn Trảm (SSR Diệt Thế Thần Khí: 12 nhát)
+	var slash_count = 7
+	for opt in weapon_options:
+		if opt.get("infinite_slash", false):
+			slash_count = 12
+			break
+	
 	var tween = create_tween()
-	for i in range(7):
+	for i in range(slash_count):
 		tween.tween_callback(func():
 			_trigger_hitbox(true)
 			_spawn_slash_vfx(randi_range(1, 4))
 			_create_screen_shake(0.12)
 		)
-		tween.tween_interval(0.08)
+		tween.tween_interval(0.06 if slash_count == 12 else 0.08)
 		tween.tween_callback(func(): _trigger_hitbox(false))
 	
 	tween.tween_callback(func():
 		is_invulnerable = false
-		current_state = State.IDLE
+		_change_state(State.IDLE)
 	)
 
 func add_flow(amount: int = 1) -> void:
@@ -615,9 +647,25 @@ func _create_screen_shake(intensity: float) -> void:
 	if cam and cam.has_method("apply_shake"):
 		cam.apply_shake(intensity)
 
+func _change_state(new_state: State) -> void:
+	if current_state == new_state:
+		return
+	current_state = new_state
+	match current_state:
+		State.IDLE:
+			_play_anim("Idle")
+		State.RUN:
+			_play_anim("Run")
+		State.JUMP:
+			_play_anim("Jump")
+		State.FALL:
+			_play_anim("Fall")
+
 func _play_anim(anim_name: String) -> void:
 	if animation_player and animation_player.has_animation(anim_name):
-		animation_player.play(anim_name)
+		# Không khởi động lại nếu đang play đúng anim đó
+		if animation_player.current_animation != anim_name:
+			animation_player.play(anim_name)
 
 func _apply_gravity(delta: float) -> void:
 	if not is_on_floor():
@@ -631,6 +679,17 @@ func _on_attack_area_body_entered(body: Node3D) -> void:
 		if combo_index == 4:
 			damage *= 1.6 # Finisher
 		var is_crit = (randf() < crit_rate)
+		
+		# Kích hoạt các dòng Option Pool (Detail.md III.2)
+		var flow_to_add = 1
+		for opt in weapon_options:
+			if opt.has("vamp_pct") and current_hp < max_hp:
+				current_hp = min(max_hp, current_hp + (max_hp * opt["vamp_pct"]))
+				hp_changed.emit(current_hp, max_hp)
+			if opt.has("flow_pct"):
+				if randf() < opt["flow_pct"]:
+					flow_to_add += 1
+		
 		body.take_hit(damage, global_position, is_crit)
-		add_flow(1)
+		add_flow(flow_to_add)
 		_create_screen_shake(0.08)
