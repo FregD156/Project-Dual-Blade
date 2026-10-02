@@ -15,6 +15,9 @@ signal flow_changed(current_flow: int, max_flow: int, is_overflow: bool)
 signal parry_success()
 signal player_died()
 
+const GhostTrail3D = preload("res://src_3d/vfx/GhostTrail3D.gd")
+const DamageNumber3D = preload("res://src_3d/vfx/DamageNumber3D.gd")
+
 @export_group("Stats")
 @export var max_hp: float = 100.0
 @export var current_hp: float = 100.0
@@ -99,6 +102,24 @@ func _physics_process(delta: float) -> void:
 	global_position.z = 0.0
 	
 	_update_facing()
+	_update_ghost_trails(delta)
+
+var trail_timer: float = 0.0
+
+func _update_ghost_trails(delta: float) -> void:
+	if is_dashing or (is_overdrive and velocity.length() > 2.0):
+		trail_timer -= delta
+		if trail_timer <= 0.0:
+			trail_timer = 0.04 if is_dashing else 0.08
+			_spawn_ghost_trail()
+
+func _spawn_ghost_trail() -> void:
+	if not visual_root or not get_parent():
+		return
+	var trail = GhostTrail3D.new()
+	get_parent().add_child(trail)
+	var tint = Color(1.0, 0.25, 0.45, 0.65) if is_overdrive else Color(0.25, 0.7, 1.0, 0.6)
+	trail.setup(visual_root, tint, 0.28)
 
 func _update_timers(delta: float) -> void:
 	if dash_cooldown_timer > 0.0:

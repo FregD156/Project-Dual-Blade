@@ -1,10 +1,11 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes_3d/Player3D.tscn" id="1_player_scn"]
 [ext_resource type="PackedScene" path="res://scenes_3d/DummyEnemy3D.tscn" id="2_enemy_scn"]
 [ext_resource type="Script" path="res://src_3d/camera/Camera25D.gd" id="3_cam_script"]
 [ext_resource type="Material" path="res://src_3d/materials/toon_stone.tres" id="4_mat_stone"]
 [ext_resource type="Script" path="res://src_3d/ui/HUD3D.gd" id="5_hud_script"]
+[ext_resource type="PackedScene" path="res://scenes_3d/Portal3D.tscn" id="6_portal_scn"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_top_color = Color(0.12, 0.15, 0.28, 1)
@@ -170,6 +171,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.5, 0)
 [node name="TrainingDummy" parent="." instance=ExtResource("2_enemy_scn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.5, 0)
 is_passive_dummy = true
+
+[node name="Portal3D" parent="." instance=ExtResource("6_portal_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 0)
+is_active = true
 
 [node name="HUD3D" type="CanvasLayer" parent="."]
 script = ExtResource("5_hud_script")

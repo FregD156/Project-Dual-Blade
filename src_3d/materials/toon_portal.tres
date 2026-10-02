@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://src_3d/shaders/void_vortex.gdshader" id="1_vortex"]
+
+[resource]
+render_priority = 2
+shader = ExtResource("1_vortex")
+shader_parameter/portal_color_core = Color(0.3, 0.85, 1, 1)
+shader_parameter/portal_color_outer = Color(0.5, 0.15, 0.95, 1)
+shader_parameter/speed = 2.2

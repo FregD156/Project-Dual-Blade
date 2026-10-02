@@ -1,0 +1,48 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src_3d/world/Portal3D.gd" id="1_portal"]
+[ext_resource type="Material" path="res://src_3d/materials/toon_stone.tres" id="2_stone"]
+[ext_resource type="Material" path="res://src_3d/materials/toon_portal.tres" id="3_vortex"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_portal"]
+size = Vector3(1.8, 3.2, 1.5)
+
+[sub_resource type="TorusMesh" id="TorusMesh_arch"]
+material = ExtResource("2_stone")
+inner_radius = 1.1
+outer_radius = 1.45
+
+[sub_resource type="QuadMesh" id="QuadMesh_vortex"]
+material = ExtResource("3_vortex")
+size = Vector2(2.2, 2.8)
+
+[node name="Portal3D" type="Area3D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("1_portal")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+shape = SubResource("BoxShape3D_portal")
+
+[node name="ArchFrame" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 1.6, 0)
+mesh = SubResource("TorusMesh_arch")
+
+[node name="VortexMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("QuadMesh_vortex")
+
+[node name="PortalLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0.4)
+light_color = Color(0.4, 0.7, 1, 1)
+light_energy = 3.0
+omni_range = 4.5
+
+[node name="PromptLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
+billboard = 1
+no_depth_test = true
+text = "🌀 VÀO CỔNG"
+font_size = 28
+outline_size = 8

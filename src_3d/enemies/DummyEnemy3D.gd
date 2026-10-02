@@ -3,6 +3,8 @@ extends CharacterBody3D
 
 signal enemy_died()
 
+const DamageNumber3D = preload("res://src_3d/vfx/DamageNumber3D.gd")
+
 @export var max_hp: float = 200.0
 var current_hp: float = 200.0
 @export var is_passive_dummy: bool = false
@@ -78,6 +80,14 @@ func take_hit(amount: float, attacker_pos: Vector3) -> void:
 	if dir_x == 0: dir_x = 1
 	velocity.x = dir_x * 4.5
 	velocity.y = 2.0
+	
+	# Hiện số sát thương 3D
+	if get_parent():
+		var num = DamageNumber3D.new()
+		get_parent().add_child(num)
+		var is_crit = (randf() < 0.25)
+		var final_dmg = amount * (1.5 if is_crit else 1.0)
+		num.setup(final_dmg, global_position + Vector3(0, 1.4, 0), is_crit, false)
 	
 	if current_hp <= 0.0:
 		_die()
