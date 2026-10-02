@@ -1,11 +1,14 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes_3d/Player3D.tscn" id="1_player_scn"]
-[ext_resource type="PackedScene" path="res://scenes_3d/DummyEnemy3D.tscn" id="2_enemy_scn"]
-[ext_resource type="Script" path="res://src_3d/camera/Camera25D.gd" id="3_cam_script"]
-[ext_resource type="Material" path="res://src_3d/materials/toon_stone.tres" id="4_mat_stone"]
-[ext_resource type="Script" path="res://src_3d/ui/HUD3D.gd" id="5_hud_script"]
-[ext_resource type="PackedScene" path="res://scenes_3d/Portal3D.tscn" id="6_portal_scn"]
+[ext_resource type="PackedScene" path="res://scenes_3d/EnemyRustyGuard3D.tscn" id="2_guard_scn"]
+[ext_resource type="PackedScene" path="res://scenes_3d/EnemyArcher3D.tscn" id="3_archer_scn"]
+[ext_resource type="PackedScene" path="res://scenes_3d/EnemyChainHound3D.tscn" id="4_hound_scn"]
+[ext_resource type="PackedScene" path="res://scenes_3d/Portal3D.tscn" id="5_portal_scn"]
+[ext_resource type="Script" path="res://src_3d/camera/Camera25D.gd" id="6_cam_script"]
+[ext_resource type="Material" path="res://src_3d/materials/toon_stone.tres" id="7_mat_stone"]
+[ext_resource type="Script" path="res://src_3d/ui/HUD3D.gd" id="8_hud_script"]
+[ext_resource type="Script" path="res://src_3d/combat/StageManager3D.gd" id="9_stage_mgr"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_top_color = Color(0.12, 0.15, 0.28, 1)
@@ -28,21 +31,21 @@ glow_intensity = 0.6
 glow_bloom = 0.2
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
-material = ExtResource("4_mat_stone")
+material = ExtResource("7_mat_stone")
 size = Vector3(45, 1, 6)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(45, 1, 6)
 
 [sub_resource type="BoxMesh" id="BoxMesh_plat"]
-material = ExtResource("4_mat_stone")
-size = Vector3(4, 0.6, 3)
+material = ExtResource("7_mat_stone")
+size = Vector3(4.5, 0.6, 3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_plat"]
-size = Vector3(4, 0.6, 3)
+size = Vector3(4.5, 0.6, 3)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_pillar"]
-material = ExtResource("4_mat_stone")
+material = ExtResource("7_mat_stone")
 top_radius = 0.8
 bottom_radius = 0.9
 height = 9.0
@@ -101,7 +104,7 @@ mesh = SubResource("BoxMesh_floor")
 shape = SubResource("BoxShape3D_floor")
 
 [node name="PlatformLeft" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2.4, 0)
 collision_layer = 1
 collision_mask = 6
 
@@ -112,7 +115,7 @@ mesh = SubResource("BoxMesh_plat")
 shape = SubResource("BoxShape3D_plat")
 
 [node name="PlatformRight" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 2.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2.4, 0)
 collision_layer = 1
 collision_mask = 6
 
@@ -157,27 +160,32 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 4.5, -5.5)
 mesh = SubResource("CylinderMesh_pillar")
 
 [node name="Player3D" parent="." instance=ExtResource("1_player_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.5, 0)
 
 [node name="Camera25D" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
 transform = Transform3D(1, 0, 0, 0, 0.985, 0.174, 0, -0.174, 0.985, 0, 2.5, 6.8)
 fov = 48.0
-script = ExtResource("3_cam_script")
+script = ExtResource("6_cam_script")
 target = NodePath("../Player3D")
 
-[node name="DummyEnemy3D" parent="." instance=ExtResource("2_enemy_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.5, 0)
-
-[node name="TrainingDummy" parent="." instance=ExtResource("2_enemy_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.5, 0)
-is_passive_dummy = true
-
-[node name="Portal3D" parent="." instance=ExtResource("6_portal_scn")]
+[node name="Portal3D" parent="." instance=ExtResource("5_portal_scn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 0)
-is_active = true
+
+[node name="StageManager3D" type="Node3D" parent="." node_paths=PackedStringArray("portal")]
+script = ExtResource("9_stage_mgr")
+portal = NodePath("../Portal3D")
+
+[node name="EnemyRustyGuard3D" parent="StageManager3D" instance=ExtResource("2_guard_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0.5, 0)
+
+[node name="EnemyChainHound3D" parent="StageManager3D" instance=ExtResource("4_hound_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.5, 0)
+
+[node name="EnemyArcher3D" parent="StageManager3D" instance=ExtResource("3_archer_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2.7, 0)
 
 [node name="HUD3D" type="CanvasLayer" parent="."]
-script = ExtResource("5_hud_script")
+script = ExtResource("8_hud_script")
 
 [node name="MarginContainer" type="MarginContainer" parent="HUD3D"]
 offset_left = 16.0
