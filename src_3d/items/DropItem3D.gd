@@ -141,7 +141,9 @@ func _collect(player: Node3D) -> void:
 				player.current_hp = min(player.max_hp, player.current_hp + (player.max_hp * 0.08))
 				player.hp_changed.emit(player.current_hp, player.max_hp)
 		ItemType.LIFE_FLASK:
-			if player.has_method("take_damage") and "current_hp" in player and "max_hp" in player:
+			if player.has_method("add_flask"):
+				player.add_flask(1)
+			elif player.has_method("take_damage") and "current_hp" in player and "max_hp" in player:
 				player.current_hp = min(player.max_hp, player.current_hp + (player.max_hp * 0.35))
 				player.hp_changed.emit(player.current_hp, player.max_hp)
 		ItemType.HEART_CORE:
@@ -150,7 +152,16 @@ func _collect(player: Node3D) -> void:
 				player.hp_changed.emit(player.current_hp, player.max_hp)
 				player.base_atk *= 1.10 # +10% ATK
 		ItemType.WEAPON:
-			if "base_atk" in player:
+			var tier_str = "tier_" + _get_rarity_str(rarity).to_lower()
+			var item_dict = {
+				"type": "weapon",
+				"tier": tier_str,
+				"name": item_name,
+				"options": WeaponOptionGenerator.generate_options(tier_str) if ClassDB.class_exists("WeaponOptionGenerator") or (WeaponOptionGenerator != null) else []
+			}
+			if player.has_method("add_to_inventory"):
+				player.add_to_inventory(item_dict)
+			elif "base_atk" in player:
 				player.base_atk += (int(rarity) + 1) * 3.0
 				
 	# Pop effect

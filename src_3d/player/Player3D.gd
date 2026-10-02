@@ -14,17 +14,50 @@ signal hp_changed(current: float, max_hp: float)
 signal flow_changed(current_flow: int, max_flow: int, is_overflow: bool)
 signal parry_success()
 signal player_died()
+signal flasks_changed(current: int, maximum: int)
+signal weapon_equipped(tier_name: String, atk: float, crit: float)
+signal crystals_changed(count: int)
+signal inventory_changed(items: Array[Dictionary])
+signal armor_changed(current_armor: float, max_armor: float)
+signal armor_equipped(equipped_armor: Dictionary)
+signal shield_equipped(shield_data: Dictionary)
+signal items_merged(merged_items: Array[Dictionary])
+signal merge_ready(group_name: String, count: int)
 
 const GhostTrail3D = preload("res://src_3d/vfx/GhostTrail3D.gd")
 const DamageNumber3D = preload("res://src_3d/vfx/DamageNumber3D.gd")
 
 @export_group("Stats")
 @export var max_hp: float = 100.0
+var base_max_hp: float = 100.0
 @export var current_hp: float = 100.0
 @export var base_atk: float = 25.0
+@export var crit_rate: float = 0.05
 @export var move_speed: float = 6.5
 @export var jump_force: float = 11.5
 @export var gravity: float = 28.0
+
+# Inventory & Equipment Data
+var current_weapon_tier: String = "tier_d"
+var current_weapon_data: Dictionary = {}
+var weapon_options: Array[Dictionary] = []
+var life_flasks: int = 1
+var max_flasks: int = 3
+var upgrade_crystals: int = 0
+var inventory: Array[Dictionary] = []
+
+var equipped_armor: Dictionary = {
+	"helmet": {},
+	"chest": {},
+	"arms": {},
+	"legs": {}
+}
+var max_armor: float = 0.0
+var current_armor: float = 0.0
+
+var equipped_shield: Dictionary = {}
+var block_chance: float = 0.0
+var shield_damage_reduction: float = 0.0
 
 @export_group("Flow System")
 @export var max_flow: int = 5
@@ -338,9 +371,32 @@ func take_damage(amount: float, attacker_pos: Vector3 = Vector3.ZERO) -> void:
 	if is_parrying:
 		trigger_parry_counter(attacker_pos)
 		return
+
+	# Block check từ khiên
+	if randf() < block_chance:
+		# Block thành công
+		var num = DamageNumber3D.new()
+		get_parent().add_child(num)
+		num.setup(0.0, global_position + Vector3(0, 1.4, 0), false, false)
+		_create_screen_shake(0.08)
+		return
 		
-	current_hp = max(0.0, current_hp - amount)
-	hp_changed.emit(current_hp, max_hp)
+	var remaining_damage = amount * (1.0 - shield_damage_reduction)
+	
+	# Hấp thụ qua lớp Giáp trước
+	if current_armor > 0.0:
+		if current_armor >= remaining_damage:
+			current_armor -= remaining_damage
+			remaining_damage = 0.0
+		else:
+			remaining_damage -= current_armor
+			current_armor = 0.0
+		armor_changed.emit(current_armor, max_armor)
+		
+	if remaining_damage > 0.0:
+		current_hp = max(0.0, current_hp - remaining_damage)
+		hp_changed.emit(current_hp, max_hp)
+		
 	_reset_flow()
 	_create_screen_shake(0.2)
 	
@@ -350,6 +406,159 @@ func take_damage(amount: float, attacker_pos: Vector3 = Vector3.ZERO) -> void:
 		_play_anim("Hurt")
 		velocity.x = -facing_direction * 3.5
 		velocity.y = 3.0
+
+# ---------------------------------------------------------
+# Inventory, Equipment & Merge System
+# ---------------------------------------------------------
+func add_to_inventory(item_dict: Dictionary) -> void:
+	inventory.append(item_dict)
+	auto_equip_if_better(item_dict)
+	_check_and_notify_merge_ready(item_dict)
+	inventory_changed.emit(inventory)
+
+func _check_and_notify_merge_ready(recent_item: Dictionary) -> void:
+	var ready_groups = MergeSystem.get_merge_ready_groups(inventory)
+	var recent_key = MergeSystem.get_merge_group_key(recent_item)
+	for grp in ready_groups:
+		if grp.get("key", "") == recent_key:
+			merge_ready.emit(grp.get("name", "Trang Bị"), grp.get("count", 5))
+			break
+
+func auto_equip_if_better(item_dict: Dictionary) -> bool:
+	var itype = item_dict.get("type", "weapon")
+	var new_tier = item_dict.get("tier", "tier_d")
+	
+	if itype == "weapon":
+		if MergeSystem.is_higher_tier(new_tier, current_weapon_tier):
+			equip_weapon_dict(item_dict)
+			return true
+	elif itype == "armor":
+		var part = item_dict.get("part", "chest")
+		var cur_equipped = equipped_armor.get(part, {})
+		var cur_tier = cur_equipped.get("tier", "tier_d") if not cur_equipped.is_empty() else ""
+		if cur_equipped.is_empty() or MergeSystem.is_higher_tier(new_tier, cur_tier):
+			equip_armor_piece(item_dict)
+			return true
+	elif itype == "shield":
+		var cur_tier = equipped_shield.get("tier", "tier_d") if not equipped_shield.is_empty() else ""
+		if equipped_shield.is_empty() or MergeSystem.is_higher_tier(new_tier, cur_tier):
+			equip_shield(item_dict)
+			return true
+	return false
+
+func auto_equip_all_highest_tiers() -> void:
+	for item in inventory:
+		auto_equip_if_better(item)
+
+func check_and_merge_inventory() -> Array[Dictionary]:
+	var merged_items = MergeSystem.perform_merge(inventory)
+	if merged_items.size() > 0:
+		for new_item in merged_items:
+			auto_equip_if_better(new_item)
+		items_merged.emit(merged_items)
+		inventory_changed.emit(inventory)
+	return merged_items
+
+func salvage_weapon(index: int) -> bool:
+	if index < 0 or index >= inventory.size():
+		return false
+	inventory.remove_at(index)
+	add_crystals(2)
+	inventory_changed.emit(inventory)
+	return true
+
+func equip_weapon_dict(item_dict: Dictionary) -> void:
+	current_weapon_data = item_dict
+	weapon_options.clear()
+	for opt in item_dict.get("options", []):
+		if opt is Dictionary:
+			weapon_options.append(opt)
+	equip_weapon_tier(item_dict.get("tier", "tier_d"))
+
+func equip_weapon_tier(tier: String) -> void:
+	current_weapon_tier = tier
+	match tier:
+		"tier_d":
+			base_atk = 25.0
+			crit_rate = 0.05
+		"tier_c":
+			base_atk = 36.0
+			crit_rate = 0.07
+		"tier_b":
+			base_atk = 52.0
+			crit_rate = 0.10
+		"tier_a":
+			base_atk = 78.0
+			crit_rate = 0.14
+		"tier_r":
+			base_atk = 115.0
+			crit_rate = 0.18
+		"tier_sr":
+			base_atk = 175.0
+			crit_rate = 0.23
+		"tier_ssr":
+			base_atk = 270.0
+			crit_rate = 0.28
+			
+	for opt in weapon_options:
+		if opt.has("atk_pct"):
+			base_atk *= (1.0 + opt["atk_pct"])
+		if opt.has("crit_pct"):
+			crit_rate += opt["crit_pct"]
+			
+	weapon_equipped.emit(current_weapon_tier, base_atk, crit_rate)
+
+func equip_armor_piece(armor_item: Dictionary) -> void:
+	var part = armor_item.get("part", "")
+	if not equipped_armor.has(part):
+		return
+	equipped_armor[part] = armor_item
+	recalculate_armor()
+	armor_equipped.emit(equipped_armor)
+
+func recalculate_armor() -> void:
+	var total_armor = 0.0
+	for part in equipped_armor.keys():
+		var item = equipped_armor[part]
+		if not item.is_empty():
+			total_armor += item.get("armor_value", 0.0)
+	if not equipped_shield.is_empty():
+		total_armor += equipped_shield.get("bonus_armor", 0.0)
+		
+	var prev_max = max_armor
+	max_armor = total_armor
+	if prev_max <= 0.0:
+		current_armor = max_armor
+	else:
+		current_armor = clampf(current_armor + (max_armor - prev_max), 0.0, max_armor)
+	armor_changed.emit(current_armor, max_armor)
+
+func equip_shield(shield_dict: Dictionary) -> void:
+	equipped_shield = shield_dict
+	block_chance = shield_dict.get("block_chance", 0.1)
+	shield_damage_reduction = shield_dict.get("damage_reduction", 0.15)
+	var prev_max_hp = max_hp
+	max_hp = base_max_hp + shield_dict.get("bonus_hp", 0.0)
+	if prev_max_hp != max_hp:
+		current_hp = clampf(current_hp + (max_hp - prev_max_hp), 1.0, max_hp)
+		hp_changed.emit(current_hp, max_hp)
+	recalculate_armor()
+	shield_equipped.emit(equipped_shield)
+
+func use_flask() -> void:
+	if life_flasks > 0 and current_hp < max_hp:
+		life_flasks -= 1
+		current_hp = min(max_hp, current_hp + (max_hp * 0.35))
+		hp_changed.emit(current_hp, max_hp)
+		flasks_changed.emit(life_flasks, max_flasks)
+
+func add_flask(count: int = 1) -> void:
+	life_flasks = clampi(life_flasks + count, 0, max_flasks)
+	flasks_changed.emit(life_flasks, max_flasks)
+
+func add_crystals(count: int = 1) -> void:
+	upgrade_crystals += count
+	crystals_changed.emit(upgrade_crystals)
 
 func _die() -> void:
 	current_state = State.DEAD

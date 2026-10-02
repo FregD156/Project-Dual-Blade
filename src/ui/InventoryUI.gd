@@ -33,7 +33,7 @@ extends Control
 @onready var hint_label: Label = get_node_or_null("CenterContainer/MainHBox/LeftPanel/Margin/VBox/MergeHintBanner/HintLabel")
 @onready var close_btn: Button = $CenterContainer/MainHBox/RightFrame/CloseBtn
 
-var player_ref: Player = null
+var player_ref: Node = null
 var open_tween: Tween = null
 var merge_glow_tween: Tween = null
 const ITEM_SLOT_TEXTURE = preload("res://assets/sprites/ui/item_slot_frame.png")
@@ -155,7 +155,7 @@ func toggle_inventory() -> void:
 		else:
 			visible = false
 
-func connect_player(player: Player) -> void:
+func connect_player(player: Node) -> void:
 	player_ref = player
 	if not player_ref:
 		return

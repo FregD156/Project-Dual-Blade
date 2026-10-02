@@ -13,6 +13,14 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/world1_bastion_bg.png" id="11_bg_tex"]
 [ext_resource type="PackedScene" path="res://scenes_3d/SpikeTrap3D.tscn" id="12_spike_scn"]
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/props/gothic_wall_banner.png" id="13_banner_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/vitals_hud_frame.png" id="14_vitals_frame"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/flow_hud_frame.png" id="15_flow_frame"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ruby_gem.png" id="16_ruby_gem"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_bag.png" id="17_icon_bag"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_map.png" id="18_icon_map"]
+[ext_resource type="PackedScene" path="res://scenes/InventoryUI.tscn" id="19_inv_scn"]
+[ext_resource type="PackedScene" path="res://scenes/FastTravelMapUI.tscn" id="20_map_scn"]
+
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_top_color = Color(0.12, 0.15, 0.28, 1)
@@ -77,6 +85,14 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_armor"]
+bg_color = Color(0.25, 0.65, 0.95, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 
 [node name="World1_Bastion_3D" type="Node3D"]
 
@@ -338,65 +354,197 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 10.2, 0)
 [node name="HUD3D" type="CanvasLayer" parent="."]
 script = ExtResource("8_hud_script")
 
-[node name="MarginContainer" type="MarginContainer" parent="HUD3D"]
+[node name="VitalsPanel" type="Control" parent="HUD3D"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 172.0
+offset_bottom = 60.0
+
+[node name="VitalsFrame" type="TextureRect" parent="HUD3D/VitalsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("14_vitals_frame")
+expand_mode = 1
+
+[node name="VBoxBars" type="VBoxContainer" parent="HUD3D/VitalsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = 16.0
-offset_right = 260.0
-offset_bottom = 90.0
+offset_top = 10.0
+offset_right = -14.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HUD3D/MarginContainer"]
+[node name="HPBar" type="ProgressBar" parent="HUD3D/VitalsPanel/VBoxBars"]
+custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="HPContainer" type="HBoxContainer" parent="HUD3D/MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="HUD3D/MarginContainer/VBoxContainer/HPContainer"]
-layout_mode = 2
-text = "HP:"
-
-[node name="HPBar" type="ProgressBar" parent="HUD3D/MarginContainer/VBoxContainer/HPContainer"]
-custom_minimum_size = Vector2(180, 14)
-layout_mode = 2
-size_flags_vertical = 4
 theme_override_styles/background = SubResource("StyleBoxFlat_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_fill")
 value = 100.0
 show_percentage = false
 
-[node name="FlowContainer" type="HBoxContainer" parent="HUD3D/MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 4
+[node name="HPLabel" type="Label" parent="HUD3D/VitalsPanel/VBoxBars/HPBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 1
+theme_override_font_sizes/font_size = 8
+text = "100 / 100"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Slot1" type="ColorRect" parent="HUD3D/MarginContainer/VBoxContainer/FlowContainer"]
-custom_minimum_size = Vector2(30, 8)
+[node name="ArmorBar" type="ProgressBar" parent="HUD3D/VitalsPanel/VBoxBars"]
+custom_minimum_size = Vector2(0, 9)
 layout_mode = 2
-color = Color(0.2, 0.25, 0.35, 0.5)
+theme_override_styles/background = SubResource("StyleBoxFlat_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_armor")
+value = 0.0
+show_percentage = false
 
-[node name="Slot2" type="ColorRect" parent="HUD3D/MarginContainer/VBoxContainer/FlowContainer"]
-custom_minimum_size = Vector2(30, 8)
-layout_mode = 2
-color = Color(0.2, 0.25, 0.35, 0.5)
+[node name="ArmorLabel" type="Label" parent="HUD3D/VitalsPanel/VBoxBars/ArmorBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 1
+theme_override_font_sizes/font_size = 7
+text = "GIÁP: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Slot3" type="ColorRect" parent="HUD3D/MarginContainer/VBoxContainer/FlowContainer"]
-custom_minimum_size = Vector2(30, 8)
-layout_mode = 2
-color = Color(0.2, 0.25, 0.35, 0.5)
+[node name="FlowPanel" type="Control" parent="HUD3D"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 12.0
+offset_top = 64.0
+offset_right = 152.0
+offset_bottom = 100.0
 
-[node name="Slot4" type="ColorRect" parent="HUD3D/MarginContainer/VBoxContainer/FlowContainer"]
-custom_minimum_size = Vector2(30, 8)
-layout_mode = 2
-color = Color(0.2, 0.25, 0.35, 0.5)
+[node name="FlowFrame" type="TextureRect" parent="HUD3D/FlowPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("15_flow_frame")
+expand_mode = 1
 
-[node name="Slot5" type="ColorRect" parent="HUD3D/MarginContainer/VBoxContainer/FlowContainer"]
-custom_minimum_size = Vector2(30, 8)
-layout_mode = 2
-color = Color(0.2, 0.25, 0.35, 0.5)
+[node name="RubyGemsContainer" type="HBoxContainer" parent="HUD3D/FlowPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -46.0
+offset_top = -11.0
+offset_right = 46.0
+offset_bottom = 3.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+alignment = 1
 
-[node name="StateLabel" type="Label" parent="HUD3D/MarginContainer/VBoxContainer"]
+[node name="Gem1" type="TextureRect" parent="HUD3D/FlowPanel/RubyGemsContainer"]
+custom_minimum_size = Vector2(12, 12)
 layout_mode = 2
-theme_override_font_sizes/font_size = 11
-text = "FLOW: 0/5"
+texture = ExtResource("16_ruby_gem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Gem2" type="TextureRect" parent="HUD3D/FlowPanel/RubyGemsContainer"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+texture = ExtResource("16_ruby_gem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Gem3" type="TextureRect" parent="HUD3D/FlowPanel/RubyGemsContainer"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+texture = ExtResource("16_ruby_gem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Gem4" type="TextureRect" parent="HUD3D/FlowPanel/RubyGemsContainer"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+texture = ExtResource("16_ruby_gem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Gem5" type="TextureRect" parent="HUD3D/FlowPanel/RubyGemsContainer"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+texture = ExtResource("16_ruby_gem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StateLabel" type="Label" parent="HUD3D/FlowPanel"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -60.0
+offset_top = -14.0
+offset_right = 60.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 1
+theme_override_font_sizes/font_size = 8
+text = "FLOW METER (0/5)"
+horizontal_alignment = 1
+
+[node name="TopRightButtons" type="HBoxContainer" parent="HUD3D"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -76.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = 36.0
+grow_horizontal = 0
+theme_override_constants/separation = 6
+
+[node name="BagButton" type="Button" parent="HUD3D/TopRightButtons"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+tooltip_text = "Mở Túi Đồ [B]"
+icon = ExtResource("17_icon_bag")
+icon_alignment = 1
+expand_icon = true
+
+[node name="MapButton" type="Button" parent="HUD3D/TopRightButtons"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+tooltip_text = "Bản Đồ [M]"
+icon = ExtResource("18_icon_map")
+icon_alignment = 1
+expand_icon = true
 
 [node name="BossContainer" type="VBoxContainer" parent="HUD3D"]
 visible = false
@@ -404,15 +552,15 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -160.0
-offset_top = 18.0
+offset_top = 16.0
 offset_right = 160.0
-offset_bottom = 50.0
+offset_bottom = 48.0
 grow_horizontal = 2
 
 [node name="BossNameLabel" type="Label" parent="HUD3D/BossContainer"]
 layout_mode = 2
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 11
 text = "👑 QUÁI TINH ANH"
 horizontal_alignment = 1
 
@@ -423,3 +571,10 @@ theme_override_styles/background = SubResource("StyleBoxFlat_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_fill")
 value = 100.0
 show_percentage = false
+
+[node name="InventoryUI" parent="." instance=ExtResource("19_inv_scn")]
+visible = false
+
+[node name="FastTravelMapUI" parent="." instance=ExtResource("20_map_scn")]
+visible = false
+
