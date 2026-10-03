@@ -102,6 +102,17 @@ func _ready() -> void:
 	current_hp = max_hp
 	flow_changed.emit(current_flow, max_flow, is_overdrive)
 	hp_changed.emit(current_hp, max_hp)
+	flasks_changed.emit(life_flasks, max_flasks)
+	crystals_changed.emit(upgrade_crystals)
+	
+	# Khởi tạo trang bị khởi đầu Bậc D chuẩn theo detail.md
+	equip_weapon_tier("tier_d")
+	equip_armor_piece(ArmorSystem.create_armor_item("helmet", "tier_d"))
+	equip_armor_piece(ArmorSystem.create_armor_item("chest", "tier_d"))
+	equip_armor_piece(ArmorSystem.create_armor_item("arms", "tier_d"))
+	equip_armor_piece(ArmorSystem.create_armor_item("legs", "tier_d"))
+	equip_shield(ShieldSystem.create_shield_item("tier_d"))
+	
 	if attack_area:
 		attack_area.monitoring = false
 

@@ -25,20 +25,29 @@ func _process(delta: float) -> void:
 	if altar_light:
 		altar_light.light_energy = 2.0 + sin(pulse_timer) * 0.8
 		
-	if player_in_range and (Input.is_key_pressed(KEY_E) or Input.is_action_just_pressed("attack")):
-		rest_at_altar()
+	if player_in_range:
+		if Input.is_key_pressed(KEY_E) or Input.is_action_just_pressed("attack"):
+			rest_at_altar()
+		elif Input.is_key_pressed(KEY_B) or Input.is_action_just_pressed("ui_focus_next"):
+			_open_blacksmith_inventory()
 
 func _on_body_entered(body: Node3D) -> void:
 	if body.is_in_group("player"):
 		player_in_range = body
 		if prompt_label:
 			prompt_label.visible = true
+			prompt_label.text = "[E/J]: ĐÀI TẾ HỒI PHỤC  |  [B]: LÃO THỢ RÈN VULCAN (RÈN/GHÉP/TẨY ĐỒ)"
 
 func _on_body_exited(body: Node3D) -> void:
 	if body == player_in_range:
 		player_in_range = null
 		if prompt_label:
 			prompt_label.visible = false
+
+func _open_blacksmith_inventory() -> void:
+	var inv = get_tree().root.find_child("InventoryUI", true, false)
+	if inv and inv.has_method("toggle_inventory"):
+		inv.toggle_inventory()
 
 func rest_at_altar() -> void:
 	if not player_in_range:
@@ -62,6 +71,9 @@ func rest_at_altar() -> void:
 		if player_in_range.has_signal("flasks_changed"):
 			player_in_range.flasks_changed.emit(player_in_range.life_flasks, player_in_range.max_flasks)
 
+	# Lưu checkpoint an toàn trước Boss 1.10
+	CheckpointManager.get_instance().activate_checkpoint(1, 9)
+
 	# Hiệu ứng hào quang
 	if altar_light:
 		var tw = create_tween()
@@ -70,5 +82,5 @@ func rest_at_altar() -> void:
 
 	player_rested.emit()
 	if prompt_label:
-		prompt_label.text = "✨ ĐÃ HỒI PHỤC TOÀN BỘ SINH LỰC & BÌNH MÁU! ✨"
+		prompt_label.text = "✨ ĐÃ HỒI PHỤC 100% SINH LỰC, GIÁP & BÌNH MÁU! CHECKPOINT ĐÃ LƯU! ✨"
 		prompt_label.modulate = Color(0.3, 1.2, 0.6)

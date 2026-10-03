@@ -4,12 +4,13 @@ extends Area3D
 ## Vật Phẩm Rơi 3D theo detail.md III.1 & VII.1
 ## Hỗ trợ: Hạt Sinh Mệnh (hút nam châm), Bình Máu Lớn, Trái Tim Huyết Tế và Vũ Khí D->SSR có tia sáng
 
-enum ItemType { LIFE_SHARD, LIFE_FLASK, HEART_CORE, WEAPON }
+enum ItemType { LIFE_SHARD, LIFE_FLASK, HEART_CORE, WEAPON, ARMOR, SHIELD }
 enum Rarity { D, C, B, A, R, SR, SSR }
 
 @export var item_type: ItemType = ItemType.LIFE_SHARD
 @export var rarity: Rarity = Rarity.D
 @export var item_name: String = "Hạt Sinh Mệnh"
+@export var item_part: String = "chest"
 
 var is_collected: bool = false
 var float_offset: float = 0.0
@@ -27,16 +28,34 @@ const TEX_WEAPON_R = preload("res://assets/sprites/items/sliced/weapon_tier_r.pn
 const TEX_WEAPON_SR = preload("res://assets/sprites/items/sliced/weapon_tier_sr.png")
 const TEX_WEAPON_SSR = preload("res://assets/sprites/items/sliced/weapon_tier_ssr.png")
 
+const TEX_ARMOR = {
+	"helmet": preload("res://assets/sprites/armor/armor_helmet.png"),
+	"chest": preload("res://assets/sprites/armor/armor_chest.png"),
+	"arms": preload("res://assets/sprites/armor/armor_arms.png"),
+	"legs": preload("res://assets/sprites/armor/armor_legs.png")
+}
+
+const TEX_SHIELD = {
+	"tier_d": preload("res://assets/sprites/items/shield/shield_tier_d.png"),
+	"tier_c": preload("res://assets/sprites/items/shield/shield_tier_c.png"),
+	"tier_b": preload("res://assets/sprites/items/shield/shield_tier_b.png"),
+	"tier_a": preload("res://assets/sprites/items/shield/shield_tier_a.png"),
+	"tier_r": preload("res://assets/sprites/items/shield/shield_tier_r.png"),
+	"tier_sr": preload("res://assets/sprites/items/shield/shield_tier_sr.png"),
+	"tier_ssr": preload("res://assets/sprites/items/shield/shield_tier_ssr.png")
+}
+
 @onready var item_sprite: Sprite3D = get_node_or_null("ItemSprite")
 @onready var visual_mesh: MeshInstance3D = get_node_or_null("VisualMesh")
 @onready var item_light: OmniLight3D = $ItemLight
 @onready var beam_mesh: MeshInstance3D = get_node_or_null("BeamMesh")
 @onready var label: Label3D = get_node_or_null("Label3D")
 
-func setup(p_type: ItemType, p_rarity: Rarity = Rarity.D, p_name: String = "") -> void:
+func setup(p_type: ItemType, p_rarity: Rarity = Rarity.D, p_name: String = "", p_part: String = "chest") -> void:
 	item_type = p_type
 	rarity = p_rarity
 	item_name = p_name
+	item_part = p_part
 	
 	_apply_visual_style()
 
@@ -95,13 +114,24 @@ func _apply_visual_style() -> void:
 					Rarity.R: item_sprite.texture = TEX_WEAPON_R
 					Rarity.SR: item_sprite.texture = TEX_WEAPON_SR
 					Rarity.SSR: item_sprite.texture = TEX_WEAPON_SSR
+		ItemType.ARMOR:
+			color = _get_rarity_color(rarity)
+			if label: label.text = "[%s] %s" % [_get_rarity_str(rarity), item_name]
+			if item_sprite:
+				item_sprite.texture = TEX_ARMOR.get(item_part, TEX_ARMOR["chest"])
+		ItemType.SHIELD:
+			color = _get_rarity_color(rarity)
+			if label: label.text = "[%s] %s" % [_get_rarity_str(rarity), item_name]
+			if item_sprite:
+				var tier_key = "tier_" + _get_rarity_str(rarity).to_lower()
+				item_sprite.texture = TEX_SHIELD.get(tier_key, TEX_SHIELD["tier_d"])
 			
 	if item_light:
 		item_light.light_color = color
 	if label:
 		label.modulate = color
 	if beam_mesh:
-		beam_mesh.visible = (item_type == ItemType.WEAPON or item_type == ItemType.HEART_CORE)
+		beam_mesh.visible = (item_type in [ItemType.WEAPON, ItemType.ARMOR, ItemType.SHIELD, ItemType.HEART_CORE])
 		if beam_mesh.visible and beam_mesh.material_override:
 			beam_mesh.material_override.albedo_color = Color(color.r, color.g, color.b, 0.45)
 
@@ -163,6 +193,20 @@ func _collect(player: Node3D) -> void:
 				player.add_to_inventory(item_dict)
 			elif "base_atk" in player:
 				player.base_atk += (int(rarity) + 1) * 3.0
+		ItemType.ARMOR:
+			var tier_str = "tier_" + _get_rarity_str(rarity).to_lower()
+			var armor_dict = ArmorSystem.create_armor_item(item_part, tier_str)
+			if player.has_method("add_to_inventory"):
+				player.add_to_inventory(armor_dict)
+			elif player.has_method("equip_armor_piece"):
+				player.equip_armor_piece(armor_dict)
+		ItemType.SHIELD:
+			var tier_str = "tier_" + _get_rarity_str(rarity).to_lower()
+			var shield_dict = ShieldSystem.create_shield_item(tier_str)
+			if player.has_method("add_to_inventory"):
+				player.add_to_inventory(shield_dict)
+			elif player.has_method("equip_shield"):
+				player.equip_shield(shield_dict)
 				
 	# Pop effect
 	var tw = create_tween()

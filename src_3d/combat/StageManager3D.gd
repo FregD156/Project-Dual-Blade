@@ -241,7 +241,10 @@ func _on_all_enemies_defeated() -> void:
 
 	var hud = get_node_or_null("../HUD3D")
 	if hud and hud.has_method("show_stage_banner"):
-		hud.show_stage_banner("✨ ẢI " + stage_str + " ĐÃ DỌN SẠCH! TIẾN VÀO CỔNG PHÍA TRƯỚC ✨")
+		if current_stage == 9:
+			hud.show_stage_banner("✨ TRẠM NGHỈ AN TOÀN — HỒI PHỤC, NÂNG CẤP ĐỒ RỒI TIẾN VÀO CỬA BOSS 1.10 ✨")
+		else:
+			hud.show_stage_banner("✨ ẢI " + stage_str + " ĐÃ DỌN SẠCH! TIẾN VÀO CỔNG PHÍA TRƯỚC ✨")
 
 	_open_portals()
 

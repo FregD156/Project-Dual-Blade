@@ -150,15 +150,35 @@ func _spawn_loot() -> void:
 		player_low_hp = (player.current_hp / player.max_hp) < 0.35
 		
 	var roll = randf()
-	if roll < (0.60 if player_low_hp else 0.35):
+	# 1. Hạt Sinh Mệnh (Mercy Drop theo detail.md VII)
+	if roll < (0.60 if player_low_hp else 0.30):
 		var item = DROP_ITEM_SCENE.instantiate()
 		get_parent().add_child(item)
 		item.global_position = global_position + Vector3(0, 0.4, 0)
-		item.setup(0, 0, "Hạt Sinh Mệnh")
+		item.setup(DropItem3D.ItemType.LIFE_SHARD, DropItem3D.Rarity.D, "Hạt Sinh Mệnh")
+	# 2. Vũ Khí Song Đao (Bậc D hoặc C)
 	elif roll < 0.55:
 		var item = DROP_ITEM_SCENE.instantiate()
 		get_parent().add_child(item)
-		item.global_position = global_position + Vector3(0, 0.4, 0)
-		var r = 1 if randf() < 0.3 else 0
-		var w_name = "Song Đao Thép Thô" if r == 1 else "Song Đao Rỉ Sét"
-		item.setup(3, r, w_name)
+		item.global_position = global_position + Vector3(randf_range(-0.5, 0.5), 0.4, 0)
+		var r = DropItem3D.Rarity.C if randf() < 0.35 else DropItem3D.Rarity.D
+		var w_name = "Song Đao Thép Thô" if r == DropItem3D.Rarity.C else "Song Đao Rỉ Sét"
+		item.setup(DropItem3D.ItemType.WEAPON, r, w_name)
+	# 3. Mảnh Giáp 4 bộ phận (Helmet, Chest, Arms, Legs)
+	elif roll < 0.75:
+		var item = DROP_ITEM_SCENE.instantiate()
+		get_parent().add_child(item)
+		item.global_position = global_position + Vector3(randf_range(-0.5, 0.5), 0.4, 0)
+		var parts = ["helmet", "chest", "arms", "legs"]
+		var p_chosen = parts.pick_random()
+		var r = DropItem3D.Rarity.C if randf() < 0.3 else DropItem3D.Rarity.D
+		var part_display = ArmorSystem.PART_NAMES.get(p_chosen, "Mảnh Giáp")
+		item.setup(DropItem3D.ItemType.ARMOR, r, part_display, p_chosen)
+	# 4. Khiên Hộ Thân (Shield)
+	elif roll < 0.90:
+		var item = DROP_ITEM_SCENE.instantiate()
+		get_parent().add_child(item)
+		item.global_position = global_position + Vector3(randf_range(-0.5, 0.5), 0.4, 0)
+		var r = DropItem3D.Rarity.C if randf() < 0.3 else DropItem3D.Rarity.D
+		var s_name = "Khiên Sắt Tân Binh" if r == DropItem3D.Rarity.C else "Khiên Gỗ Rỉ"
+		item.setup(DropItem3D.ItemType.SHIELD, r, s_name)

@@ -144,3 +144,43 @@ func _enter_phase_2() -> void:
 func die() -> void:
 	boss_defeated.emit()
 	super.die()
+
+func _spawn_loot() -> void:
+	if not DROP_ITEM_SCENE or not get_parent():
+		return
+		
+	# 1. Rơi Trái Tim Huyết Tế
+	var heart = DROP_ITEM_SCENE.instantiate()
+	get_parent().add_child(heart)
+	heart.global_position = global_position + Vector3(0, 0.6, 0)
+	heart.setup(DropItem3D.ItemType.HEART_CORE, DropItem3D.Rarity.D, "Trái Tim Huyết Tế")
+	
+	# 2. Rơi Vũ Khí Cao Cấp (Bậc A hoặc R hoặc SR theo Detail.md IV.1)
+	var weapon = DROP_ITEM_SCENE.instantiate()
+	get_parent().add_child(weapon)
+	weapon.global_position = global_position + Vector3(1.8, 0.6, 0)
+	var roll_w = randf()
+	var w_rarity = DropItem3D.Rarity.A
+	var w_name = "Song Đao Thép Tinh Chế"
+	if roll_w < 0.20:
+		w_rarity = DropItem3D.Rarity.SR
+		w_name = "Song Đao Hoàng Kim Thiết Vệ"
+	elif roll_w < 0.60:
+		w_rarity = DropItem3D.Rarity.R
+		w_name = "Song Đao Khắc Cổ Tự"
+	weapon.setup(DropItem3D.ItemType.WEAPON, w_rarity, w_name)
+	
+	# 3. Rơi Mảnh Giáp Bậc A
+	var armor = DROP_ITEM_SCENE.instantiate()
+	get_parent().add_child(armor)
+	armor.global_position = global_position + Vector3(-1.8, 0.6, 0)
+	var parts = ["helmet", "chest", "arms", "legs"]
+	var p_chosen = parts.pick_random()
+	var part_display = ArmorSystem.PART_NAMES.get(p_chosen, "Mảnh Giáp")
+	armor.setup(DropItem3D.ItemType.ARMOR, DropItem3D.Rarity.A, part_display, p_chosen)
+	
+	# 4. Rơi Khiên Hộ Thân Bậc A
+	var shield = DROP_ITEM_SCENE.instantiate()
+	get_parent().add_child(shield)
+	shield.global_position = global_position + Vector3(3.2, 0.6, 0)
+	shield.setup(DropItem3D.ItemType.SHIELD, DropItem3D.Rarity.A, "Khiên Lam Ngọc Hộ Vệ")
