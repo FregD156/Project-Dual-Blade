@@ -135,29 +135,29 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 	var list = []
 	match stage:
 		1:
-			# 1.1 Khởi đầu: 2 Lính Gác tầng 1 (cách xa bẫy gai)
+			# 1.1 Khởi đầu: 1 Lính Gác ngay trước mặt (X=-4.0) và 1 Lính Gác trên cầu vòm đá (X=0.0, Y=4.0)
 			list = [
-				{"scene": SCENE_GUARD, "pos": Vector3(-6.0, 0.5, 0.0)},
-				{"scene": SCENE_GUARD, "pos": Vector3(6.0, 0.5, 0.0)}
+				{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
+				{"scene": SCENE_GUARD, "pos": Vector3(0.0, 4.0, 0.0)}
 			]
 		2:
 			# 1.2: Lính gác + Chó săn + 1 Cung thủ trên đỉnh cầu vòm đá
 			if branch == RoomBranch.COMBAT:
 				list = [
-					{"scene": SCENE_GUARD, "pos": Vector3(-6.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
 					{"scene": SCENE_HOUND, "pos": Vector3(6.0, 0.5, 0.0)},
-					{"scene": SCENE_HOUND, "pos": Vector3(18.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(14.0, 0.5, 0.0)},
 					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
 				]
 			else:
 				list = [
-					{"scene": SCENE_GUARD, "pos": Vector3(-5.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
 					{"scene": SCENE_HOUND, "pos": Vector3(5.0, 0.5, 0.0)}
 				]
 		3:
 			# 1.3: Cung thủ 2 bên đài quan sát (X=-21, X=21) + 2 chó săn dưới sàn
 			list = [
-				{"scene": SCENE_HOUND, "pos": Vector3(-5.0, 0.5, 0.0)},
+				{"scene": SCENE_HOUND, "pos": Vector3(-4.0, 0.5, 0.0)},
 				{"scene": SCENE_HOUND, "pos": Vector3(5.0, 0.5, 0.0)},
 				{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
 				{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
@@ -165,30 +165,30 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 		4:
 			# 1.4: Trước cửa Tinh Anh - Quân tiên phong tinh nhuệ & Cung thủ đứng trên cầu vòm
 			list = [
-				{"scene": SCENE_GUARD, "pos": Vector3(-6.0, 0.5, 0.0)},
+				{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
 				{"scene": SCENE_GUARD, "pos": Vector3(5.0, 0.5, 0.0)},
-				{"scene": SCENE_HOUND, "pos": Vector3(18.0, 0.5, 0.0)},
-				{"scene": SCENE_ARCHER, "pos": Vector3(-3.0, 4.0, 0.0)}
+				{"scene": SCENE_HOUND, "pos": Vector3(14.0, 0.5, 0.0)},
+				{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
 			]
 		5:
 			# 1.5: QUÁI TINH ANH — Thủ Lĩnh Đao Phủ Quỷ + 2 cung thủ hỗ trợ trên 2 đài quan sát
 			list = [
-				{"scene": SCENE_ELITE, "pos": Vector3(0.0, 0.5, 0.0)},
+				{"scene": SCENE_ELITE, "pos": Vector3(3.0, 0.5, 0.0)},
 				{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
 				{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
 			]
 		6:
 			# 1.6: Thành Lũy Đổ Nát sau Tinh Anh - Cung thủ bắn tỉa trên đỉnh cầu vòm đá
 			list = [
-				{"scene": SCENE_GUARD, "pos": Vector3(-5.0, 0.5, 0.0)},
+				{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
 				{"scene": SCENE_HOUND, "pos": Vector3(5.0, 0.5, 0.0)},
-				{"scene": SCENE_GUARD, "pos": Vector3(18.0, 0.5, 0.0)},
+				{"scene": SCENE_GUARD, "pos": Vector3(14.0, 0.5, 0.0)},
 				{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
 			]
 		7:
 			# 1.7: Hào Chông Tàn Sát — Quái phân bổ Tầng 1, Đỉnh Cầu Vòm và 2 Đài Quan Sát
 			list = [
-				{"scene": SCENE_HOUND, "pos": Vector3(-5.0, 0.5, 0.0)},
+				{"scene": SCENE_HOUND, "pos": Vector3(-4.0, 0.5, 0.0)},
 				{"scene": SCENE_HOUND, "pos": Vector3(5.0, 0.5, 0.0)},
 				{"scene": SCENE_GUARD, "pos": Vector3(0.0, 4.0, 0.0)},
 				{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
@@ -197,7 +197,7 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 		8:
 			# 1.8: Trước Trạm Nghỉ — Hỗn chiến khốc liệt
 			list = [
-				{"scene": SCENE_ELITE, "pos": Vector3(0.0, 0.5, 0.0)},
+				{"scene": SCENE_ELITE, "pos": Vector3(3.0, 0.5, 0.0)},
 				{"scene": SCENE_HOUND, "pos": Vector3(6.0, 0.5, 0.0)},
 				{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
 			]
@@ -209,7 +209,7 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 	return list
 
 func _spawn_sustain_caches() -> void:
-	for offset_x in [-6.0, 6.0]:
+	for offset_x in [-4.0, 4.0]:
 		var drop = SCENE_DROP.instantiate()
 		add_child(drop)
 		drop.global_position = Vector3(offset_x, 0.5, 0.0)
@@ -241,7 +241,7 @@ func _on_all_enemies_defeated() -> void:
 
 	var hud = get_node_or_null("../HUD3D")
 	if hud and hud.has_method("show_stage_banner"):
-		hud.show_stage_banner("✨ ẢI " + stage_str + " ĐÃ DỌN SẠCH! ✨")
+		hud.show_stage_banner("✨ ẢI " + stage_str + " ĐÃ DỌN SẠCH! TIẾN VÀO CỔNG PHÍA TRƯỚC ✨")
 
 	_open_portals()
 
@@ -264,17 +264,17 @@ func _open_portals() -> void:
 	if current_stage in [4, 8, 9, 10]:
 		var p: Portal3D = SCENE_PORTAL.instantiate()
 		add_child(p)
-		p.global_position = Vector3(32.0, 0.0, 0.0)
+		p.global_position = Vector3(18.0, 0.0, 0.0)
 		p.setup(Portal3D.PortalType.STANDARD)
 		p.portal_chosen.connect(_on_portal_chosen)
 		p.set_active(true)
 		active_portals.append(p)
 		return
 
-	# Các ải thông thường (1.1, 1.2, 1.3, 1.6, 1.7): Xuất hiện 2 cổng phân nhánh (Đao Kiếm & Sinh Mệnh)
+	# Các ải thông thường (1.1, 1.2, 1.3, 1.6, 1.7): Xuất hiện 2 cổng phân nhánh (Đao Kiếm & Sinh Mệnh) gần hơn (X=14 và X=19)
 	var p_combat: Portal3D = SCENE_PORTAL.instantiate()
 	add_child(p_combat)
-	p_combat.global_position = Vector3(26.0, 0.0, 0.0)
+	p_combat.global_position = Vector3(14.0, 0.0, 0.0)
 	p_combat.setup(Portal3D.PortalType.COMBAT)
 	p_combat.portal_chosen.connect(_on_portal_chosen)
 	p_combat.set_active(true)
@@ -282,7 +282,7 @@ func _open_portals() -> void:
 
 	var p_sustain: Portal3D = SCENE_PORTAL.instantiate()
 	add_child(p_sustain)
-	p_sustain.global_position = Vector3(34.0, 0.0, 0.0)
+	p_sustain.global_position = Vector3(19.0, 0.0, 0.0)
 	p_sustain.setup(Portal3D.PortalType.SUSTAIN)
 	p_sustain.portal_chosen.connect(_on_portal_chosen)
 	p_sustain.set_active(true)

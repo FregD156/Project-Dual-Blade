@@ -98,6 +98,7 @@ const PARRY_WINDOW: float = 0.16
 @onready var parry_shield_fx: Node3D = get_node_or_null("VisualRoot/ParryShieldFX")
 
 func _ready() -> void:
+	add_to_group("player")
 	current_hp = max_hp
 	flow_changed.emit(current_flow, max_flow, is_overdrive)
 	hp_changed.emit(current_hp, max_hp)
