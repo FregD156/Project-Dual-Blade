@@ -381,10 +381,10 @@ alpha_cut = 1
 texture = ExtResource("23_barricade_tex")
 
 [node name="Player3D" parent="." instance=ExtResource("1_player_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.5, 0)
 
 [node name="Camera25D" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
-transform = Transform3D(1, 0, 0, 0, 0.985, 0.174, 0, -0.174, 0.985, -34, 2.5, 7.5)
+transform = Transform3D(1, 0, 0, 0, 0.985, 0.174, 0, -0.174, 0.985, -10, 2.5, 7.5)
 fov = 50.0
 script = ExtResource("6_cam_script")
 target = NodePath("../Player3D")

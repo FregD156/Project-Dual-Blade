@@ -74,7 +74,7 @@ func _reposition_player() -> void:
 	var players = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		var p = players[0]
-		p.global_position = Vector3(-32.0, 0.5, 0.0)
+		p.global_position = Vector3(-10.0, 0.5, 0.0)
 		p.velocity = Vector3.ZERO
 		# Hồi phục 100% Giáp sau mỗi round
 		if "current_armor" in p and "max_armor" in p:
