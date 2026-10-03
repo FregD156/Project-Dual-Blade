@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3]
+[gd_scene load_steps=32 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes_3d/Player3D.tscn" id="1_player_scn"]
 [ext_resource type="PackedScene" path="res://scenes_3d/EnemyRustyGuard3D.tscn" id="2_guard_scn"]
@@ -66,6 +66,13 @@ size = Vector3(5.5, 0.6, 3.5)
 [sub_resource type="BoxShape3D" id="BoxShape3D_plat_med"]
 size = Vector3(5.5, 0.6, 3.5)
 
+[sub_resource type="BoxMesh" id="BoxMesh_step"]
+material = ExtResource("7_mat_stone")
+size = Vector3(3.2, 0.5, 3.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_step"]
+size = Vector3(3.2, 0.5, 3.5)
+
 [sub_resource type="CylinderMesh" id="CylinderMesh_pillar"]
 material = ExtResource("7_mat_stone")
 top_radius = 0.9
@@ -111,31 +118,31 @@ shadow_enabled = true
 [node name="Torches" type="Node3D" parent="."]
 
 [node name="Torch1" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 3.2, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 3.5, 0.5)
 light_color = Color(1, 0.6, 0.2, 1)
 light_energy = 2.5
 omni_range = 8.0
 
 [node name="Torch2" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4.0, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 6.5, 0.5)
 light_color = Color(1, 0.6, 0.2, 1)
 light_energy = 2.5
 omni_range = 8.0
 
 [node name="Torch3" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 4.0, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 6.5, 0.5)
 light_color = Color(1, 0.6, 0.2, 1)
 light_energy = 2.5
 omni_range = 8.0
 
 [node name="Torch4" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 3.2, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 3.5, 0.5)
 light_color = Color(1, 0.6, 0.2, 1)
 light_energy = 2.5
 omni_range = 8.0
 
 [node name="TorchTop" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 10.5, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.5, 0.5)
 light_color = Color(1, 0.65, 0.25, 1)
 light_energy = 3.0
 omni_range = 9.0
@@ -154,7 +161,7 @@ mesh = SubResource("BoxMesh_floor")
 shape = SubResource("BoxShape3D_floor")
 
 [node name="SpikeTrapFloor1" parent="StageGeometry" instance=ExtResource("12_spike_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 0)
 
 [node name="SpikeTrapFloor2" parent="StageGeometry" instance=ExtResource("12_spike_scn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 0)
@@ -175,8 +182,48 @@ collision_mask = 6
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/WallRight"]
 shape = SubResource("BoxShape3D_wall")
 
+[node name="StepBridgeLeft" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 1.4, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/StepBridgeLeft"]
+mesh = SubResource("BoxMesh_step")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/StepBridgeLeft"]
+shape = SubResource("BoxShape3D_step")
+
+[node name="SpriteVisual" type="Sprite3D" parent="StageGeometry/StepBridgeLeft"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.05)
+pixel_size = 0.0034
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("21_step_tex")
+
+[node name="StepBridgeRight" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 1.4, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/StepBridgeRight"]
+mesh = SubResource("BoxMesh_step")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/StepBridgeRight"]
+shape = SubResource("BoxShape3D_step")
+
+[node name="SpriteVisual" type="Sprite3D" parent="StageGeometry/StepBridgeRight"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0.05)
+pixel_size = 0.0034
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("21_step_tex")
+
 [node name="Tier2_Left" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 2.8, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 2.8, 0)
 collision_layer = 1
 collision_mask = 6
 
@@ -186,30 +233,28 @@ mesh = SubResource("BoxMesh_plat_large")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier2_Left"]
 shape = SubResource("BoxShape3D_plat_large")
 
-[node name="Tier2_MidLeft" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 3.2, 0)
+[node name="Tier2_MidPlatform" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
 collision_layer = 1
 collision_mask = 6
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier2_MidLeft"]
-mesh = SubResource("BoxMesh_plat_med")
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier2_MidPlatform"]
+mesh = SubResource("BoxMesh_plat_large")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier2_MidLeft"]
-shape = SubResource("BoxShape3D_plat_med")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier2_MidPlatform"]
+shape = SubResource("BoxShape3D_plat_large")
 
-[node name="Tier2_MidRight" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 3.2, 0)
-collision_layer = 1
-collision_mask = 6
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier2_MidRight"]
-mesh = SubResource("BoxMesh_plat_med")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier2_MidRight"]
-shape = SubResource("BoxShape3D_plat_med")
+[node name="ArchVisual" type="Sprite3D" parent="StageGeometry/Tier2_MidPlatform"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0.05)
+pixel_size = 0.0085
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("22_arch_tex")
 
 [node name="Tier2_Right" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 2.8, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 2.8, 0)
 collision_layer = 1
 collision_mask = 6
 
@@ -220,29 +265,29 @@ mesh = SubResource("BoxMesh_plat_large")
 shape = SubResource("BoxShape3D_plat_large")
 
 [node name="Tier3_BridgeLeft" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 6.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 5.8, 0)
 collision_layer = 1
 collision_mask = 6
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier3_BridgeLeft"]
-mesh = SubResource("BoxMesh_plat_large")
+mesh = SubResource("BoxMesh_plat_med")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier3_BridgeLeft"]
-shape = SubResource("BoxShape3D_plat_large")
+shape = SubResource("BoxShape3D_plat_med")
 
 [node name="Tier3_BridgeRight" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 6.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 5.8, 0)
 collision_layer = 1
 collision_mask = 6
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier3_BridgeRight"]
-mesh = SubResource("BoxMesh_plat_large")
+mesh = SubResource("BoxMesh_plat_med")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier3_BridgeRight"]
-shape = SubResource("BoxShape3D_plat_large")
+shape = SubResource("BoxShape3D_plat_med")
 
 [node name="Tier4_HighTower" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 9.4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.4, 0)
 collision_layer = 1
 collision_mask = 6
 
@@ -303,35 +348,8 @@ mesh = SubResource("CylinderMesh_pillar")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 8, -5)
 mesh = SubResource("CylinderMesh_pillar")
 
-[node name="GothicArchCenter" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 4.5, -2.8)
-pixel_size = 0.016
-texture_filter = 0
-shaded = true
-transparent = true
-alpha_cut = 1
-texture = ExtResource("22_arch_tex")
-
-[node name="StoneStepLeft" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.5, 2.0, -1.8)
-pixel_size = 0.0055
-texture_filter = 0
-shaded = true
-transparent = true
-alpha_cut = 1
-texture = ExtResource("21_step_tex")
-
-[node name="StoneStepRight" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 2.0, -1.8)
-pixel_size = 0.0055
-texture_filter = 0
-shaded = true
-transparent = true
-alpha_cut = 1
-texture = ExtResource("21_step_tex")
-
 [node name="BarricadeFloor1" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0.95, -0.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0.95, -0.6)
 pixel_size = 0.0022
 texture_filter = 0
 shaded = true
@@ -340,7 +358,7 @@ alpha_cut = 1
 texture = ExtResource("23_barricade_tex")
 
 [node name="BarricadeFloor2" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0.95, -0.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.95, -0.6)
 pixel_size = 0.0022
 texture_filter = 0
 shaded = true
