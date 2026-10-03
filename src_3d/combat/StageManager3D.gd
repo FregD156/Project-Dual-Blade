@@ -135,76 +135,152 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 	var list = []
 	match stage:
 		1:
-			# 1.1 Khởi đầu: 1 Lính Gác ngay trước mặt (X=-4.0) và 1 Lính Gác trên cầu vòm đá (X=0.0, Y=4.0)
+			# 1.1 Khởi đầu: 4 quái (2 Lính gác sàn trước/sau, 1 Lính gác trên cầu vòm đá, 1 Chó săn)
 			list = [
 				{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
-				{"scene": SCENE_GUARD, "pos": Vector3(0.0, 4.0, 0.0)}
+				{"scene": SCENE_GUARD, "pos": Vector3(8.0, 0.5, 0.0)},
+				{"scene": SCENE_GUARD, "pos": Vector3(0.0, 4.0, 0.0)},
+				{"scene": SCENE_HOUND, "pos": Vector3(18.0, 0.5, 0.0)}
 			]
 		2:
-			# 1.2: Lính gác + Chó săn + 1 Cung thủ trên đỉnh cầu vòm đá
+			# 1.2: 5-7 quái (Lính gác + Đàn chó săn + Cung thủ trên đỉnh cầu vòm đá và đài quan sát)
 			if branch == RoomBranch.COMBAT:
 				list = [
 					{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
-					{"scene": SCENE_HOUND, "pos": Vector3(6.0, 0.5, 0.0)},
-					{"scene": SCENE_HOUND, "pos": Vector3(14.0, 0.5, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
+					{"scene": SCENE_GUARD, "pos": Vector3(6.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(12.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(20.0, 0.5, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(28.0, 0.5, 0.0)}
 				]
 			else:
 				list = [
 					{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
-					{"scene": SCENE_HOUND, "pos": Vector3(5.0, 0.5, 0.0)}
+					{"scene": SCENE_GUARD, "pos": Vector3(5.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(12.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(18.0, 0.5, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
 				]
 		3:
-			# 1.3: Cung thủ 2 bên đài quan sát (X=-21, X=21) + 2 chó săn dưới sàn
-			list = [
-				{"scene": SCENE_HOUND, "pos": Vector3(-4.0, 0.5, 0.0)},
-				{"scene": SCENE_HOUND, "pos": Vector3(5.0, 0.5, 0.0)},
-				{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
-				{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
-			]
+			# 1.3: 6-8 quái (Cung thủ 2 đài quan sát X=-21, X=21 + Bầy chó săn tuần tra + Đội lính gác)
+			if branch == RoomBranch.COMBAT:
+				list = [
+					{"scene": SCENE_HOUND, "pos": Vector3(-4.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(4.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(12.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(18.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(26.0, 0.5, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
+				]
+			else:
+				list = [
+					{"scene": SCENE_HOUND, "pos": Vector3(-4.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(5.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(15.0, 0.5, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(22.0, 0.5, 0.0)}
+				]
 		4:
-			# 1.4: Trước cửa Tinh Anh - Quân tiên phong tinh nhuệ & Cung thủ đứng trên cầu vòm
-			list = [
-				{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
-				{"scene": SCENE_GUARD, "pos": Vector3(5.0, 0.5, 0.0)},
-				{"scene": SCENE_HOUND, "pos": Vector3(14.0, 0.5, 0.0)},
-				{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
-			]
+			# 1.4: 7-8 quái (Trước cửa Tinh Anh - Đội tiên phong tinh nhuệ & Lính bắn tỉa)
+			if branch == RoomBranch.COMBAT:
+				list = [
+					{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(4.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(12.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(18.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(25.0, 0.5, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
+				]
+			else:
+				list = [
+					{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(6.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(14.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(22.0, 0.5, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
+				]
 		5:
-			# 1.5: QUÁI TINH ANH — Thủ Lĩnh Đao Phủ Quỷ + 2 cung thủ hỗ trợ trên 2 đài quan sát
+			# 1.5: QUÁI TINH ANH — Thủ Lĩnh Đao Phủ Quỷ + 2 Cung thủ đài quan sát + 2 Lính gác thiết vệ bảo hộ
 			list = [
-				{"scene": SCENE_ELITE, "pos": Vector3(3.0, 0.5, 0.0)},
+				{"scene": SCENE_ELITE, "pos": Vector3(4.0, 0.5, 0.0)},
+				{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
+				{"scene": SCENE_GUARD, "pos": Vector3(12.0, 0.5, 0.0)},
 				{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
 				{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
 			]
 		6:
-			# 1.6: Thành Lũy Đổ Nát sau Tinh Anh - Cung thủ bắn tỉa trên đỉnh cầu vòm đá
-			list = [
-				{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
-				{"scene": SCENE_HOUND, "pos": Vector3(5.0, 0.5, 0.0)},
-				{"scene": SCENE_GUARD, "pos": Vector3(14.0, 0.5, 0.0)},
-				{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
-			]
+			# 1.6: 7-9 quái (Thành Lũy Đổ Nát sau Tinh Anh - Đội hình dày đặc)
+			if branch == RoomBranch.COMBAT:
+				list = [
+					{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(4.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(10.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(18.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(25.0, 0.5, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(32.0, 0.5, 0.0)}
+				]
+			else:
+				list = [
+					{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(6.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(14.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(20.0, 0.5, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
+				]
 		7:
-			# 1.7: Hào Chông Tàn Sát — Quái phân bổ Tầng 1, Đỉnh Cầu Vòm và 2 Đài Quan Sát
+			# 1.7: 8-10 quái (Hào Chông Tàn Sát — Quái tràn ngập sàn đấu, đỉnh cầu và 2 đài quan sát)
+			if branch == RoomBranch.COMBAT:
+				list = [
+					{"scene": SCENE_HOUND, "pos": Vector3(-4.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(4.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(12.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(18.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(24.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(30.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(0.0, 4.0, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
+				]
+			else:
+				list = [
+					{"scene": SCENE_HOUND, "pos": Vector3(-4.0, 0.5, 0.0)},
+					{"scene": SCENE_HOUND, "pos": Vector3(5.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(14.0, 0.5, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(22.0, 0.5, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)},
+					{"scene": SCENE_GUARD, "pos": Vector3(0.0, 4.0, 0.0)}
+				]
+		8:
+			# 1.8: 8 quái (Trước Trạm Nghỉ — Quái Tinh Anh dẫn đầu cùng bầy chó săn và cung thủ)
 			list = [
-				{"scene": SCENE_HOUND, "pos": Vector3(-4.0, 0.5, 0.0)},
-				{"scene": SCENE_HOUND, "pos": Vector3(5.0, 0.5, 0.0)},
-				{"scene": SCENE_GUARD, "pos": Vector3(0.0, 4.0, 0.0)},
+				{"scene": SCENE_ELITE, "pos": Vector3(5.0, 0.5, 0.0)},
+				{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
+				{"scene": SCENE_GUARD, "pos": Vector3(14.0, 0.5, 0.0)},
+				{"scene": SCENE_HOUND, "pos": Vector3(8.0, 0.5, 0.0)},
+				{"scene": SCENE_HOUND, "pos": Vector3(20.0, 0.5, 0.0)},
+				{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)},
 				{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
 				{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
 			]
-		8:
-			# 1.8: Trước Trạm Nghỉ — Hỗn chiến khốc liệt
-			list = [
-				{"scene": SCENE_ELITE, "pos": Vector3(3.0, 0.5, 0.0)},
-				{"scene": SCENE_HOUND, "pos": Vector3(6.0, 0.5, 0.0)},
-				{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
-			]
 		10:
-			# 1.10: ĐẠI TRÙM CUỐI WORLD 1 — Thống Lĩnh Thiết Vệ 2-phase
+			# 1.10: ĐẠI TRÙM CUỐI WORLD 1 — Thống Lĩnh Thiết Vệ 2-phase + 2 Cung thủ yểm trợ
 			list = [
-				{"scene": SCENE_BOSS, "pos": Vector3(8.0, 0.5, 0.0)}
+				{"scene": SCENE_BOSS, "pos": Vector3(10.0, 0.5, 0.0)},
+				{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
+				{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
 			]
 	return list
 

@@ -47,10 +47,10 @@ glow_bloom = 0.2
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 material = ExtResource("7_mat_stone")
-size = Vector3(80, 1.2, 6)
+size = Vector3(120, 1.2, 6)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
-size = Vector3(80, 1.2, 6)
+size = Vector3(120, 1.2, 6)
 
 [sub_resource type="BoxMesh" id="BoxMesh_plat_large"]
 material = ExtResource("7_mat_stone")
@@ -124,6 +124,12 @@ shadow_enabled = true
 
 [node name="Torches" type="Node3D" parent="."]
 
+[node name="TorchFarLeft" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42, 4.2, 0.5)
+light_color = Color(1, 0.6, 0.2, 1)
+light_energy = 2.5
+omni_range = 10.0
+
 [node name="Torch1" type="OmniLight3D" parent="Torches"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 4.2, 0.5)
 light_color = Color(1, 0.6, 0.2, 1)
@@ -148,6 +154,12 @@ light_color = Color(1, 0.6, 0.2, 1)
 light_energy = 2.5
 omni_range = 8.0
 
+[node name="TorchFarRight" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 4.2, 0.5)
+light_color = Color(1, 0.6, 0.2, 1)
+light_energy = 2.5
+omni_range = 10.0
+
 [node name="TorchTop" type="OmniLight3D" parent="Torches"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.5, 0.5)
 light_color = Color(1, 0.65, 0.25, 1)
@@ -168,13 +180,13 @@ mesh = SubResource("BoxMesh_floor")
 shape = SubResource("BoxShape3D_floor")
 
 [node name="SpikeTrapFloor1" parent="StageGeometry" instance=ExtResource("12_spike_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.5, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.0, 0, 0)
 
 [node name="SpikeTrapFloor2" parent="StageGeometry" instance=ExtResource("12_spike_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.0, 0, 0)
 
 [node name="WallLeft" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39, 10, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -59, 10, 0)
 collision_layer = 1
 collision_mask = 6
 
@@ -182,7 +194,7 @@ collision_mask = 6
 shape = SubResource("BoxShape3D_wall")
 
 [node name="WallRight" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 10, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 59, 10, 0)
 collision_layer = 1
 collision_mask = 6
 
