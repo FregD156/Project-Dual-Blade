@@ -27,6 +27,7 @@ const SCENE_BOSS = preload("res://scenes_3d/BossIroncladCommander3D.tscn")
 const SCENE_PORTAL = preload("res://scenes_3d/Portal3D.tscn")
 const SCENE_ALTAR = preload("res://scenes_3d/SafeHavenAltar3D.tscn")
 const SCENE_DROP = preload("res://scenes_3d/DropItem3D.tscn")
+const SCENE_SUMMON = preload("res://scenes_3d/SummonEffect3D.tscn")
 
 var active_enemies: Array = []
 var active_portals: Array = []
@@ -74,8 +75,15 @@ func _reposition_player() -> void:
 	var players = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		var p = players[0]
-		p.global_position = Vector3(-10.0, 0.5, 0.0)
+		var spawn_pos = Vector3(-48.0, 0.5, 0.0)
+		p.global_position = spawn_pos
 		p.velocity = Vector3.ZERO
+		
+		# Kích hoạt hiệu ứng ma pháp triệu hồi giáng trần
+		var summon_fx = SCENE_SUMMON.instantiate()
+		add_child(summon_fx)
+		summon_fx.global_position = Vector3(spawn_pos.x, 0.0, spawn_pos.z)
+		
 		# Hồi phục 100% Giáp sau mỗi round
 		if "current_armor" in p and "max_armor" in p:
 			p.current_armor = p.max_armor
@@ -163,7 +171,7 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
 				]
 		3:
-			# 1.3: 6-8 quái (Cung thủ 2 đài quan sát X=-21, X=21 + Bầy chó săn tuần tra + Đội lính gác)
+			# 1.3: 6-8 quái (Cung thủ 2 đài quan sát X=-26, X=26 + Bầy chó săn tuần tra + Đội lính gác)
 			if branch == RoomBranch.COMBAT:
 				list = [
 					{"scene": SCENE_HOUND, "pos": Vector3(-4.0, 0.5, 0.0)},
@@ -171,8 +179,8 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 					{"scene": SCENE_HOUND, "pos": Vector3(12.0, 0.5, 0.0)},
 					{"scene": SCENE_GUARD, "pos": Vector3(18.0, 0.5, 0.0)},
 					{"scene": SCENE_GUARD, "pos": Vector3(26.0, 0.5, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(-26.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(26.0, 3.8, 0.0)},
 					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
 				]
 			else:
@@ -180,8 +188,8 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 					{"scene": SCENE_HOUND, "pos": Vector3(-4.0, 0.5, 0.0)},
 					{"scene": SCENE_HOUND, "pos": Vector3(5.0, 0.5, 0.0)},
 					{"scene": SCENE_GUARD, "pos": Vector3(15.0, 0.5, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(-26.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(26.0, 3.8, 0.0)},
 					{"scene": SCENE_HOUND, "pos": Vector3(22.0, 0.5, 0.0)}
 				]
 		4:
@@ -194,8 +202,8 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 					{"scene": SCENE_HOUND, "pos": Vector3(18.0, 0.5, 0.0)},
 					{"scene": SCENE_HOUND, "pos": Vector3(25.0, 0.5, 0.0)},
 					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
+					{"scene": SCENE_ARCHER, "pos": Vector3(-26.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(26.0, 3.8, 0.0)}
 				]
 			else:
 				list = [
@@ -204,7 +212,7 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 					{"scene": SCENE_HOUND, "pos": Vector3(14.0, 0.5, 0.0)},
 					{"scene": SCENE_HOUND, "pos": Vector3(22.0, 0.5, 0.0)},
 					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
+					{"scene": SCENE_ARCHER, "pos": Vector3(26.0, 3.8, 0.0)}
 				]
 		5:
 			# 1.5: QUÁI TINH ANH — Thủ Lĩnh Đao Phủ Quỷ + 2 Cung thủ đài quan sát + 2 Lính gác thiết vệ bảo hộ
@@ -212,8 +220,8 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 				{"scene": SCENE_ELITE, "pos": Vector3(4.0, 0.5, 0.0)},
 				{"scene": SCENE_GUARD, "pos": Vector3(-4.0, 0.5, 0.0)},
 				{"scene": SCENE_GUARD, "pos": Vector3(12.0, 0.5, 0.0)},
-				{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
-				{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
+				{"scene": SCENE_ARCHER, "pos": Vector3(-26.0, 3.8, 0.0)},
+				{"scene": SCENE_ARCHER, "pos": Vector3(26.0, 3.8, 0.0)}
 			]
 		6:
 			# 1.6: 7-9 quái (Thành Lũy Đổ Nát sau Tinh Anh - Đội hình dày đặc)
@@ -225,8 +233,8 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 					{"scene": SCENE_HOUND, "pos": Vector3(18.0, 0.5, 0.0)},
 					{"scene": SCENE_GUARD, "pos": Vector3(25.0, 0.5, 0.0)},
 					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(-26.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(26.0, 3.8, 0.0)},
 					{"scene": SCENE_GUARD, "pos": Vector3(32.0, 0.5, 0.0)}
 				]
 			else:
@@ -236,7 +244,7 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 					{"scene": SCENE_GUARD, "pos": Vector3(14.0, 0.5, 0.0)},
 					{"scene": SCENE_HOUND, "pos": Vector3(20.0, 0.5, 0.0)},
 					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
+					{"scene": SCENE_ARCHER, "pos": Vector3(26.0, 3.8, 0.0)}
 				]
 		7:
 			# 1.7: 8-10 quái (Hào Chông Tàn Sát — Quái tràn ngập sàn đấu, đỉnh cầu và 2 đài quan sát)
@@ -249,8 +257,8 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 					{"scene": SCENE_GUARD, "pos": Vector3(24.0, 0.5, 0.0)},
 					{"scene": SCENE_GUARD, "pos": Vector3(30.0, 0.5, 0.0)},
 					{"scene": SCENE_GUARD, "pos": Vector3(0.0, 4.0, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(-26.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(26.0, 3.8, 0.0)},
 					{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)}
 				]
 			else:
@@ -259,8 +267,8 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 					{"scene": SCENE_HOUND, "pos": Vector3(5.0, 0.5, 0.0)},
 					{"scene": SCENE_GUARD, "pos": Vector3(14.0, 0.5, 0.0)},
 					{"scene": SCENE_GUARD, "pos": Vector3(22.0, 0.5, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
-					{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(-26.0, 3.8, 0.0)},
+					{"scene": SCENE_ARCHER, "pos": Vector3(26.0, 3.8, 0.0)},
 					{"scene": SCENE_GUARD, "pos": Vector3(0.0, 4.0, 0.0)}
 				]
 		8:
@@ -272,15 +280,15 @@ func _get_stage_spawn_config(stage: int, branch: RoomBranch) -> Array:
 				{"scene": SCENE_HOUND, "pos": Vector3(8.0, 0.5, 0.0)},
 				{"scene": SCENE_HOUND, "pos": Vector3(20.0, 0.5, 0.0)},
 				{"scene": SCENE_ARCHER, "pos": Vector3(0.0, 4.0, 0.0)},
-				{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
-				{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
+				{"scene": SCENE_ARCHER, "pos": Vector3(-26.0, 3.8, 0.0)},
+				{"scene": SCENE_ARCHER, "pos": Vector3(26.0, 3.8, 0.0)}
 			]
 		10:
 			# 1.10: ĐẠI TRÙM CUỐI WORLD 1 — Thống Lĩnh Thiết Vệ 2-phase + 2 Cung thủ yểm trợ
 			list = [
 				{"scene": SCENE_BOSS, "pos": Vector3(10.0, 0.5, 0.0)},
-				{"scene": SCENE_ARCHER, "pos": Vector3(-21.0, 3.8, 0.0)},
-				{"scene": SCENE_ARCHER, "pos": Vector3(21.0, 3.8, 0.0)}
+				{"scene": SCENE_ARCHER, "pos": Vector3(-26.0, 3.8, 0.0)},
+				{"scene": SCENE_ARCHER, "pos": Vector3(26.0, 3.8, 0.0)}
 			]
 	return list
 
@@ -343,17 +351,17 @@ func _open_portals() -> void:
 	if current_stage in [4, 8, 9, 10]:
 		var p: Portal3D = SCENE_PORTAL.instantiate()
 		add_child(p)
-		p.global_position = Vector3(18.0, 0.0, 0.0)
+		p.global_position = Vector3(45.0, 0.0, 0.0)
 		p.setup(Portal3D.PortalType.STANDARD)
 		p.portal_chosen.connect(_on_portal_chosen)
 		p.set_active(true)
 		active_portals.append(p)
 		return
 
-	# Các ải thông thường (1.1, 1.2, 1.3, 1.6, 1.7): Xuất hiện 2 cổng phân nhánh (Đao Kiếm & Sinh Mệnh) gần hơn (X=14 và X=19)
+	# Các ải thông thường (1.1, 1.2, 1.3, 1.6, 1.7): Xuất hiện 2 cổng phân nhánh (Đao Kiếm & Sinh Mệnh) ở cuối hành trình (X=40 và X=47)
 	var p_combat: Portal3D = SCENE_PORTAL.instantiate()
 	add_child(p_combat)
-	p_combat.global_position = Vector3(14.0, 0.0, 0.0)
+	p_combat.global_position = Vector3(40.0, 0.0, 0.0)
 	p_combat.setup(Portal3D.PortalType.COMBAT)
 	p_combat.portal_chosen.connect(_on_portal_chosen)
 	p_combat.set_active(true)
@@ -361,7 +369,7 @@ func _open_portals() -> void:
 
 	var p_sustain: Portal3D = SCENE_PORTAL.instantiate()
 	add_child(p_sustain)
-	p_sustain.global_position = Vector3(19.0, 0.0, 0.0)
+	p_sustain.global_position = Vector3(47.0, 0.0, 0.0)
 	p_sustain.setup(Portal3D.PortalType.SUSTAIN)
 	p_sustain.portal_chosen.connect(_on_portal_chosen)
 	p_sustain.set_active(true)
