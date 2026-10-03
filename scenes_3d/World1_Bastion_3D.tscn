@@ -190,7 +190,7 @@ collision_mask = 6
 shape = SubResource("BoxShape3D_wall")
 
 [node name="BridgeArchCenter" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, -0.5)
 collision_layer = 1
 collision_mask = 6
 
@@ -201,7 +201,7 @@ mesh = SubResource("BoxMesh_arch")
 shape = SubResource("BoxShape3D_arch")
 
 [node name="ArchVisual" type="Sprite3D" parent="StageGeometry/BridgeArchCenter"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.65, 0.05)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.65, 0.58)
 pixel_size = 0.009
 texture_filter = 0
 shaded = true
@@ -210,7 +210,7 @@ alpha_cut = 1
 texture = ExtResource("22_arch_tex")
 
 [node name="StepBridgeLeft" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 1.8, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.8, 1.8, -0.5)
 collision_layer = 1
 collision_mask = 6
 
@@ -221,7 +221,7 @@ mesh = SubResource("BoxMesh_step")
 shape = SubResource("BoxShape3D_step")
 
 [node name="SpriteVisual" type="Sprite3D" parent="StageGeometry/StepBridgeLeft"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.05)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.58)
 pixel_size = 0.0042
 texture_filter = 0
 shaded = true
@@ -230,7 +230,7 @@ alpha_cut = 1
 texture = ExtResource("21_step_tex")
 
 [node name="StepBridgeRight" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 1.8, 0)
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8, 1.8, -0.5)
 collision_layer = 1
 collision_mask = 6
 
@@ -241,7 +241,7 @@ mesh = SubResource("BoxMesh_step")
 shape = SubResource("BoxShape3D_step")
 
 [node name="SpriteVisual" type="Sprite3D" parent="StageGeometry/StepBridgeRight"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.05)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.58)
 pixel_size = 0.0042
 texture_filter = 0
 shaded = true
@@ -250,7 +250,7 @@ alpha_cut = 1
 texture = ExtResource("21_step_tex")
 
 [node name="LeftOverlookPlatform" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 3.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 3.2, -0.5)
 collision_layer = 1
 collision_mask = 6
 
@@ -261,7 +261,7 @@ mesh = SubResource("BoxMesh_plat_large")
 shape = SubResource("BoxShape3D_plat_large")
 
 [node name="StepAccessLeft" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.5, 1.6, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.5, 1.6, -0.5)
 collision_layer = 1
 collision_mask = 6
 
@@ -272,7 +272,7 @@ mesh = SubResource("BoxMesh_step")
 shape = SubResource("BoxShape3D_step")
 
 [node name="SpriteVisual" type="Sprite3D" parent="StageGeometry/StepAccessLeft"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.05)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.58)
 pixel_size = 0.0042
 texture_filter = 0
 shaded = true
@@ -281,7 +281,7 @@ alpha_cut = 1
 texture = ExtResource("21_step_tex")
 
 [node name="RightOverlookPlatform" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 3.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 3.2, -0.5)
 collision_layer = 1
 collision_mask = 6
 
@@ -292,7 +292,7 @@ mesh = SubResource("BoxMesh_plat_large")
 shape = SubResource("BoxShape3D_plat_large")
 
 [node name="StepAccessRight" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, 1, 25.5, 1.6, 0)
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, 1, 25.5, 1.6, -0.5)
 collision_layer = 1
 collision_mask = 6
 
@@ -303,7 +303,7 @@ mesh = SubResource("BoxMesh_step")
 shape = SubResource("BoxShape3D_step")
 
 [node name="SpriteVisual" type="Sprite3D" parent="StageGeometry/StepAccessRight"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.05)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.58)
 pixel_size = 0.0042
 texture_filter = 0
 shaded = true
