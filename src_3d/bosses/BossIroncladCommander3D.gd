@@ -141,9 +141,9 @@ func _enter_phase_2() -> void:
 		tw.tween_property(boss_sprite, "modulate", Color(3.0, 0.4, 0.6), 0.2)
 		tw.tween_property(boss_sprite, "modulate", Color(1.3, 0.8, 0.8), 0.3)
 
-func die() -> void:
+func die(reason: String = "hp_depleted") -> void:
 	boss_defeated.emit()
-	super.die()
+	super.die(reason)
 
 func _spawn_loot() -> void:
 	if not DROP_ITEM_SCENE or not get_parent():

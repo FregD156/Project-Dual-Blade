@@ -1,11 +1,74 @@
 {
   "world": 2,
-  "name": "Hầm Ngục Huyết Rễ",
+  "name": "Hầm Ngục Huyết Rễ (The Crimson Catacombs)",
+  "theme": "dark underground dungeon, blood-red roots, glowing fungi, toxic spores",
   "enemies": {
-    "jumping_spore": { "id": "jumping_spore", "name": "Bào Tử Nhảy", "hp": 90, "atk": 22, "def": 3, "behavior": "Nổ chậm gây độc nếu không hạ nhanh" },
-    "wall_parasite": { "id": "wall_parasite", "name": "Ấu Trùng Bám Tường", "hp": 75, "atk": 25, "def": 2, "behavior": "Bám trần tường, rơi bất ngờ khi đi ngang" },
-    "floor_root": { "id": "floor_root", "name": "Rễ Con Đâm Sàn", "hp": 110, "atk": 30, "def": 5, "behavior": "Bất động, đâm khi người chơi đến gần" },
-    "giant_blood_spider": { "id": "giant_blood_spider", "name": "Nhện Máu Lớn", "hp": 160, "atk": 35, "def": 6, "behavior": "Phun tơ làm chậm diện rộng, nhảy né" },
-    "elite_mutated_tree": { "id": "elite_mutated_tree", "name": "Cổ Thụ Biến Dị", "hp": 1800, "atk": 55, "def": 6, "behavior": "Rễ đâm ngẫu nhiên + phun phấn độc diện rộng" }
+    "spore_shambler": {
+      "id": "spore_shambler",
+      "name": "Bào Tử Xác Sống (Spore Shambler)",
+      "hp": 140,
+      "atk": 24,
+      "def": 3,
+      "move_speed": 1.8,
+      "drop_tier_min": "D",
+      "drop_tier_max": "B",
+      "behavior": "Di chuyển chậm chạp, tiếp cận phát nổ đám mây bào tử độc khi chết"
+    },
+    "root_lurker": {
+      "id": "root_lurker",
+      "name": "Rễ Máu Ẩn Nấp (Root Lurker)",
+      "hp": 180,
+      "atk": 32,
+      "def": 5,
+      "move_speed": 3.8,
+      "drop_tier_min": "C",
+      "drop_tier_max": "A",
+      "behavior": "Ẩn mình dưới sàn/trần, nhô lên đột kích bất ngờ khi người chơi đến gần"
+    },
+    "acid_spitter": {
+      "id": "acid_spitter",
+      "name": "Ấu Trùng Phun Axit (Acid Spitter)",
+      "hp": 120,
+      "atk": 28,
+      "def": 2,
+      "move_speed": 2.2,
+      "drop_tier_min": "C",
+      "drop_tier_max": "A",
+      "behavior": "Chiếm cứ bục cao, bắn cầu axit đạn parabol ăn mòn giáp"
+    },
+    "elite_mutated_tree": {
+      "id": "elite_mutated_tree",
+      "name": "Cổ Thụ Biến Dị (Mutated Elder Tree)",
+      "stage": 5,
+      "hp": 1800,
+      "atk": 52,
+      "def": 7,
+      "move_speed": 1.2,
+      "drop_tier_min": "B",
+      "drop_tier_max": "R",
+      "behavior": "Quái Tinh Anh: Đập rễ unparryable, triệu hồi gai rễ trỗi dậy và gọi ấu trùng trợ chiến"
+    },
+    "boss_parasitic_matriarch": {
+      "id": "boss_parasitic_matriarch",
+      "name": "Mẫu Thể Ký Sinh (Parasitic Matriarch)",
+      "stage": 10,
+      "hp": 7800,
+      "def": 8,
+      "move_speed": 3.5,
+      "drop_tier_min": "R",
+      "drop_tier_max": "SSR",
+      "phases": [
+        {
+          "phase": 1,
+          "hp": 4680,
+          "behavior": "Bám vách, phun chùm tơ làm chậm, đâm vuốt nhọn có vệt báo đỏ tập parry"
+        },
+        {
+          "phase": 2,
+          "hp": 3120,
+          "behavior": "Hạ sàn cuồng nộ, sinh ấu trùng bão hòa, sóng chấn động axit và độc diện rộng"
+        }
+      ]
+    }
   }
 }

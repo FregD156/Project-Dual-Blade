@@ -1,0 +1,46 @@
+{
+  "world": 2,
+  "loot_table": {
+    "enemy_standard": {
+      "life_shard_chance": 0.35,
+      "weapon_chance": 0.30,
+      "armor_chance": 0.20,
+      "shield_chance": 0.15,
+      "tier_weights": {
+        "D": 0.15,
+        "C": 0.40,
+        "B": 0.30,
+        "A": 0.12,
+        "R": 0.03,
+        "SR": 0.00,
+        "SSR": 0.00
+      }
+    },
+    "elite_elder_tree": {
+      "guaranteed_drops": 3,
+      "life_flask_chance": 0.80,
+      "tier_weights": {
+        "D": 0.00,
+        "C": 0.15,
+        "B": 0.45,
+        "A": 0.30,
+        "R": 0.09,
+        "SR": 0.01,
+        "SSR": 0.00
+      }
+    },
+    "boss_parasitic_matriarch": {
+      "guaranteed_drops": 5,
+      "mercy_drop_flasks_per_25_pct": 2,
+      "tier_weights": {
+        "D": 0.00,
+        "C": 0.00,
+        "B": 0.20,
+        "A": 0.40,
+        "R": 0.28,
+        "SR": 0.10,
+        "SSR": 0.02
+      }
+    }
+  }
+}

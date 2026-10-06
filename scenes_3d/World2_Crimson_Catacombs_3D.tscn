@@ -1,0 +1,680 @@
+[gd_scene load_steps=34 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes_3d/Player3D.tscn" id="1_player_scn"]
+[ext_resource type="Script" path="res://src_3d/camera/Camera25D.gd" id="2_cam_script"]
+[ext_resource type="Material" path="res://src_3d/materials/toon_catacomb.tres" id="3_mat_catacomb"]
+[ext_resource type="Script" path="res://src_3d/ui/HUD3D.gd" id="4_hud_script"]
+[ext_resource type="Script" path="res://src_3d/combat/StageManager3D.gd" id="5_stage_mgr"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/world2_catacombs_bg.png" id="6_bg_catacombs"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/vitals_hud_frame.png" id="7_vitals_frame"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/flow_hud_frame.png" id="8_flow_frame"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/ruby_gem.png" id="9_ruby_gem"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_bag.png" id="10_icon_bag"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/icon_map.png" id="11_icon_map"]
+[ext_resource type="PackedScene" path="res://scenes/InventoryUI.tscn" id="12_inv_scn"]
+[ext_resource type="PackedScene" path="res://scenes/FastTravelMapUI.tscn" id="13_map_scn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/stone_step_bridge.png" id="14_step_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/gothic_stone_arch.png" id="15_arch_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/gothic_stone_stairs.png" id="16_stairs_tex"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/bouncy_spore_shroom.png" id="17_shroom_prop"]
+[ext_resource type="Script" path="res://src_3d/world/SpawnPoint3D.gd" id="18_spawn_pt"]
+[ext_resource type="Script" path="res://src_3d/world/PlayerStart3D.gd" id="19_player_start"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_catacomb"]
+sky_top_color = Color(0.18, 0.05, 0.09, 1)
+sky_horizon_color = Color(0.25, 0.08, 0.16, 1)
+ground_bottom_color = Color(0.06, 0.02, 0.04, 1)
+ground_horizon_color = Color(0.16, 0.05, 0.1, 1)
+
+[sub_resource type="Sky" id="Sky_catacomb"]
+sky_material = SubResource("ProceduralSkyMaterial_catacomb")
+
+[sub_resource type="Environment" id="Environment_catacomb"]
+background_mode = 2
+sky = SubResource("Sky_catacomb")
+ambient_light_source = 2
+ambient_light_color = Color(0.35, 0.15, 0.22, 1)
+ambient_light_energy = 0.9
+tonemap_mode = 3
+glow_enabled = true
+glow_intensity = 0.65
+glow_bloom = 0.25
+fog_enabled = true
+fog_light_color = Color(0.2, 0.05, 0.1, 1)
+fog_density = 0.008
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+material = ExtResource("3_mat_catacomb")
+size = Vector3(120, 1.2, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(120, 1.2, 3.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_plat_large"]
+material = ExtResource("3_mat_catacomb")
+size = Vector3(8, 0.6, 3.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_plat_large"]
+size = Vector3(8, 0.6, 3.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_plat_med"]
+material = ExtResource("3_mat_catacomb")
+size = Vector3(5, 0.6, 3.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_plat_med"]
+size = Vector3(5, 0.6, 3.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_arch"]
+material = ExtResource("3_mat_catacomb")
+size = Vector3(14.0, 0.7, 3.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_arch"]
+size = Vector3(14.0, 0.7, 3.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_step"]
+material = ExtResource("3_mat_catacomb")
+size = Vector3(4.5, 0.5, 3.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_step"]
+size = Vector3(4.5, 0.5, 3.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
+size = Vector3(1.5, 25, 6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.1, 0.12, 0.18, 0.85)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fill"]
+bg_color = Color(0.85, 0.25, 0.35, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_armor"]
+bg_color = Color(0.25, 0.65, 0.95, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="World2_Crimson_Catacombs_3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_catacomb")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.25, 0.433, 0, 0.866, 0.5, -0.5, -0.433, 0.75, 5, 14, 10)
+light_color = Color(0.9, 0.55, 0.6, 1)
+light_energy = 0.85
+shadow_enabled = true
+
+[node name="CatacombLights" type="Node3D" parent="."]
+
+[node name="FungusLightFarLeft" type="OmniLight3D" parent="CatacombLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44, 3.5, 0.5)
+light_color = Color(0.25, 0.95, 0.45, 1)
+light_energy = 2.4
+omni_range = 9.0
+
+[node name="TorchLeft" type="OmniLight3D" parent="CatacombLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 4.5, 0.5)
+light_color = Color(0.95, 0.35, 0.25, 1)
+light_energy = 2.5
+omni_range = 8.5
+
+[node name="SporeLightMidLeft" type="OmniLight3D" parent="CatacombLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 3.2, 0.5)
+light_color = Color(0.75, 0.25, 0.85, 1)
+light_energy = 2.2
+omni_range = 8.0
+
+[node name="CenterRootLight" type="OmniLight3D" parent="CatacombLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.5, 0.5)
+light_color = Color(0.95, 0.25, 0.35, 1)
+light_energy = 2.8
+omni_range = 10.0
+
+[node name="FungusLightMidRight" type="OmniLight3D" parent="CatacombLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 3.5, 0.5)
+light_color = Color(0.25, 0.95, 0.45, 1)
+light_energy = 2.4
+omni_range = 8.5
+
+[node name="TorchRight" type="OmniLight3D" parent="CatacombLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 4.5, 0.5)
+light_color = Color(0.95, 0.35, 0.25, 1)
+light_energy = 2.5
+omni_range = 8.5
+
+[node name="FungusLightFarRight" type="OmniLight3D" parent="CatacombLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, 3.5, 0.5)
+light_color = Color(0.25, 0.95, 0.45, 1)
+light_energy = 2.4
+omni_range = 9.0
+
+[node name="StageGeometry" type="Node3D" parent="."]
+
+[node name="MainFloor" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/MainFloor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.5)
+mesh = SubResource("BoxMesh_floor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/MainFloor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.5)
+shape = SubResource("BoxShape3D_floor")
+
+[node name="WallLeft" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -59, 10, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/WallLeft"]
+shape = SubResource("BoxShape3D_wall")
+
+[node name="WallRight" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 59, 10, 0)
+collision_layer = 1
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/WallRight"]
+shape = SubResource("BoxShape3D_wall")
+
+[node name="Tier2_RootBridgeLeft" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 2.5, -0.5)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier2_RootBridgeLeft"]
+mesh = SubResource("BoxMesh_plat_large")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier2_RootBridgeLeft"]
+shape = SubResource("BoxShape3D_plat_large")
+
+[node name="Tier2_RootBridgeRight" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 2.5, -0.5)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier2_RootBridgeRight"]
+mesh = SubResource("BoxMesh_plat_large")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier2_RootBridgeRight"]
+shape = SubResource("BoxShape3D_plat_large")
+
+[node name="Tier3_CentralArch" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, -0.5)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier3_CentralArch"]
+mesh = SubResource("BoxMesh_arch")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier3_CentralArch"]
+shape = SubResource("BoxShape3D_arch")
+
+[node name="Tier4_HighLedgeLeft" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 5.5, -0.5)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier4_HighLedgeLeft"]
+mesh = SubResource("BoxMesh_plat_med")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier4_HighLedgeLeft"]
+shape = SubResource("BoxShape3D_plat_med")
+
+[node name="Tier4_HighLedgeRight" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 5.5, -0.5)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/Tier4_HighLedgeRight"]
+mesh = SubResource("BoxMesh_plat_med")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/Tier4_HighLedgeRight"]
+shape = SubResource("BoxShape3D_plat_med")
+
+[node name="StepBridgeLeft" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 1.8, -0.5)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/StepBridgeLeft"]
+mesh = SubResource("BoxMesh_step")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/StepBridgeLeft"]
+shape = SubResource("BoxShape3D_step")
+
+[node name="VisualStepBridgeLeft" type="Sprite3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 1.8, 0.08)
+pixel_size = 0.0022
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("14_step_tex")
+
+[node name="StepBridgeRight" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 1.8, -0.5)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/StepBridgeRight"]
+mesh = SubResource("BoxMesh_step")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/StepBridgeRight"]
+shape = SubResource("BoxShape3D_step")
+
+[node name="VisualStepBridgeRight" type="Sprite3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 1.8, 0.08)
+pixel_size = 0.0022
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("14_step_tex")
+
+[node name="VisualCentralArch" type="Sprite3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8, 0.08)
+pixel_size = 0.0026
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("15_arch_tex")
+
+[node name="StairsLeft1" type="Sprite3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 1.2, 0.08)
+pixel_size = 0.0022
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("16_stairs_tex")
+
+[node name="StairsRight1" type="Sprite3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 1.2, 0.08)
+pixel_size = 0.0022
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("16_stairs_tex")
+
+[node name="BackgroundScenery" type="Node3D" parent="."]
+
+[node name="BgFarLeft" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 9.5, -8.5)
+pixel_size = 0.024
+texture_filter = 0
+shaded = true
+transparent = false
+texture = ExtResource("6_bg_catacombs")
+
+[node name="BgCenter" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.5, -8.5)
+pixel_size = 0.024
+texture_filter = 0
+shaded = true
+transparent = false
+texture = ExtResource("6_bg_catacombs")
+
+[node name="BgFarRight" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 9.5, -8.5)
+pixel_size = 0.024
+texture_filter = 0
+shaded = true
+transparent = false
+texture = ExtResource("6_bg_catacombs")
+
+[node name="MushroomProp1" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0.6, -0.6)
+pixel_size = 0.0022
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("17_shroom_prop")
+
+[node name="MushroomProp2" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.6, -0.6)
+pixel_size = 0.0022
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("17_shroom_prop")
+
+[node name="PlayerStart" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.5, 0)
+script = ExtResource("19_player_start")
+
+[node name="Player3D" parent="." instance=ExtResource("1_player_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.5, 0)
+
+[node name="Camera25D" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
+transform = Transform3D(1, 0, 0, 0, 0.985, 0.174, 0, -0.174, 0.985, -10, 2.5, 7.5)
+fov = 50.0
+script = ExtResource("2_cam_script")
+target = NodePath("../Player3D")
+default_distance = 7.5
+
+[node name="StageManager3D" type="Node3D" parent="."]
+script = ExtResource("5_stage_mgr")
+current_world = 2
+current_stage = 1
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="SpawnFloor_FarLeft" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.1, 0)
+script = ExtResource("18_spawn_pt")
+tier = 1
+allowed_enemy_types = PackedStringArray("shambler", "lurker", "elite")
+default_facing = 1
+
+[node name="SpawnFloor_MidLeft" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.1, 0)
+script = ExtResource("18_spawn_pt")
+tier = 1
+allowed_enemy_types = PackedStringArray("shambler", "lurker")
+default_facing = -1
+
+[node name="SpawnFloor_MidRight" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.1, 0)
+script = ExtResource("18_spawn_pt")
+tier = 1
+allowed_enemy_types = PackedStringArray("shambler", "lurker")
+default_facing = -1
+
+[node name="SpawnFloor_FarRight" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0.1, 0)
+script = ExtResource("18_spawn_pt")
+tier = 1
+allowed_enemy_types = PackedStringArray("shambler", "lurker")
+default_facing = -1
+
+[node name="SpawnFloor_Elite" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.1, 0)
+script = ExtResource("18_spawn_pt")
+tier = 1
+allowed_enemy_types = PackedStringArray("elite", "shambler")
+default_facing = -1
+
+[node name="SpawnFloor_Boss" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.1, 0)
+script = ExtResource("18_spawn_pt")
+tier = 1
+allowed_enemy_types = PackedStringArray("boss", "elite")
+default_facing = -1
+
+[node name="SpawnBridge_Left" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 2.1, 0)
+script = ExtResource("18_spawn_pt")
+tier = 2
+allowed_enemy_types = PackedStringArray("shambler", "lurker", "spitter")
+default_facing = -1
+
+[node name="SpawnBridge_Right" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 2.1, 0)
+script = ExtResource("18_spawn_pt")
+tier = 2
+allowed_enemy_types = PackedStringArray("shambler", "lurker", "spitter")
+default_facing = -1
+
+[node name="SpawnArch_Center" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.4, 0)
+script = ExtResource("18_spawn_pt")
+tier = 2
+allowed_enemy_types = PackedStringArray("lurker", "spitter")
+default_facing = -1
+
+[node name="SpawnHighLedge_Left" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 4.0, 0)
+script = ExtResource("18_spawn_pt")
+tier = 3
+allowed_enemy_types = PackedStringArray("spitter", "lurker")
+default_facing = 1
+
+[node name="SpawnHighLedge_Right" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 4.0, 0)
+script = ExtResource("18_spawn_pt")
+tier = 3
+allowed_enemy_types = PackedStringArray("spitter", "lurker")
+default_facing = -1
+
+[node name="HUD3D" type="CanvasLayer" parent="."]
+script = ExtResource("4_hud_script")
+
+[node name="VitalsPanel" type="Control" parent="HUD3D"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 172.0
+offset_bottom = 60.0
+
+[node name="VitalsFrame" type="TextureRect" parent="HUD3D/VitalsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7_vitals_frame")
+expand_mode = 1
+
+[node name="VBoxBars" type="VBoxContainer" parent="HUD3D/VitalsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 10.0
+offset_right = -14.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+
+[node name="HPBar" type="ProgressBar" parent="HUD3D/VitalsPanel/VBoxBars"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_fill")
+value = 100.0
+show_percentage = false
+
+[node name="HPLabel" type="Label" parent="HUD3D/VitalsPanel/VBoxBars/HPBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 1
+theme_override_font_sizes/font_size = 8
+text = "100 / 100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ArmorBar" type="ProgressBar" parent="HUD3D/VitalsPanel/VBoxBars"]
+custom_minimum_size = Vector2(0, 9)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_armor")
+value = 0.0
+show_percentage = false
+
+[node name="ArmorLabel" type="Label" parent="HUD3D/VitalsPanel/VBoxBars/ArmorBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 1
+theme_override_font_sizes/font_size = 7
+text = "GIÁP: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FlowPanel" type="Control" parent="HUD3D"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 12.0
+offset_top = 64.0
+offset_right = 152.0
+offset_bottom = 100.0
+
+[node name="FlowFrame" type="TextureRect" parent="HUD3D/FlowPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("8_flow_frame")
+expand_mode = 1
+
+[node name="RubyGemsContainer" type="HBoxContainer" parent="HUD3D/FlowPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -46.0
+offset_top = -11.0
+offset_right = 46.0
+offset_bottom = 3.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Gem1" type="TextureRect" parent="HUD3D/FlowPanel/RubyGemsContainer"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+texture = ExtResource("9_ruby_gem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Gem2" type="TextureRect" parent="HUD3D/FlowPanel/RubyGemsContainer"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+texture = ExtResource("9_ruby_gem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Gem3" type="TextureRect" parent="HUD3D/FlowPanel/RubyGemsContainer"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+texture = ExtResource("9_ruby_gem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Gem4" type="TextureRect" parent="HUD3D/FlowPanel/RubyGemsContainer"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+texture = ExtResource("9_ruby_gem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Gem5" type="TextureRect" parent="HUD3D/FlowPanel/RubyGemsContainer"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+texture = ExtResource("9_ruby_gem")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StateLabel" type="Label" parent="HUD3D/FlowPanel"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -60.0
+offset_top = -14.0
+offset_right = 60.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_outline_size = 1
+theme_override_font_sizes/font_size = 8
+text = "FLOW METER (0/5)"
+horizontal_alignment = 1
+
+[node name="TopRightButtons" type="HBoxContainer" parent="HUD3D"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -76.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = 36.0
+grow_horizontal = 0
+theme_override_constants/separation = 6
+
+[node name="BagButton" type="Button" parent="HUD3D/TopRightButtons"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+tooltip_text = "Mở Túi Đồ [B]"
+icon = ExtResource("10_icon_bag")
+icon_alignment = 1
+expand_icon = true
+
+[node name="MapButton" type="Button" parent="HUD3D/TopRightButtons"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+tooltip_text = "Bản Đồ [M]"
+icon = ExtResource("11_icon_map")
+icon_alignment = 1
+expand_icon = true
+
+[node name="BossContainer" type="VBoxContainer" parent="HUD3D"]
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -160.0
+offset_top = 16.0
+offset_right = 160.0
+offset_bottom = 48.0
+grow_horizontal = 2
+
+[node name="BossNameLabel" type="Label" parent="HUD3D/BossContainer"]
+layout_mode = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 11
+text = "👑 QUÁI TINH ANH"
+horizontal_alignment = 1
+
+[node name="BossBar" type="ProgressBar" parent="HUD3D/BossContainer"]
+custom_minimum_size = Vector2(320, 12)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_fill")
+value = 100.0
+show_percentage = false
+
+[node name="InventoryUI" parent="." instance=ExtResource("12_inv_scn")]
+visible = false
+
+[node name="FastTravelMapUI" parent="." instance=ExtResource("13_map_scn")]
+visible = false

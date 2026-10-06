@@ -8,6 +8,7 @@ signal enemy_died(enemy: EnemyBase3D)
 signal hp_changed(curr: float, max_v: float)
 
 const DamageNumber3D = preload("res://src_3d/vfx/DamageNumber3D.gd")
+const SpawnPoint3D = preload("res://src_3d/world/SpawnPoint3D.gd")
 
 @export_group("Stats")
 @export var enemy_name: String = "Quái Vật"
@@ -19,6 +20,16 @@ var current_hp: float = 120.0
 @export var move_speed: float = 3.2
 @export var gravity: float = 28.0
 
+@export_group("Tier & Spawning")
+@export var assigned_tier: int = 1
+var last_valid_position: Vector3 = Vector3.ZERO
+var stuck_timer: float = 0.0
+var stuck_count: int = 0
+var last_check_pos: Vector3 = Vector3.ZERO
+const STUCK_TIME_THRESHOLD: float = 2.0
+const MIN_MOVE_DISTANCE: float = 0.08
+const DEATH_Y_THRESHOLD: float = -4.0
+
 var facing_direction: int = -1 # -1 = trái, 1 = phải
 var is_dead: bool = false
 var flash_timer: float = 0.0
@@ -28,6 +39,10 @@ var flash_timer: float = 0.0
 func _ready() -> void:
 	current_hp = max_hp
 	add_to_group("enemies")
+	last_valid_position = global_position
+	last_check_pos = global_position
+	floor_snap_length = 0.35
+	floor_max_angle = deg_to_rad(46.0)
 
 func _physics_process(delta: float) -> void:
 	global_position.z = 0.0
@@ -37,6 +52,12 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 		
+	# 1. Kiểm tra rơi khỏi map
+	if global_position.y < DEATH_Y_THRESHOLD:
+		_handle_out_of_bounds()
+		return
+
+	# 2. Xử lý hành vi AI
 	_process_enemy_behavior(delta)
 	
 	_apply_gravity(delta)
@@ -46,10 +67,71 @@ func _physics_process(delta: float) -> void:
 	global_position.z = 0.0
 	_update_visual_facing()
 	
+	# 3. Giám sát kẹt địa hình (Anti-stuck Watchdog)
+	_monitor_stuck_state(delta)
+	
 	if flash_timer > 0.0:
 		flash_timer -= delta
 		if flash_timer <= 0.0:
 			_reset_flash()
+
+func _handle_out_of_bounds() -> void:
+	stuck_count += 1
+	print("[EnemyBase3D] [CẢNH BÁO] Quái '%s' (%s) rơi dưới vực Y=%.2f, đang phục hồi về sàn..." % [enemy_name, name, global_position.y])
+	_recover_to_nearest_spawn_point("fell_out_of_bounds")
+
+func _monitor_stuck_state(delta: float) -> void:
+	if not is_on_floor():
+		return
+		
+	# Nếu quái vật đứng yên hoặc di chuyển quá ít (< 0.08m)
+	if global_position.distance_to(last_check_pos) < MIN_MOVE_DISTANCE:
+		var player = get_player()
+		# Chỉ kích hoạt tính thời gian kẹt khi có ý định di chuyển áp sát người chơi
+		if player and abs(player.global_position.x - global_position.x) > 1.8:
+			stuck_timer += delta
+			if stuck_timer >= STUCK_TIME_THRESHOLD:
+				stuck_timer = 0.0
+				stuck_count += 1
+				print("[EnemyBase3D] [CẢNH BÁO] Quái '%s' (%s) đứng yên/kẹt tại %s quá 2.0s, đang phục hồi..." % [enemy_name, name, global_position])
+				_recover_to_nearest_spawn_point("stuck_in_geometry")
+	else:
+		last_check_pos = global_position
+		stuck_timer = 0.0
+		if global_position.y >= -1.0:
+			last_valid_position = global_position
+
+func _recover_to_nearest_spawn_point(reason: String = "recovery") -> void:
+	var sps = get_tree().get_nodes_in_group("spawn_points")
+	var best_sp: SpawnPoint3D = null
+	var min_d: float = 999999.0
+	var space_state = get_world_3d().direct_space_state if get_world_3d() else null
+	
+	for sp in sps:
+		if sp is SpawnPoint3D and sp.tier == assigned_tier:
+			if space_state:
+				var res = sp.validate_location(space_state)
+				if not res.get("valid", false):
+					continue
+			var d = global_position.distance_to(sp.global_position)
+			if d < min_d:
+				min_d = d
+				best_sp = sp
+				
+	if best_sp:
+		global_position = best_sp.global_position
+		velocity = Vector3.ZERO
+		global_position.z = 0.0
+		print("[EnemyBase3D] [PHỤC HỒI THÀNH CÔNG] Quái '%s' (%s) đã dịch về SpawnPoint '%s' tại %s (Lý do: %s)" % [
+			enemy_name, name, best_sp.name, global_position, reason
+		])
+	elif last_valid_position != Vector3.ZERO:
+		global_position = last_valid_position
+		velocity = Vector3.ZERO
+		global_position.z = 0.0
+		print("[EnemyBase3D] [PHỤC HỒI THÀNH CÔNG] Quái '%s' (%s) đã về last_valid_position tại %s (Lý do: %s)" % [
+			enemy_name, name, global_position, reason
+		])
 
 func _process_enemy_behavior(_delta: float) -> void:
 	# Ghi đè ở các lớp con
@@ -130,9 +212,12 @@ func _reset_flash() -> void:
 
 const DROP_ITEM_SCENE = preload("res://scenes_3d/DropItem3D.tscn")
 
-func die() -> void:
+func die(reason: String = "hp_depleted") -> void:
 	if is_dead:
 		return
+	print("[EnemyBase3D] [TIÊU DIỆT] Quái '%s' (%s) tử nạn/xóa bỏ với lý do: '%s' | Vị trí: %s | HP: %.1f/%.1f" % [
+		enemy_name, name, reason, global_position, current_hp, max_hp
+	])
 	is_dead = true
 	enemy_died.emit(self)
 	_spawn_loot()

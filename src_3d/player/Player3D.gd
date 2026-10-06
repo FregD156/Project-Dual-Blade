@@ -113,6 +113,12 @@ func _ready() -> void:
 	equip_armor_piece(ArmorSystem.create_armor_item("legs", "tier_d"))
 	equip_shield(ShieldSystem.create_shield_item("tier_d"))
 	
+	# Cấu hình leo dốc và cầu thang mượt mà
+	floor_snap_length = 0.35
+	floor_max_angle = deg_to_rad(46.0)
+	floor_stop_on_slope = true
+	floor_constant_speed = true
+	
 	if attack_area:
 		attack_area.monitoring = false
 

@@ -1,0 +1,30 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src_3d/environment/AcidPoolHazard3D.gd" id="1_acid"]
+[ext_resource type="Texture2D" path="res://assets/sprites/environment/props/acid_pool_hazard_hd.png" id="2_tex"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_acid"]
+size = Vector3(2.2, 0.4, 1.2)
+
+[node name="AcidPoolHazard3D" type="Area3D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("1_acid")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+shape = SubResource("BoxShape3D_acid")
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.02)
+cast_shadow = 2
+alpha_cut = 1
+texture_filter = 0
+pixel_size = 0.0038
+texture = ExtResource("2_tex")
+
+[node name="AcidLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0.4)
+light_color = Color(0.3, 0.95, 0.2, 1)
+light_energy = 1.6
+omni_range = 3.0
