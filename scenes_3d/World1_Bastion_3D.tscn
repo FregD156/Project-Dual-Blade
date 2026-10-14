@@ -30,6 +30,8 @@
 [ext_resource type="PackedScene" path="res://scenes_3d/SummonEffect3D.tscn" id="26_summon_scn"]
 [ext_resource type="Script" path="res://src_3d/world/SpawnPoint3D.gd" id="27_spawn_pt"]
 [ext_resource type="Script" path="res://src_3d/world/PlayerStart3D.gd" id="28_player_start"]
+[ext_resource type="Script" path="res://src_3d/vfx/AtmosphericEmbers3D.gd" id="29_embers_script"]
+[ext_resource type="Script" path="res://src_3d/environment/BrazierFire3D.gd" id="30_brazier_script"]
 
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
@@ -51,6 +53,18 @@ tonemap_mode = 3
 glow_enabled = true
 glow_intensity = 0.6
 glow_bloom = 0.2
+ssao_enabled = true
+ssao_radius = 1.6
+ssao_intensity = 2.0
+ssil_enabled = true
+ssil_radius = 5.0
+ssil_intensity = 0.7
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.016
+volumetric_fog_albedo = Color(0.2, 0.25, 0.36, 1)
+volumetric_fog_emission = Color(0.04, 0.06, 0.1, 1)
+volumetric_fog_emission_energy = 0.8
+volumetric_fog_length = 36.0
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 material = ExtResource("7_mat_stone")
@@ -128,6 +142,10 @@ corner_radius_bottom_left = 4
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_1")
+
+[node name="AtmosphericEmbers" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
+script = ExtResource("29_embers_script")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866, -0.25, 0.433, 0, 0.866, 0.5, -0.5, -0.433, 0.75, 5, 14, 10)
@@ -365,6 +383,9 @@ transparent = true
 alpha_cut = 1
 texture = ExtResource("25_brazier_tex")
 
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierSpawn"]
+script = ExtResource("30_brazier_script")
+
 [node name="BrazierMidLeft" type="Sprite3D" parent="BackgroundScenery"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 1.3, -0.6)
 pixel_size = 0.0026
@@ -373,6 +394,9 @@ shaded = true
 transparent = true
 alpha_cut = 1
 texture = ExtResource("25_brazier_tex")
+
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierMidLeft"]
+script = ExtResource("30_brazier_script")
 
 [node name="BrazierMidRight" type="Sprite3D" parent="BackgroundScenery"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 1.3, -0.6)
@@ -383,6 +407,9 @@ transparent = true
 alpha_cut = 1
 texture = ExtResource("25_brazier_tex")
 
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierMidRight"]
+script = ExtResource("30_brazier_script")
+
 [node name="BrazierEnd" type="Sprite3D" parent="BackgroundScenery"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 52, 1.3, -0.6)
 pixel_size = 0.0026
@@ -391,6 +418,9 @@ shaded = true
 transparent = true
 alpha_cut = 1
 texture = ExtResource("25_brazier_tex")
+
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierEnd"]
+script = ExtResource("30_brazier_script")
 
 [node name="WallBanner1" type="Sprite3D" parent="BackgroundScenery"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 7.5, -4.5)

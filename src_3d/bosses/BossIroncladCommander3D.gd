@@ -11,6 +11,8 @@ extends "res://src_3d/enemies/EnemyBase3D.gd"
 signal phase_changed(new_phase: int)
 signal boss_defeated()
 
+const SoundManager3D = preload("res://src_3d/audio/SoundManager3D.gd")
+
 const TOTAL_HP: float = 3800.0
 var current_phase: int = 1
 var hp_milestone_threshold: float = TOTAL_HP * 0.75 # Mốc 75%, 50%, 25%
@@ -122,6 +124,8 @@ func take_hit(amount: float, attacker_pos: Vector3, incoming_crit: bool = false)
 func _trigger_milestone_drop() -> void:
 	is_staggered = true
 	stagger_timer = 0.8
+	if SoundManager3D.get_instance():
+		SoundManager3D.get_instance().play_mercy_drop()
 	# Rơi 2 Bình Máu Lớn
 	for i in range(2):
 		var flask = DROP_ITEM_SCENE.instantiate()
@@ -134,6 +138,8 @@ func _enter_phase_2() -> void:
 	phase_changed.emit(2)
 	move_speed = 3.6
 	base_atk = 34.0
+	if SoundManager3D.get_instance():
+		SoundManager3D.get_instance().play_boss_roar()
 	
 	# Hiệu ứng nổ hào quang đỏ cuồng nộ
 	if boss_sprite:
@@ -143,6 +149,8 @@ func _enter_phase_2() -> void:
 
 func die(reason: String = "hp_depleted") -> void:
 	boss_defeated.emit()
+	if SoundManager3D.get_instance():
+		SoundManager3D.get_instance().play_victory_bell()
 	super.die(reason)
 
 func _spawn_loot() -> void:

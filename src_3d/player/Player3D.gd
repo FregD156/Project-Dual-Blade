@@ -26,6 +26,7 @@ signal merge_ready(group_name: String, count: int)
 
 const GhostTrail3D = preload("res://src_3d/vfx/GhostTrail3D.gd")
 const DamageNumber3D = preload("res://src_3d/vfx/DamageNumber3D.gd")
+const SoundManager3D = preload("res://src_3d/audio/SoundManager3D.gd")
 
 @export_group("Stats")
 @export var max_hp: float = 100.0
@@ -233,11 +234,15 @@ func _handle_movement(delta: float) -> void:
 			facing_direction = 1 if wall_norm.x > 0 else -1
 			jump_count = 1
 			_play_anim("Jump")
+			if SoundManager3D.get_instance():
+				SoundManager3D.get_instance().play_jump()
 		elif jump_count < max_jumps:
 			velocity.y = jump_force * (0.9 if jump_count > 0 else 1.0)
 			jump_count += 1
 			_change_state(State.JUMP)
 			_play_anim("Jump")
+			if SoundManager3D.get_instance():
+				SoundManager3D.get_instance().play_jump()
 		
 	# Shadow Dash
 	if Input.is_action_just_pressed("dash") and dash_cooldown_timer <= 0.0:
@@ -284,6 +289,8 @@ func _start_attack_combo() -> void:
 	_trigger_hitbox(true)
 	_play_anim("Attack" + str(combo_index))
 	_spawn_slash_vfx(combo_index)
+	if SoundManager3D.get_instance():
+		SoundManager3D.get_instance().play_slash(combo_index)
 
 func _process_attack_state(delta: float) -> void:
 	attack_busy_timer -= delta
@@ -312,7 +319,9 @@ func _process_dive_state(delta: float) -> void:
 		_trigger_hitbox(false)
 		current_state = State.IDLE
 		_play_anim("DiveLand")
-		_create_screen_shake(0.2)
+		_create_screen_shake(0.25)
+		if SoundManager3D.get_instance():
+			SoundManager3D.get_instance().play_dive_land()
 
 func _start_cross_parry() -> void:
 	current_state = State.PARRY
@@ -337,7 +346,14 @@ func trigger_parry_counter(attacker_pos: Vector3) -> void:
 	if parry_shield_fx:
 		parry_shield_fx.visible = false
 	parry_success.emit()
-	_create_screen_shake(0.3)
+	_create_screen_shake(0.35)
+	
+	if SoundManager3D.get_instance():
+		SoundManager3D.get_instance().play_parry()
+		
+	# Bắn tia lửa phản đòn chói lọi
+	HitSparks3D.spawn_at(get_parent(), global_position + Vector3(facing_direction * 0.8, 1.0, 0.0), true, true, facing_direction)
+	_trigger_hit_stop(0.08)
 	
 	# Lướt ra sau lưng kẻ địch
 	var target_x = attacker_pos.x + (-facing_direction * 1.5)
@@ -366,6 +382,8 @@ func _start_shadow_dash() -> void:
 	velocity.x = facing_direction * DASH_SPEED
 	velocity.y = 0.0
 	_play_anim("ShadowDash")
+	if SoundManager3D.get_instance():
+		SoundManager3D.get_instance().play_dash()
 	
 	var tween = create_tween()
 	tween.tween_interval(DASH_DURATION + bonus_iframe)
@@ -601,6 +619,8 @@ func use_flask() -> void:
 		current_hp = min(max_hp, current_hp + (max_hp * 0.35))
 		hp_changed.emit(current_hp, max_hp)
 		flasks_changed.emit(life_flasks, max_flasks)
+		if SoundManager3D.get_instance():
+			SoundManager3D.get_instance().play_flask()
 
 func add_flask(count: int = 1) -> void:
 	life_flasks = clampi(life_flasks + count, 0, max_flasks)
@@ -710,4 +730,23 @@ func _on_attack_area_body_entered(body: Node3D) -> void:
 		
 		body.take_hit(damage, global_position, is_crit)
 		add_flow(flow_to_add)
-		_create_screen_shake(0.08)
+		_create_screen_shake(0.12 if (combo_index == 4 or is_crit) else 0.06)
+		
+		# Hiệu ứng âm thanh va chạm chém trúng quái
+		if SoundManager3D.get_instance():
+			SoundManager3D.get_instance().play_hit(is_crit)
+			
+		# Bắn tia lửa va chạm 3D theo hướng chém
+		HitSparks3D.spawn_at(get_parent(), body.global_position + Vector3(0.0, 1.1, 0.0), false, is_crit, facing_direction)
+		
+		# Micro hit-stop tạo độ nặng cho đòn chém
+		if combo_index == 4 or is_crit:
+			_trigger_hit_stop(0.06)
+
+func _trigger_hit_stop(duration: float = 0.05) -> void:
+	if animation_player:
+		var prev_speed = animation_player.speed_scale
+		animation_player.speed_scale = 0.06
+		await get_tree().create_timer(duration).timeout
+		if is_instance_valid(animation_player):
+			animation_player.speed_scale = prev_speed

@@ -30,6 +30,7 @@ const SCENE_DROP = preload("res://scenes_3d/DropItem3D.tscn")
 const SCENE_SUMMON = preload("res://scenes_3d/SummonEffect3D.tscn")
 const SpawnPoint3D = preload("res://src_3d/world/SpawnPoint3D.gd")
 const PlayerStart3D = preload("res://src_3d/world/PlayerStart3D.gd")
+const SoundManager3D = preload("res://src_3d/audio/SoundManager3D.gd")
 
 var active_enemies: Array = []
 var active_portals: Array = []
@@ -596,6 +597,12 @@ func register_enemy(enemy: EnemyBase3D) -> void:
 				hud.show_boss_bar(enemy.enemy_name, enemy.max_hp)
 				if enemy.has_signal("hp_changed"):
 					enemy.hp_changed.connect(func(c, _m): hud.update_boss_bar(c))
+					
+			var cam = get_viewport().get_camera_3d()
+			if cam and cam.has_method("set_boss_mode"):
+				cam.set_boss_mode(true)
+			if SoundManager3D.get_instance():
+				SoundManager3D.get_instance().play_boss_roar()
 
 func _on_enemy_died(enemy: EnemyBase3D) -> void:
 	active_enemies.erase(enemy)
@@ -607,10 +614,19 @@ func _on_all_enemies_defeated() -> void:
 	var stage_str = "%d.%d" % [current_world, current_stage]
 	stage_cleared.emit(stage_str)
 
+	# Khôi phục camera về chế độ bình thường
+	var cam = get_viewport().get_camera_3d()
+	if cam and cam.has_method("set_boss_mode"):
+		cam.set_boss_mode(false)
+
 	var hud = get_node_or_null("../HUD3D")
 	if hud and hud.has_method("show_stage_banner"):
 		if current_stage == 9:
 			hud.show_stage_banner("✨ TRẠM NGHỈ AN TOÀN — HỒI PHỤC, NÂNG CẤP ĐỒ RỒI TIẾN VÀO CỬA BOSS 1.10 ✨")
+		elif current_stage == 10:
+			hud.show_stage_banner("🏆 CHIẾN THẮNG ĐẠI TRÙM THỐNG LĨNH THIẾT VỆ! TIẾN VÀO WORLD 2! 🏆")
+			if SoundManager3D.get_instance():
+				SoundManager3D.get_instance().play_victory_bell()
 		else:
 			hud.show_stage_banner("✨ ẢI " + stage_str + " ĐÃ DỌN SẠCH! TIẾN VÀO CỔNG PHÍA TRƯỚC ✨")
 
@@ -630,6 +646,8 @@ func _clear_portals() -> void:
 
 func _open_portals() -> void:
 	_clear_portals()
+	if SoundManager3D.get_instance():
+		SoundManager3D.get_instance().play_portal_warp()
 
 	# Các ải đặc biệt (X.4, X.8, X.9, X.10) chỉ xuất hiện 1 Cổng Dịch Chuyển duy nhất ở cuối cầu
 	if current_stage in [4, 8, 9, 10]:
