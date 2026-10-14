@@ -151,6 +151,14 @@ func _ready() -> void:
 	if cp_mgr.current_world == current_world and cp_mgr.current_checkpoint_stage > 0:
 		current_stage = cp_mgr.current_checkpoint_stage
 
+	# Hỗ trợ nhận tham số dòng lệnh (vd: --stage=10 hoặc --world=2) để test nhanh
+	var all_args = OS.get_cmdline_args() + OS.get_cmdline_user_args()
+	for arg in all_args:
+		if arg.begins_with("--stage="):
+			current_stage = arg.replace("--stage=", "").to_int()
+		elif arg.begins_with("--world="):
+			current_world = arg.replace("--world=", "").to_int()
+
 	# Bắt đầu tại Ải chỉ định khi tải scene
 	call_deferred("start_stage", current_world, current_stage, current_branch)
 
