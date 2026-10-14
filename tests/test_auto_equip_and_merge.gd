@@ -5,19 +5,18 @@ func _init():
 	call_deferred("_run_test")
 
 func _run_test() -> void:
-	var main_scn = load("res://scenes/Main.tscn")
+	var main_scn = load("res://scenes_3d/World1_Bastion_3D.tscn")
 	var main_node = main_scn.instantiate()
 	root.add_child(main_node)
 	
 	await process_frame
+	await process_frame
 	
-	var player: Player = main_node.get_node("World/Entities/Player")
-	var inv_ui: InventoryUI = main_node.get_node("UI_Layer/InventoryUI")
-	var game_ui: GameUI = main_node.get_node("UI_Layer")
+	var player = main_node.get_node("Player3D")
+	var inv_ui: InventoryUI = main_node.get_node("InventoryUI")
 	
-	assert(player != null, "Player missing")
+	assert(player != null, "Player3D missing")
 	assert(inv_ui != null, "InventoryUI missing")
-	assert(game_ui != null, "GameUI missing")
 	
 	print("[1] Player khởi đầu tier vũ khí: ", player.current_weapon_tier)
 	assert(player.current_weapon_tier == "tier_d", "Initial weapon should be tier_d")
