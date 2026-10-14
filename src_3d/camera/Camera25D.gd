@@ -17,7 +17,7 @@ extends Camera3D
 @export var height_offset: float = 1.2
 
 @export var clamp_x_min: float = -52.0
-@export var clamp_x_max: float = 52.0
+@export var clamp_x_max: float = 54.0
 
 var shake_intensity: float = 0.0
 var shake_decay: float = 10.0

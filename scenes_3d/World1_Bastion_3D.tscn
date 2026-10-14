@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3]
+[gd_scene load_steps=57 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes_3d/Player3D.tscn" id="1_player_scn"]
 [ext_resource type="PackedScene" path="res://scenes_3d/EnemyRustyGuard3D.tscn" id="2_guard_scn"]
@@ -32,7 +32,6 @@
 [ext_resource type="Script" path="res://src_3d/world/PlayerStart3D.gd" id="28_player_start"]
 [ext_resource type="Script" path="res://src_3d/vfx/AtmosphericEmbers3D.gd" id="29_embers_script"]
 [ext_resource type="Script" path="res://src_3d/environment/BrazierFire3D.gd" id="30_brazier_script"]
-
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_top_color = Color(0.12, 0.15, 0.28, 1)
@@ -116,6 +115,20 @@ height = 16.0
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
 size = Vector3(1.5, 25, 6)
 
+[sub_resource type="BoxMesh" id="BoxMesh_throne_dais"]
+material = ExtResource("7_mat_stone")
+size = Vector3(8.0, 0.9, 3.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_throne_dais"]
+size = Vector3(8.0, 0.9, 3.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_throne_step"]
+material = ExtResource("7_mat_stone")
+size = Vector3(2.5, 0.45, 3.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_throne_step"]
+size = Vector3(2.5, 0.45, 3.5)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.1, 0.12, 0.18, 0.85)
 corner_radius_top_left = 4
@@ -155,47 +168,65 @@ shadow_enabled = true
 
 [node name="Torches" type="Node3D" parent="."]
 
-[node name="TorchFarLeft" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42, 4.2, 0.5)
+[node name="TorchOutpostLeft" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44, 4.2, 0.5)
 light_color = Color(1, 0.6, 0.2, 1)
 light_energy = 2.5
 omni_range = 10.0
 
-[node name="Torch1" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 4.2, 0.5)
+[node name="TorchOutpostMid" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 4.2, 0.5)
 light_color = Color(1, 0.6, 0.2, 1)
 light_energy = 2.5
 omni_range = 8.0
 
-[node name="Torch2" type="OmniLight3D" parent="Torches"]
+[node name="TorchOuterGate" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 4.5, 0.5)
+light_color = Color(1, 0.65, 0.25, 1)
+light_energy = 2.8
+omni_range = 9.0
+
+[node name="TorchCourtyardLeft" type="OmniLight3D" parent="Torches"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 4.5, 0.5)
 light_color = Color(1, 0.6, 0.2, 1)
 light_energy = 2.5
 omni_range = 8.0
-
-[node name="Torch3" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 4.5, 0.5)
-light_color = Color(1, 0.6, 0.2, 1)
-light_energy = 2.5
-omni_range = 8.0
-
-[node name="Torch4" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21, 4.2, 0.5)
-light_color = Color(1, 0.6, 0.2, 1)
-light_energy = 2.5
-omni_range = 8.0
-
-[node name="TorchFarRight" type="OmniLight3D" parent="Torches"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, 4.2, 0.5)
-light_color = Color(1, 0.6, 0.2, 1)
-light_energy = 2.5
-omni_range = 10.0
 
 [node name="TorchTop" type="OmniLight3D" parent="Torches"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.5, 0.5)
 light_color = Color(1, 0.65, 0.25, 1)
 light_energy = 3.0
 omni_range = 9.0
+
+[node name="TorchCourtyardRight" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 4.5, 0.5)
+light_color = Color(1, 0.6, 0.2, 1)
+light_energy = 2.5
+omni_range = 8.0
+
+[node name="TorchRoyalGate" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 4.5, 0.5)
+light_color = Color(1, 0.65, 0.25, 1)
+light_energy = 2.8
+omni_range = 9.0
+
+[node name="TorchSafeHaven" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 4.5, 0.5)
+light_color = Color(0.7, 0.85, 1.0, 1)
+light_energy = 2.8
+omni_range = 9.0
+
+[node name="TorchSpireArena" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 4.5, 0.5)
+light_color = Color(1, 0.6, 0.2, 1)
+light_energy = 2.5
+omni_range = 8.0
+
+[node name="TorchThrone" type="OmniLight3D" parent="Torches"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53, 5.2, 0.5)
+light_color = Color(1, 0.72, 0.28, 1)
+light_energy = 3.2
+omni_range = 11.0
 
 [node name="StageGeometry" type="Node3D" parent="."]
 
@@ -228,11 +259,42 @@ collision_mask = 6
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/WallRight"]
 shape = SubResource("BoxShape3D_wall")
 
+[node name="StepAccessLeft" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.5, 1.6, -0.5)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/StepAccessLeft"]
+mesh = SubResource("BoxMesh_step")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/StepAccessLeft"]
+shape = SubResource("BoxShape3D_step")
+
+[node name="SpriteVisual" type="Sprite3D" parent="StageGeometry/StepAccessLeft"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.58)
+pixel_size = 0.0042
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("21_step_tex")
+
+[node name="LeftOverlookPlatform" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 3.2, -0.5)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/LeftOverlookPlatform"]
+mesh = SubResource("BoxMesh_plat_large")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/LeftOverlookPlatform"]
+shape = SubResource("BoxShape3D_plat_large")
+
+[node name="SpikeTrapOutpost" parent="StageGeometry" instance=ExtResource("12_spike_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38.0, 0, 0)
+
 [node name="SpikeTrapFloor1" parent="StageGeometry" instance=ExtResource("12_spike_scn")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.0, 0, 0)
-
-[node name="SpikeTrapFloor2" parent="StageGeometry" instance=ExtResource("12_spike_scn")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.0, 0, 0)
 
 [node name="StairsLeft" type="Sprite3D" parent="StageGeometry"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.2, 1.6, 0.08)
@@ -286,36 +348,8 @@ collision_mask = 6
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/StairsRampRight"]
 shape = SubResource("ConvexPolygonShape3D_ramp_right")
 
-[node name="LeftOverlookPlatform" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 3.2, -0.5)
-collision_layer = 1
-collision_mask = 6
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/LeftOverlookPlatform"]
-mesh = SubResource("BoxMesh_plat_large")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/LeftOverlookPlatform"]
-shape = SubResource("BoxShape3D_plat_large")
-
-[node name="StepAccessLeft" type="StaticBody3D" parent="StageGeometry"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.5, 1.6, -0.5)
-collision_layer = 1
-collision_mask = 6
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/StepAccessLeft"]
-mesh = SubResource("BoxMesh_step")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/StepAccessLeft"]
-shape = SubResource("BoxShape3D_step")
-
-[node name="SpriteVisual" type="Sprite3D" parent="StageGeometry/StepAccessLeft"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.58)
-pixel_size = 0.0042
-texture_filter = 0
-shaded = true
-transparent = true
-alpha_cut = 1
-texture = ExtResource("21_step_tex")
+[node name="SpikeTrapFloor2" parent="StageGeometry" instance=ExtResource("12_spike_scn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.0, 0, 0)
 
 [node name="RightOverlookPlatform" type="StaticBody3D" parent="StageGeometry"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 3.2, -0.5)
@@ -348,6 +382,28 @@ transparent = true
 alpha_cut = 1
 texture = ExtResource("21_step_tex")
 
+[node name="BossThroneStep" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.75, 0.225, -0.5)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/BossThroneStep"]
+mesh = SubResource("BoxMesh_throne_step")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/BossThroneStep"]
+shape = SubResource("BoxShape3D_throne_step")
+
+[node name="BossThroneDais" type="StaticBody3D" parent="StageGeometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53.0, 0.45, -0.5)
+collision_layer = 1
+collision_mask = 6
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StageGeometry/BossThroneDais"]
+mesh = SubResource("BoxMesh_throne_dais")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StageGeometry/BossThroneDais"]
+shape = SubResource("BoxShape3D_throne_dais")
+
 [node name="BackgroundScenery" type="Node3D" parent="."]
 
 [node name="BastionBackdropLeft" type="Sprite3D" parent="BackgroundScenery"]
@@ -374,93 +430,41 @@ shaded = false
 transparent = false
 texture = ExtResource("11_bg_right")
 
-[node name="BrazierSpawn" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52, 1.3, -0.6)
-pixel_size = 0.0026
+[node name="ArchOuterGate" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.5, 3.5, -0.4)
+pixel_size = 0.009
 texture_filter = 0
 shaded = true
 transparent = true
 alpha_cut = 1
-texture = ExtResource("25_brazier_tex")
+texture = ExtResource("22_arch_tex")
 
-[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierSpawn"]
-script = ExtResource("30_brazier_script")
-
-[node name="BrazierMidLeft" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 1.3, -0.6)
-pixel_size = 0.0026
+[node name="ArchRoyalGate" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.0, 3.5, -0.4)
+pixel_size = 0.009
 texture_filter = 0
 shaded = true
 transparent = true
 alpha_cut = 1
-texture = ExtResource("25_brazier_tex")
+texture = ExtResource("22_arch_tex")
 
-[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierMidLeft"]
-script = ExtResource("30_brazier_script")
-
-[node name="BrazierMidRight" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 1.3, -0.6)
-pixel_size = 0.0026
+[node name="BarricadeOutpost1" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46, 0.95, -0.6)
+pixel_size = 0.0022
 texture_filter = 0
 shaded = true
 transparent = true
 alpha_cut = 1
-texture = ExtResource("25_brazier_tex")
+texture = ExtResource("23_barricade_tex")
 
-[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierMidRight"]
-script = ExtResource("30_brazier_script")
-
-[node name="BrazierEnd" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 52, 1.3, -0.6)
-pixel_size = 0.0026
+[node name="BarricadeOutpost2" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0.95, -0.6)
+pixel_size = 0.0022
 texture_filter = 0
 shaded = true
 transparent = true
 alpha_cut = 1
-texture = ExtResource("25_brazier_tex")
-
-[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierEnd"]
-script = ExtResource("30_brazier_script")
-
-[node name="WallBanner1" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 7.5, -4.5)
-pixel_size = 0.005
-texture_filter = 0
-transparent = true
-alpha_cut = 1
-texture = ExtResource("13_banner_tex")
-
-[node name="WallBanner2" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 7.5, -5.5)
-pixel_size = 0.005
-texture_filter = 0
-transparent = true
-alpha_cut = 1
-texture = ExtResource("13_banner_tex")
-
-[node name="WallBanner3" type="Sprite3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 7.5, -4.5)
-pixel_size = 0.005
-texture_filter = 0
-transparent = true
-alpha_cut = 1
-texture = ExtResource("13_banner_tex")
-
-[node name="Pillar1" type="MeshInstance3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 8, -5)
-mesh = SubResource("CylinderMesh_pillar")
-
-[node name="Pillar2" type="MeshInstance3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 8, -6)
-mesh = SubResource("CylinderMesh_pillar")
-
-[node name="Pillar3" type="MeshInstance3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 8, -6)
-mesh = SubResource("CylinderMesh_pillar")
-
-[node name="Pillar4" type="MeshInstance3D" parent="BackgroundScenery"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 8, -5)
-mesh = SubResource("CylinderMesh_pillar")
+texture = ExtResource("23_barricade_tex")
 
 [node name="BarricadeFloor1" type="Sprite3D" parent="BackgroundScenery"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0.95, -0.6)
@@ -480,6 +484,190 @@ transparent = true
 alpha_cut = 1
 texture = ExtResource("23_barricade_tex")
 
+[node name="BrazierSpawn" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52, 1.3, -0.6)
+pixel_size = 0.0026
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("25_brazier_tex")
+
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierSpawn"]
+script = ExtResource("30_brazier_script")
+
+[node name="BrazierOutpost" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 1.3, -0.6)
+pixel_size = 0.0026
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("25_brazier_tex")
+
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierOutpost"]
+script = ExtResource("30_brazier_script")
+
+[node name="BrazierMidLeft" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 1.3, -0.6)
+pixel_size = 0.0026
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("25_brazier_tex")
+
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierMidLeft"]
+script = ExtResource("30_brazier_script")
+
+[node name="BrazierCourtyardLeft" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1.3, -0.6)
+pixel_size = 0.0026
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("25_brazier_tex")
+
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierCourtyardLeft"]
+script = ExtResource("30_brazier_script")
+
+[node name="BrazierCourtyardRight" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1.3, -0.6)
+pixel_size = 0.0026
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("25_brazier_tex")
+
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierCourtyardRight"]
+script = ExtResource("30_brazier_script")
+
+[node name="BrazierMidRight" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 1.3, -0.6)
+pixel_size = 0.0026
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("25_brazier_tex")
+
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierMidRight"]
+script = ExtResource("30_brazier_script")
+
+[node name="BrazierSpireArena" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 1.3, -0.6)
+pixel_size = 0.0026
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("25_brazier_tex")
+
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierSpireArena"]
+script = ExtResource("30_brazier_script")
+
+[node name="BrazierSpireThroneLeft" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 1.3, -0.6)
+pixel_size = 0.0026
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("25_brazier_tex")
+
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierSpireThroneLeft"]
+script = ExtResource("30_brazier_script")
+
+[node name="BrazierEnd" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55, 2.2, -0.6)
+pixel_size = 0.0026
+texture_filter = 0
+shaded = true
+transparent = true
+alpha_cut = 1
+texture = ExtResource("25_brazier_tex")
+
+[node name="Fire" type="Node3D" parent="BackgroundScenery/BrazierEnd"]
+script = ExtResource("30_brazier_script")
+
+[node name="WallBannerOutpost" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48, 7.5, -4.5)
+pixel_size = 0.005
+texture_filter = 0
+transparent = true
+alpha_cut = 1
+texture = ExtResource("13_banner_tex")
+
+[node name="WallBanner1" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 7.5, -4.5)
+pixel_size = 0.005
+texture_filter = 0
+transparent = true
+alpha_cut = 1
+texture = ExtResource("13_banner_tex")
+
+[node name="WallBanner2" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.5, -5.5)
+pixel_size = 0.005
+texture_filter = 0
+transparent = true
+alpha_cut = 1
+texture = ExtResource("13_banner_tex")
+
+[node name="WallBanner3" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 7.5, -4.5)
+pixel_size = 0.005
+texture_filter = 0
+transparent = true
+alpha_cut = 1
+texture = ExtResource("13_banner_tex")
+
+[node name="WallBannerSpire1" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 7.5, -4.5)
+pixel_size = 0.005
+texture_filter = 0
+transparent = true
+alpha_cut = 1
+texture = ExtResource("13_banner_tex")
+
+[node name="WallBannerSpire2" type="Sprite3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54, 8.5, -4.5)
+pixel_size = 0.005
+texture_filter = 0
+transparent = true
+alpha_cut = 1
+texture = ExtResource("13_banner_tex")
+
+[node name="PillarOutpost" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44, 8, -5)
+mesh = SubResource("CylinderMesh_pillar")
+
+[node name="Pillar1" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 8, -5)
+mesh = SubResource("CylinderMesh_pillar")
+
+[node name="Pillar2" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 8, -6)
+mesh = SubResource("CylinderMesh_pillar")
+
+[node name="Pillar3" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 8, -6)
+mesh = SubResource("CylinderMesh_pillar")
+
+[node name="Pillar4" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 8, -5)
+mesh = SubResource("CylinderMesh_pillar")
+
+[node name="PillarSpire1" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 8, -5)
+mesh = SubResource("CylinderMesh_pillar")
+
+[node name="PillarSpire2" type="MeshInstance3D" parent="BackgroundScenery"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54, 8, -5)
+mesh = SubResource("CylinderMesh_pillar")
+
 [node name="PlayerStart" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.5, 0)
 script = ExtResource("28_player_start")
@@ -498,6 +686,20 @@ default_distance = 7.5
 script = ExtResource("9_stage_mgr")
 
 [node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="SpawnFloor_OutpostLeft" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44, 0.1, 0)
+script = ExtResource("27_spawn_pt")
+tier = 1
+allowed_enemy_types = PackedStringArray("guard", "hound")
+default_facing = 1
+
+[node name="SpawnFloor_OutpostMid" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0.1, 0)
+script = ExtResource("27_spawn_pt")
+tier = 1
+allowed_enemy_types = PackedStringArray("guard", "hound")
+default_facing = 1
 
 [node name="SpawnFloor_FarLeft" type="Marker3D" parent="SpawnPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.1, 0)
@@ -534,8 +736,15 @@ tier = 1
 allowed_enemy_types = PackedStringArray("elite", "guard")
 default_facing = -1
 
+[node name="SpawnFloor_SpireArena" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 0.1, 0)
+script = ExtResource("27_spawn_pt")
+tier = 1
+allowed_enemy_types = PackedStringArray("guard", "hound", "elite")
+default_facing = -1
+
 [node name="SpawnFloor_Boss" type="Marker3D" parent="SpawnPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.1, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53, 0.95, 0)
 script = ExtResource("27_spawn_pt")
 tier = 1
 allowed_enemy_types = PackedStringArray("boss", "elite")
@@ -575,7 +784,6 @@ script = ExtResource("27_spawn_pt")
 tier = 3
 allowed_enemy_types = PackedStringArray("archer", "spitter")
 default_facing = -1
-
 
 [node name="HUD3D" type="CanvasLayer" parent="."]
 script = ExtResource("8_hud_script")
@@ -803,4 +1011,3 @@ visible = false
 
 [node name="FastTravelMapUI" parent="." instance=ExtResource("20_map_scn")]
 visible = false
-
