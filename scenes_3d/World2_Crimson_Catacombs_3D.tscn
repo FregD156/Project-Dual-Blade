@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3]
+[gd_scene load_steps=37 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes_3d/Player3D.tscn" id="1_player_scn"]
 [ext_resource type="Script" path="res://src_3d/camera/Camera25D.gd" id="2_cam_script"]
@@ -19,6 +19,9 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/environment/props/bouncy_spore_shroom.png" id="17_shroom_prop"]
 [ext_resource type="Script" path="res://src_3d/world/SpawnPoint3D.gd" id="18_spawn_pt"]
 [ext_resource type="Script" path="res://src_3d/world/PlayerStart3D.gd" id="19_player_start"]
+[ext_resource type="PackedScene" path="res://scenes_3d/AcidPoolHazard3D.tscn" id="20_acid_pool"]
+[ext_resource type="PackedScene" path="res://scenes_3d/BouncyMushroom3D.tscn" id="21_bouncy_shroom"]
+[ext_resource type="Script" path="res://src_3d/vfx/AtmosphericSpores3D.gd" id="22_spores_script"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_catacomb"]
 sky_top_color = Color(0.18, 0.05, 0.09, 1)
@@ -39,9 +42,18 @@ tonemap_mode = 3
 glow_enabled = true
 glow_intensity = 0.65
 glow_bloom = 0.25
-fog_enabled = true
-fog_light_color = Color(0.2, 0.05, 0.1, 1)
-fog_density = 0.008
+ssao_enabled = true
+ssao_radius = 1.8
+ssao_intensity = 2.0
+ssil_enabled = true
+ssil_radius = 5.0
+ssil_intensity = 0.8
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.016
+volumetric_fog_albedo = Color(0.35, 0.1, 0.18, 1)
+volumetric_fog_emission = Color(0.08, 0.02, 0.05, 1)
+volumetric_fog_emission_energy = 0.85
+volumetric_fog_length = 36.0
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 material = ExtResource("3_mat_catacomb")
@@ -106,6 +118,10 @@ corner_radius_bottom_left = 4
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_catacomb")
+
+[node name="AtmosphericSpores" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
+script = ExtResource("22_spores_script")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866, -0.25, 0.433, 0, 0.866, 0.5, -0.5, -0.433, 0.75, 5, 14, 10)
@@ -309,6 +325,21 @@ shaded = true
 transparent = true
 alpha_cut = 1
 texture = ExtResource("16_stairs_tex")
+
+[node name="AcidPoolHazard1" parent="StageGeometry" instance=ExtResource("20_acid_pool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.0, 0, 0)
+
+[node name="AcidPoolHazard2" parent="StageGeometry" instance=ExtResource("20_acid_pool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.0, 0, 0)
+
+[node name="AcidPoolHazard3" parent="StageGeometry" instance=ExtResource("20_acid_pool")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32.0, 0, 0)
+
+[node name="BouncyMushroomLeft" parent="StageGeometry" instance=ExtResource("21_bouncy_shroom")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.0, 0, 0)
+
+[node name="BouncyMushroomRight" parent="StageGeometry" instance=ExtResource("21_bouncy_shroom")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26.0, 0, 0)
 
 [node name="BackgroundScenery" type="Node3D" parent="."]
 

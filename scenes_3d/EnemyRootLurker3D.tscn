@@ -1,0 +1,27 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src_3d/enemies/EnemyRootLurker3D.gd" id="1_lurker"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/world2/crimson_spider_crawler.png" id="2_tex"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lurker"]
+radius = 0.4
+height = 1.3
+
+[node name="EnemyRootLurker3D" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_lurker")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 0)
+shape = SubResource("CapsuleShape3D_lurker")
+
+[node name="VisualRoot" type="Node3D" parent="."]
+
+[node name="Sprite3D" type="Sprite3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.65, 0)
+cast_shadow = 2
+alpha_cut = 1
+texture_filter = 0
+pixel_size = 0.0032
+texture = ExtResource("2_tex")

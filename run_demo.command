@@ -96,14 +96,20 @@ EXTRA_ARGS=()
 # Xử lý tham số dòng lệnh nhanh
 if [ "$1" == "w1" ] || [ "$1" == "1" ]; then
     TARGET_SCENE="scenes_3d/World1_Bastion_3D.tscn"
-elif [ "$1" == "boss" ] || [ "$1" == "10" ]; then
+elif [ "$1" == "boss" ] || [ "$1" == "10" ] || [ "$1" == "boss1" ]; then
     TARGET_SCENE="scenes_3d/World1_Bastion_3D.tscn"
     EXTRA_ARGS=("--stage=10")
-elif [ "$1" == "elite" ] || [ "$1" == "5" ]; then
+elif [ "$1" == "elite" ] || [ "$1" == "5" ] || [ "$1" == "elite1" ]; then
     TARGET_SCENE="scenes_3d/World1_Bastion_3D.tscn"
     EXTRA_ARGS=("--stage=5")
 elif [ "$1" == "w2" ] || [ "$1" == "2" ]; then
     TARGET_SCENE="scenes_3d/World2_Crimson_Catacombs_3D.tscn"
+elif [ "$1" == "boss2" ] || [ "$1" == "20" ]; then
+    TARGET_SCENE="scenes_3d/World2_Crimson_Catacombs_3D.tscn"
+    EXTRA_ARGS=("--stage=10")
+elif [ "$1" == "elite2" ] || [ "$1" == "25" ]; then
+    TARGET_SCENE="scenes_3d/World2_Crimson_Catacombs_3D.tscn"
+    EXTRA_ARGS=("--stage=5")
 elif [ "$1" == "menu" ] || [ "$1" == "m" ]; then
     TARGET_SCENE="scenes/MainMenu.tscn"
 elif [ "$1" == "test" ] || [ "$1" == "t" ]; then
@@ -115,13 +121,14 @@ fi
 if [ -z "$TARGET_SCENE" ]; then
     echo -e "${BOLD}CHỌN CHẾ ĐỘ TRẢI NGHIỆM (Tự động chọn 1 sau 5 giây):${NC}"
     echo -e " [1] 🏰 Khám phá ${BOLD}World 1: Pháo Đài Bị Ruồng Bỏ (Khởi đầu Ải 1.1)${NC} [Mặc định]"
-    echo -e " [2] 👑 Tử chiến ngay ${BOLD}Đại Trùm Boss 1.10: Thống Lĩnh Thiết Vệ (Đỉnh Tháp)${NC}"
-    echo -e " [3] 🪓 Khiêu chiến ngay ${BOLD}Quái Tinh Anh Ải 1.5: Thủ Lĩnh Đao Phủ Quỷ${NC}"
-    echo -e " [4] 🌿 Khám phá ${BOLD}World 2: Hầm Ngục Huyết Rễ (Ải 2.1)${NC}"
-    echo -e " [5] 📋 Mở ${BOLD}Trang Chủ Chính (MainMenu)${NC}"
-    echo -e " [6] 🧪 Chạy toàn bộ ${BOLD}5 Bộ Kiểm Thử Tự Động (Test Suite)${NC}"
+    echo -e " [2] 👑 Tử chiến ngay ${BOLD}World 1 Boss 1.10: Thống Lĩnh Thiết Vệ (Đỉnh Tháp)${NC}"
+    echo -e " [3] 🌿 Khám phá ${BOLD}World 2: Hầm Ngục Huyết Rễ (Khởi đầu Ải 2.1)${NC}"
+    echo -e " [4] 🕷️  Tử chiến ngay ${BOLD}World 2 Boss 2.10: Mẫu Thể Ký Sinh (Nhện Chúa)${NC}"
+    echo -e " [5] 🌳 Khiêu chiến ${BOLD}World 2 Quái Tinh Anh 2.5: Cổ Thụ Biến Dị${NC}"
+    echo -e " [6] 📋 Mở ${BOLD}Trang Chủ Chính (MainMenu)${NC}"
+    echo -e " [7] 🧪 Chạy toàn bộ ${BOLD}5 Bộ Kiểm Thử Tự Động (Test Suite)${NC}"
     echo ""
-    read -t 5 -p "Lựa chọn của bạn [1-6] (Mặc định 1): " CHOICE
+    read -t 5 -p "Lựa chọn của bạn [1-7] (Mặc định 1): " CHOICE
     echo ""
     
     case "$CHOICE" in
@@ -130,16 +137,20 @@ if [ -z "$TARGET_SCENE" ]; then
             EXTRA_ARGS=("--stage=10")
             ;;
         3)
-            TARGET_SCENE="scenes_3d/World1_Bastion_3D.tscn"
-            EXTRA_ARGS=("--stage=5")
+            TARGET_SCENE="scenes_3d/World2_Crimson_Catacombs_3D.tscn"
             ;;
         4)
             TARGET_SCENE="scenes_3d/World2_Crimson_Catacombs_3D.tscn"
+            EXTRA_ARGS=("--stage=10")
             ;;
         5)
-            TARGET_SCENE="scenes/MainMenu.tscn"
+            TARGET_SCENE="scenes_3d/World2_Crimson_Catacombs_3D.tscn"
+            EXTRA_ARGS=("--stage=5")
             ;;
         6)
+            TARGET_SCENE="scenes/MainMenu.tscn"
+            ;;
+        7)
             run_all_tests "interactive"
             exit 0
             ;;

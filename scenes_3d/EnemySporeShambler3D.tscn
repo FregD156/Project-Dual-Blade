@@ -1,0 +1,46 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://src_3d/enemies/EnemySporeShambler3D.gd" id="1_shambler"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/world2/toxic_spore_mushroom.png" id="2_tex"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_shambler"]
+radius = 0.45
+height = 1.5
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_atk"]
+size = Vector3(2.0, 1.8, 1.2)
+
+[node name="EnemySporeShambler3D" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_shambler")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+shape = SubResource("CapsuleShape3D_shambler")
+
+[node name="VisualRoot" type="Node3D" parent="."]
+
+[node name="Sprite3D" type="Sprite3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+cast_shadow = 2
+alpha_cut = 1
+texture_filter = 0
+pixel_size = 0.0035
+texture = ExtResource("2_tex")
+
+[node name="TelegraphLight" type="OmniLight3D" parent="VisualRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0.2)
+visible = false
+light_color = Color(0.3, 0.95, 0.35, 1)
+light_energy = 4.5
+omni_range = 3.5
+
+[node name="AttackArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("BoxShape3D_atk")
